@@ -12,7 +12,7 @@ from supabase import Client, create_client
 from dotenv import load_dotenv
 from langchain.schema import Document
 import logging
-from pubsub.pubsub_manager import PubSubManager
+from qna.pubsub_manager import PubSubManager
 
 load_dotenv()
 

@@ -8,8 +8,8 @@ sys.path.append(parent_dir)
 # app.py
 from flask import Flask, render_template, request, jsonify
 from qna import question_service
-from encoder_service import publish_to_pubsub_embed
-from encoder_service import pubsub_chunk_to_store as pb
+from qna import publish_to_pubsub_embed
+from qna import pubsub_chunk_to_store as pb
 import logging
 import bot_help
 

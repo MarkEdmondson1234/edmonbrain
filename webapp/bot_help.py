@@ -1,5 +1,5 @@
 import os
-from encoder_service import publish_to_pubsub_embed
+from qna import publish_to_pubsub_embed
 import logging
 import base64
 import json
