@@ -162,6 +162,8 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
         logging.info(f"doc_content: {doc.page_content[:30]}")
         if metadata is not None:
             doc.metadata.update(metadata)
+    
+    logging.info(f"gs_file:{gs_file} read into {len(docs)} docs")
 
     return docs
 
@@ -179,13 +181,14 @@ def remove_whitespace(page_content: str):
 
 def chunk_doc_to_docs(documents: list, extension: str = ".md"):
     """Turns a Document object into a list of many Document chunks"""
+    source_chunks = []
     for document in documents:
-        source_chunks = []
         splitter = choose_splitter(extension)
         for chunk in splitter.split_text(remove_whitespace(document.page_content)):
             source_chunks.append(Document(page_content=chunk, metadata=document.metadata))
 
-        return source_chunks  
+    logging.info(f"Chunked into {len(source_chunks)} documents")
+    return source_chunks  
 
 def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     """Triggered from a message on a Cloud Pub/Sub topic.
