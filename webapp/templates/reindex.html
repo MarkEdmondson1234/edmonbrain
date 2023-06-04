@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reindex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Reindex Files</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/reindex">Reindex</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <form id="upload-form" enctype="multipart/form-data">
+            <label for="files">Upload files:</label>
+            <input type="file" name="files" id="files" multiple>
+            <br>
+            <input type="submit" id="submit-button" value="Upload and Process">
+        </form>
+        <div id="loading-message" style="display:none;">
+            <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..." width="400"/>
+        </div>
+        <div id="output">
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function onSubmit() {
+            document.getElementById("submit-button").style.display = "none";
+            document.getElementById("loading-message").style.display = "block";
+        }
+    
+        $("#upload-form").on("submit", function (event) {
+            event.preventDefault();
+            onSubmit();
+    
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/process_files',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'text',
+                success: function (response) {
+                    try {
+                        const outputElement = document.getElementById('output');
+                        var parsedData = JSON.parse(response);
+                        console.log(response)
+                        let htmlContent = '<div class="card"><div class="card-body">';
+
+                        if (parsedData.summaries) {
+                            htmlContent += '<h3>Summaries</h3>';
+                            parsedData.summaries.forEach((doc, index) => {
+                                htmlContent += `<div class="card mt-3"><div class="card-body">`;
+                                htmlContent += `<h4 class="card-title">-- Summary ${index + 1}</h4>`;
+                                htmlContent += `<p class="card-text"> - ${doc}</p>`;
+                                htmlContent += `</div></div>`;
+                            });
+                        }
+
+                        htmlContent += '</div></div>';
+
+                        outputElement.innerHTML = htmlContent;
+                    } catch (error) {
+                        console.error("Error parsing JSON response:", error);
+                    }
+                    document.getElementById("submit-button").style.display = "block";
+                    document.getElementById("loading-message").style.display = "none";
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", xhr.responseText);
+                    document.getElementById("submit-button").style.display = "block";
+                    document.getElementById("loading-message").style.display = "none";
+                }
+            });
+        });
+    </script>
+    
+    
+</body>
+</html>

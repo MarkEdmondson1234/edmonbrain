@@ -1,0 +1,91 @@
+
+nav {
+  margin-bottom: 1em;
+}
+
+nav ul {
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+}
+nav li {
+  margin: 0 10px;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header {
+  background-color: #3f51b5;
+  color: white;
+  text-align: center;
+  padding: 1em;
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+form label {
+  font-weight: bold;
+}
+
+form .form-check-label {
+  font-weight: normal;
+}
+
+form input[type="text"],
+form input[type="file"],
+form button,
+form input[type="checkbox"] {
+  display: inline-block;
+}
+
+form button {
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+form button:hover {
+  background-color: #283593;
+}
+
+#hidden-repo-input {
+  display: none;
+}
+
+#select-folder-btn {
+  cursor: pointer;
+}
+
+#output {
+  max-width: 800px;
+  margin: 1em auto;
+}
+
+#output h2 {
+  color: #3f51b5;
+}
+
+#output h3 {
+  color: #283593;
+}
+
+#output h4 {
+  color: #1a237e;
+}
+
