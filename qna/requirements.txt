@@ -3,11 +3,11 @@ openai
 chromadb
 tiktoken
 requests
+flask
 python-dateutil
 google-cloud-bigquery
 google-cloud-pubsub
 google-auth
-flask
 google-cloud-storage
 unstructured[local-inference]
 tabulate
