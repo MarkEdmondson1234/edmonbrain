@@ -10,7 +10,13 @@ TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env fil
 FLASKURL = os.getenv('FLASK_URL', None)
 
 def load_config(filename):
-    with open(filename, 'r') as f:
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+
+    # Join the script directory with the filename
+    config_path = os.path.join(script_dir, filename)
+
+    with open(config_path, 'r') as f:
         config = json.load(f)
     return config
 
