@@ -50,7 +50,7 @@ steps:
            --cpu 1 \
            --max-instances 2 \
            --service-account ${_SERVICE_ACCOUNT} \
-           --tag openai
+           --tag openai vertex
 
   # Get service URL
   - name: "gcr.io/cloud-builders/gcloud"
