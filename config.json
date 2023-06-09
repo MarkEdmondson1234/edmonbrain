@@ -1,0 +1,18 @@
+{
+	"edmonbrain_vertex":{
+        "llm":"vertex",
+        "vectorstore": "supabase"
+    },
+	"fnd":{
+        "llm":"openai",
+        "vectorstore": "supabase"
+    },
+	"sanne":{
+        "llm":"openai",
+        "vectorstore": "supabase"
+    },
+    "edmonbrain":{
+        "llm":"openai",
+        "vectorstore": "supabase"
+    }
+}

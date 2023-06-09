@@ -1,7 +1,5 @@
 # imports
-import os, sys
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.embeddings import VertexAIEmbeddings
+import os
 
 from langchain.docstore.document import Document
 import base64
@@ -13,6 +11,7 @@ from dotenv import load_dotenv
 from langchain.schema import Document
 import logging
 from qna.pubsub_manager import PubSubManager
+from llm import pick_llm
 
 load_dotenv()
 
@@ -53,16 +52,9 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
     supabase_key = os.getenv('SUPABASE_KEY')
 
     logging.info(f"Supabase URL: {supabase_url}")
-    llm_str = 'openai' if sys.getenv('OPENAI_API_KEY', None) is not None else 'vertex'
-    logging.info(f'Using embeddings: {llm_str}')
 
-    if llm_str == 'openai':
-        embeddings = OpenAIEmbeddings()
-    elif llm_str == 'vertex':
-        embeddings = VertexAIEmbeddings()
-    else:
-        raise NotImplementedError(f'No llm implemented for {llm_str}')
-    
+    _, embeddings = pick_llm(vector_name)
+
     supabase: Client = create_client(supabase_url, supabase_key)
 
     # ensure the supabase sql function and table has been created before using this

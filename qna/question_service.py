@@ -1,11 +1,7 @@
-import os, logging, sys
+import os, logging, json
 
 from langchain.vectorstores import SupabaseVectorStore
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.llms import OpenAI
-
-from langchain.llms import VertexAI
-from langchain.embeddings import VertexAIEmbeddings
+from llm import pick_llm
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
 from langchain.chains import ConversationalRetrievalChain
@@ -17,19 +13,7 @@ load_dotenv()
 
 def qna(question: str, vector_name: str, chat_history=None):
 
-    llm = None
-    embeddings = None
-    llm_str = 'openai' if os.getenv('OPENAI_API_KEY', None) is not None else 'vertex'
-    logging.info(f'Using embeddings: {llm_str}')
-
-    if llm_str == 'openai':
-        llm = OpenAI(temperature=0)
-        embeddings = OpenAIEmbeddings()
-    elif llm_str == 'vertex':
-        llm = VertexAI(temperature=0)
-        embeddings = VertexAIEmbeddings()
-    else:
-        raise NotImplementedError(f'No llm implemented for {llm_str}')
+    llm, embeddings = pick_llm(vector_name)
 
     logging.info(f"Initiating Supabase store: {vector_name}")
     # init embedding and vector store

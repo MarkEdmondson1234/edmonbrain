@@ -49,8 +49,7 @@ steps:
            --memory 2Gi \
            --cpu 1 \
            --max-instances 2 \
-           --service-account ${_SERVICE_ACCOUNT} \
-           --tag openai vertex
+           --service-account ${_SERVICE_ACCOUNT}
 
   # Get service URL
   - name: "gcr.io/cloud-builders/gcloud"
@@ -60,7 +59,7 @@ steps:
       - "-c"
       - |
         echo $(gcloud run services describe ${_SERVICE_NAME} --region ${_REGION} --format 'value(status.url)') \
-          > service_url.txt
+          > service_url.txt && cat service_url.txt
 
   # Update the service with SERVICE_URL environment variable
   - name: "gcr.io/cloud-builders/gcloud"
