@@ -1,4 +1,5 @@
 import os, json
+import logging
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.llms import OpenAI
@@ -34,5 +35,7 @@ def pick_llm(vector_name):
         embeddings = VertexAIEmbeddings()
     else:
         raise NotImplementedError(f'No llm implemented for {llm_str}')   
+    
+    logging.info(f'Using {llm_str}')
 
     return llm, embeddings
