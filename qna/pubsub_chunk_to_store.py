@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from langchain.schema import Document
 import logging
 from qna.pubsub_manager import PubSubManager
-from llm import pick_llm
+from qna.llm import pick_llm
 
 load_dotenv()
 

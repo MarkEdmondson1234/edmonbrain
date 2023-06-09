@@ -1,7 +1,7 @@
-import os, logging, json
+import os, logging
 
 from langchain.vectorstores import SupabaseVectorStore
-from llm import pick_llm
+from qna.llm import pick_llm
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
 from langchain.chains import ConversationalRetrievalChain
