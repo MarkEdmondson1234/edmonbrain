@@ -53,6 +53,7 @@ e.g. `your-app@your-project.iam.gserviceaccount.com`
 
 * Pub Sub Editor
 * Storage Admin
+* AI Platform Model User (for vertex)
 
 ### Run Cloud Build
 

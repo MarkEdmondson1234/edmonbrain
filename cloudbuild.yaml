@@ -4,8 +4,10 @@ substitutions:
 steps:
   # Build the Docker image
   - name: "gcr.io/cloud-builders/docker"
+    dir: prebuild
     args: ["build", "-t", "gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}", "."]
 
   # Push the Docker image to Google Container Registry
   - name: "gcr.io/cloud-builders/docker"
+    dir: prebuild
     args: ["push", "gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}"]
