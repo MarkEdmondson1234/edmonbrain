@@ -23,12 +23,14 @@ def load_config(filename):
 # Load the config file at the start of your program
 config = load_config('config.json')
 
-def select_vectorname(message):
+def select_vectorname(message, bot_mention):
+
     if message.guild is not None:  
         server_name = message.guild.name
         if server_name in config:
-            vector_name = config[server_name]
-            print(f'Guild: {server_name} - vector_name: {vector_name}')
+            bot_lookup = bot_mention.replace('<').replace('>').replace('@').strip()
+            vector_name = config[server_name][bot_lookup]
+            print(f'Guild: {server_name} - bot_lookup: {bot_lookup} - vector_name: {vector_name}')
             return config[server_name]
 
         raise ValueError(f"Could not find a configured vector for server_name: {server_name}")
@@ -115,7 +117,7 @@ async def on_message(message):
     chat_history = await make_chat_history(new_thread, bot_mention, client.user)
 
     try:
-        VECTORNAME = select_vectorname(message)
+        VECTORNAME = select_vectorname(message, bot_mention)
     except ValueError as e:
         print(e)
         return  # exit the event handler

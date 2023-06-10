@@ -1,5 +1,14 @@
 {
-	"Mark Edmondson": "edmonbrain_vertex",
-	"Illys Shield": "fnd",
-	"MemoAux":"sanne"
+	"Mark Edmondson": {
+		"1107554583192031232":"edmonbrain",
+		"1114588633505206353": "edmonbrain_vertex"
+	},
+	"Illys Shield":{
+		"1107554583192031232":"fnd_openai",
+		"1114588633505206353": "fnd_vertex"
+	},
+	"MemoAux":{
+		"1107554583192031232":"sanne_openai",
+		"1114588633505206353": "sanne_vertex"
+	}
 }
