@@ -66,7 +66,7 @@ def discord_message(vector_name):
     data = request.get_json()
     user_input = data['content'].strip()  # Extract user input from the payload
 
-    logging.info(f"discord_message: {data}")
+    logging.info(f"discord_message: {data} to {vector_name}")
 
     now = datetime.datetime.now()
     hourmin = now.strftime("%H%M")
