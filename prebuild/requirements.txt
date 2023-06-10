@@ -1,6 +1,5 @@
 langchain>=0.0.195
 openai
-chromadb
 tiktoken
 requests
 python-dateutil
