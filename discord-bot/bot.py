@@ -31,7 +31,7 @@ def select_vectorname(message, bot_mention):
             bot_lookup = bot_mention.replace('<','').replace('>','').replace('@','').strip()
             vector_name = config[server_name][bot_lookup]
             print(f'Guild: {server_name} - bot_lookup: {bot_lookup} - vector_name: {vector_name}')
-            return config[server_name]
+            return vector_name
 
         raise ValueError(f"Could not find a configured vector for server_name: {server_name}")
     return None
