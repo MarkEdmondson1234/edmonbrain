@@ -20,3 +20,4 @@ google-auth-oauthlib
 psycopg2-binary
 google-cloud-aiplatform
 google-generativeai
+python-dotenv

@@ -19,3 +19,6 @@ google-auth-oauthlib
 psycopg2-binary
 google-cloud-aiplatform>=1.26.0
 google-generativeai
+discord
+aiohttp
+python-dotenv
