@@ -28,7 +28,7 @@ def select_vectorname(message, bot_mention):
     if message.guild is not None:  
         server_name = message.guild.name
         if server_name in config:
-            bot_lookup = bot_mention.replace('<').replace('>').replace('@').strip()
+            bot_lookup = bot_mention.replace('<','').replace('>','').replace('@','').strip()
             vector_name = config[server_name][bot_lookup]
             print(f'Guild: {server_name} - bot_lookup: {bot_lookup} - vector_name: {vector_name}')
             return config[server_name]
