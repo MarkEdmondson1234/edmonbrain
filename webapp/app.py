@@ -118,10 +118,11 @@ def discord_message(vector_name):
     if user_input.startswith("!help"):
         result = {"result":f"""* `!sources` - get sources added in last 24hrs
 * `!deletesource [gs:// source]` - delete a source from database
-* `!saveurl [https:// url]` - add the contents found at this URL to database
+* `!saveurl [https:// url]` - add the contents found at this URL to database. 
 * `!savethread` - save current Discord thread as a source to database
 * `!help`- see this message
 * Files attached to messages will be added as source to database
+* URLs of GoogleDrive work if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* or are *public*
 """}
         return jsonify(result)
 

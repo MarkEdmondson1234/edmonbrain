@@ -46,6 +46,19 @@ def convert_to_txt(file_path):
     shutil.copyfile(file_path, txt_file)
     return txt_file
 
+def read_gdoc_file(url):
+    document_id = extract_document_id(url)
+    allowed_extensions = ["document","sheet","pdf"]
+    for ext in allowed_extensions:
+        try:
+            loader = GoogleDriveLoader(file_ids=[document_id], file_type=ext)
+            return loader.load()
+        except HttpError as e:
+            logging.error(f"Failed to load file with mime type {ext}: {str(e)}")
+
+    logging.error("Failed to load file with all attempted mime types.")
+    return None
+
 def read_gdrive_to_document(url: str, metadata: dict = None):
 
     logging.info(f"Reading gdrive doc from {url}")
@@ -54,18 +67,13 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
         folder_id = extract_folder_id(url)
         try:
             loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
+            docs = loader.load()
         except HttpError as e:
             logging.error(f"Could not load file: {str(e)}")
             return None
     elif url.startswith("https://docs.google.com/document"):
-        document_id = extract_document_id(url)
-        try:
-            loader = GoogleDriveLoader(file_ids=[document_id])
-        except HttpError as e:
-            logging.error(f"Could not load file: {str(e)}")
-            return None
+        docs = read_gdoc_file(url)
     
-    docs = loader.load()
     if metadata is not None:
         for doc in docs:
             doc.metadata.update(metadata)
