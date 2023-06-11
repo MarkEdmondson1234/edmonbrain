@@ -10,6 +10,8 @@ import os
 import shutil
 from urllib.parse import urlparse, unquote
 
+from googleapiclient.errors import HttpError
+
 def extract_folder_id(url):
     parsed_url = urlparse(unquote(url))
     path_parts = parsed_url.path.split('/')
@@ -50,10 +52,18 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
 
     if url.startswith("https://drive.google.com"):
         folder_id = extract_folder_id(url)
-        loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
+        try:
+            loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
+        except HttpError as e:
+            logging.error(f"Could not load file: {str(e)}")
+            return None
     elif url.startswith("https://docs.google.com/document"):
         document_id = extract_document_id(url)
-        loader = GoogleDriveLoader(file_ids=[document_id])
+        try:
+            loader = GoogleDriveLoader(file_ids=[document_id])
+        except HttpError as e:
+            logging.error(f"Could not load file: {str(e)}")
+            return None
     
     docs = loader.load()
     if metadata is not None:
@@ -110,13 +120,6 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
                 # Ensure cleanup happens if txt_file was created
                 if txt_file is not None and os.path.exists(txt_file):
                     os.remove(txt_file)
-
-        else:
-            raise
-
-    except Exception as e:
-        logging.error(f"An unexpected error occurred for {gs_file}: {str(e)}")
-        raise
 
     for doc in docs:
         #doc.metadata["file_sha1"] = file_sha1

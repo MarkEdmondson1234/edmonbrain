@@ -123,7 +123,8 @@ class GoogleDriveLoader(BaseLoader, BaseModel):
             elif "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
                 creds, project = default()
                 # no need to write to a file
-                return creds
+                if creds:
+                    return creds
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     str(self.credentials_path), SCOPES
