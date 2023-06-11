@@ -14,12 +14,8 @@ from langchain.schema import Document
 import logging
 from qna.pubsub_manager import PubSubManager
 import datetime
-from .database import setup_database
-from .database import delete_row_from_source
-from .database import return_sources_last24
-from .loaders import read_file_to_document
-from .loaders import read_gdrive_to_document
-from .loaders import read_url_to_document
+import database
+import loaders
 
 load_dotenv()
 
@@ -86,7 +82,7 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
     if not sub_exists:
         pubsub_manager.create_subscription(sub_name,
                                            push_endpoint=f"/pubsub_to_store/{vector_name}")
-        setup_database(vector_name)
+        database.setup_database(vector_name)
         
 
     return f"gs://{bucket_name}/{bucket_filepath}"
@@ -154,9 +150,6 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
 
     chunks = []
 
-    if message_data.startswith('"gs://'):
-        message_data = message_data.strip('\"')
-
     if message_data.startswith("gs://"):
         logging.info("Detected gs://")
         bucket_name, file_name = message_data[5:].split("/", 1)
@@ -181,7 +174,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             }
             metadata.update(the_metadata)
 
-            docs = read_file_to_document(tmp_file_path, metadata=metadata)
+            docs = loaders.read_file_to_document(tmp_file_path, metadata=metadata)
             chunks = chunk_doc_to_docs(docs, file_name.suffix)
 
     elif message_data.startswith("https://drive.google.com") or message_data.startswith("https://docs.google.com"):
@@ -193,7 +186,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = read_gdrive_to_document(url, metadata=metadata)
+            doc = loaders.read_gdrive_to_document(url, metadata=metadata)
             docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
@@ -209,7 +202,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = read_url_to_document(url, metadata=metadata)
+            doc = loaders.read_url_to_document(url, metadata=metadata)
             docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
@@ -268,7 +261,7 @@ def publish_chunks(chunks: list[Document], vector_name: str):
     if not sub_exists:
         pubsub_manager.create_subscription(sub_name,
                                            push_endpoint=f"/pubsub_chunk_to_store/{vector_name}")
-        setup_database(vector_name)
+        database.setup_database(vector_name)
         
     for chunk in chunks:
         # Convert chunk to string, as Pub/Sub messages must be strings or bytes
@@ -286,17 +279,6 @@ def publish_text(text:str, vector_name: str):
     if not sub_exists:
         pubsub_manager.create_subscription(sub_name,
                                            push_endpoint=f"/pubsub_chunk_to_store/{vector_name}")
-        setup_database(vector_name)
+        database.setup_database(vector_name)
     
     pubsub_manager.publish_message(text)
-
-def delete_source(source:str, vector_name:str):
-    logging.info(f"Deleting source: {source} from {vector_name}")
-    delete_row_from_source(source, vector_name)
-    logging.info(f"Deleted source: {source} from {vector_name}")
-
-
-def return_sources_last24_(vector_name:str):
-    logging.info(f"Returning sources last 24")
-    rows = return_sources_last24(vector_name)
-    return rows

@@ -7,9 +7,10 @@ sys.path.append(parent_dir)
 
 # app.py
 from flask import Flask, render_template, request, jsonify
-from qna import question_service
-from qna import publish_to_pubsub_embed
-from qna import pubsub_chunk_to_store as pb
+import qna.question_service as qs
+import qna.publish_to_pubsub_embed as pbembed
+import qna.pubsub_chunk_to_store as pb
+import qna.database as db
 import logging
 import bot_help
 
@@ -48,7 +49,7 @@ def process_input():
     paired_messages = bot_help.extract_chat_history(app_chat_history)
 
     # ask the bot a question about the documents in the vectorstore
-    bot_output = question_service.qna(user_input, vector_name, chat_history=paired_messages)
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
 
     # append user message to chat history
     app_chat_history.append({'name': 'Human', 'content': user_input})
@@ -87,10 +88,10 @@ def discord_message(vector_name):
             return result
     
     if user_input.startswith("!saveurl"):
-        if publish_to_pubsub_embed.contains_url(user_input):
-            urls = publish_to_pubsub_embed.extract_urls(user_input)
+        if pbembed.contains_url(user_input):
+            urls = pbembed.extract_urls(user_input)
             for url in urls:
-                publish_to_pubsub_embed.publish_text(url, vector_name)
+                pbembed.publish_text(url, vector_name)
             result = {"result": f"URLs sent for processing: {urls}"}
         else:
             result = {"result": f"No URLs were found"}
@@ -99,12 +100,12 @@ def discord_message(vector_name):
     if user_input.startswith("!deletesource"):
         source = user_input.replace("!deletesource", "")
         source = source.replace("source:","").strip()
-        publish_to_pubsub_embed.delete_source(source, vector_name=vector_name)
+        db.delete_row_from_source(source, vector_name=vector_name)
         result = {"result": f"Deleting source: {source}"}
         return jsonify(result)
     
     if user_input.startswith("!sources"):
-        rows = publish_to_pubsub_embed.return_sources_last24_(vector_name)
+        rows = db.return_sources_last24(vector_name)
 
         if rows is None:
             result = {"result": "No sources were found"}
@@ -124,7 +125,7 @@ def discord_message(vector_name):
 """}
         return jsonify(result)
 
-    bot_output = question_service.qna(user_input, vector_name, chat_history=paired_messages)
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     
     logging.info(f"bot_output: {bot_output}")
     
@@ -188,7 +189,7 @@ def pubsub_to_store(vector_name):
     if request.method == 'POST':
         data = request.get_json()
 
-        meta = publish_to_pubsub_embed.data_to_embed_pubsub(data, vector_name)
+        meta = pbembed.data_to_embed_pubsub(data, vector_name)
         file_uploaded = str(meta.get("source", "Could not find a source"))
         return jsonify({'status': 'Success', 'source': file_uploaded}), 200
 
