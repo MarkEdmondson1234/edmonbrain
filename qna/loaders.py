@@ -74,6 +74,9 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
     elif url.startswith("https://docs.google.com/document"):
         docs = read_gdoc_file(url)
     
+    if docs is None:
+        return None
+    
     if metadata is not None:
         for doc in docs:
             doc.metadata.update(metadata)
