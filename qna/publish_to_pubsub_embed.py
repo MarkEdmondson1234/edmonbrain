@@ -1,9 +1,6 @@
 # imports
-import os, shutil, json, re
+import os, json, re
 import pathlib
-from langchain.document_loaders.unstructured import UnstructuredFileLoader
-from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
-from langchain.document_loaders import UnstructuredURLLoader
 
 from langchain.docstore.document import Document
 from google.cloud import storage
@@ -20,6 +17,7 @@ import datetime
 from .database import setup_database
 from .database import delete_row_from_source
 from .database import return_sources_last24
+import loaders
 
 load_dotenv()
 
@@ -34,14 +32,6 @@ def extract_urls(text):
     url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
     urls = url_pattern.findall(text)
     return urls
-
-# utility functions
-def convert_to_txt(file_path):
-    file_dir, file_name = os.path.split(file_path)
-    file_base, file_ext = os.path.splitext(file_name)
-    txt_file = os.path.join(file_dir, f"{file_base}.txt")
-    shutil.copyfile(file_path, txt_file)
-    return txt_file
 
 def compute_sha1_from_file(file_path):
     with open(file_path, "rb") as file:
@@ -98,74 +88,6 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
         
 
     return f"gs://{bucket_name}/{bucket_filepath}"
-
-
-def read_url_to_document(url: str, metadata: dict = None):
-    
-    loader = UnstructuredURLLoader(urls=[url])
-    docs = loader.load()
-    if metadata is not None:
-        for doc in docs:
-            doc.metadata.update(metadata)
-    
-    logging.info(f"UnstructuredURLLoader docs: {docs}")
-    
-    return docs
-
-
-def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = None):
-    
-    #file_sha1 = compute_sha1_from_file(gs_file.name)
-    
-    try:
-        #TODO: Use UnstructuredAPIFileLoader instead?
-        logging.info(f"Sending {gs_file} to UnstructuredAPIFileLoader")
-        loader = UnstructuredAPIFileLoader(gs_file, mode="elements", api_key="FAKE_API_KEY")
-        
-        if split:
-            # only supported for some file types
-            docs = loader.load_and_split()
-        else:
-            docs = loader.load()
-            logging.info(f"Loaded docs for {gs_file} from UnstructuredAPIFileLoader")
-    except ValueError as e:
-        logging.info(f"Error for {gs_file} from UnstructuredAPIFileLoader: {str(e)}")
-        if "file type is not supported in partition" in str(e):
-            logging.info("trying locally via .txt conversion")
-            txt_file = None
-            try:
-                # Convert the file to .txt and try again
-                txt_file = convert_to_txt(gs_file)
-                loader = UnstructuredFileLoader(txt_file, mode="elements")
-                if split:
-                    docs = loader.load_and_split()
-                else:
-                    docs = loader.load()
-
-            except Exception as inner_e:
-                raise Exception("An error occurred during txt conversion or loading.") from inner_e
-
-            finally:
-                # Ensure cleanup happens if txt_file was created
-                if txt_file is not None and os.path.exists(txt_file):
-                    os.remove(txt_file)
-
-        else:
-            raise
-
-    except Exception as e:
-        logging.error(f"An unexpected error occurred for {gs_file}: {str(e)}")
-        raise
-
-    for doc in docs:
-        #doc.metadata["file_sha1"] = file_sha1
-        logging.info(f"doc_content: {doc.page_content[:30]}")
-        if metadata is not None:
-            doc.metadata.update(metadata)
-    
-    logging.info(f"gs_file:{gs_file} read into {len(docs)} docs")
-
-    return docs
 
 def choose_splitter(extension: str, chunk_size: int=1024, chunk_overlap:int=0):
     if extension == ".py":
@@ -257,9 +179,23 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             }
             metadata.update(the_metadata)
 
-            docs = read_file_to_document(tmp_file_path, metadata=metadata)
+            docs = loaders.read_file_to_document(tmp_file_path, metadata=metadata)
             chunks = chunk_doc_to_docs(docs, file_name.suffix)
 
+    elif message_data.startswith("https://drive.google.com") or message_data.startswith("https://docs.google.com"):
+        logging.info("Got google drive URL")
+        urls = extract_urls(message_data)
+
+        docs = []
+        for url in urls:
+            metadata["source"] = url
+            metadata["url"] = url
+            metadata["type"] = "url_load"
+            doc = loaders.read_gdrive_to_document(url, metadata=metadata)
+            docs.extend(doc)
+
+        chunks = chunk_doc_to_docs(docs)
+        
     elif message_data.startswith("http"):
         logging.info(f"Got http message: {message_data}")
 
@@ -271,7 +207,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = read_url_to_document(url, metadata=metadata)
+            doc = loaders.read_url_to_document(url, metadata=metadata)
             docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
@@ -337,8 +273,6 @@ def publish_chunks(chunks: list[Document], vector_name: str):
         chunk_str = chunk.json()
         pubsub_manager.publish_message(chunk_str)
     
-
-
 
 def publish_text(text:str, vector_name: str):
     logging.info(f"Publishing text to app_to_pubsub_{vector_name}")
