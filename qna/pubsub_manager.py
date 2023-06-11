@@ -120,11 +120,10 @@ class PubSubManager:
             
             return full_subscription_name
 
-    @staticmethod
-    def _callback(future):
+    def _callback(self, future):
         try:
             message_id = future.result()
-            logging.info(f"Published message with ID: {message_id}")
+            logging.info(f"Published message with ID: {message_id} to {self.pubsub_topic}")
         except Exception as e:
             logging.error(f"Failed to publish message: {e}")
 

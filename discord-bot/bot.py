@@ -150,13 +150,14 @@ async def on_message(message):
                     summaries = response_data.get('summaries', [])
                     for summary in summaries:
                         await chunk_send(new_thread, summary)
-                    await thinking_message2.edit(content="Uploaded file(s). Use !deletesource {source_name} to remove it again")
+                    await thinking_message2.edit(
+                        content="Uploaded file(s). Use !deletesource {source_name} to remove it again")
                 else:
                     # Edit the thinking message to show an error
                     await thinking_message2.edit(content="Error in processing file(s).")
 
         # we don't send to message endpoint as well
-        return 
+        return
 
     if message.content:
         print(f'Got the message: {message.content}')
@@ -180,69 +181,77 @@ async def on_message(message):
                     await chunk_send(message.channel, f"vectorname={VECTORNAME}")
                     clean_content = words[2]
                 else:
-                    await chunk_send(message.channel, "Hello Master. Use !vectorname <vector_name> 'clean content' to debug")
+                    await chunk_send(message.channel, 
+                                     "Hello Master. Use !vectorname <vector_name> 'clean content' to debug")
             else:
                 return
 
         # Send a thinking message
         thinking_message = await new_thread.send("Thinking...")
 
-        if len(clean_content) > 10 or clean_content.startswith("!"):
-            # Forward the message content to your Flask app
-            flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
-            print(f'Calling {flask_app_url}')
-            payload = {
-                'content': clean_content,
-                'chat_history': chat_history
-            }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(flask_app_url, json=payload) as response:
-                    print(f'chat response.status: {response.status}')
-                    if response.status == 200:
-                        response_data = await response.json()  # Get the response data as JSON
-                        #print(f'response_data: {response_data}')
-
-                        source_docs = response_data.get('source_documents', [])
-                        reply_content = response_data.get('result')  # Get the 'result' field from the JSON
-
-                        # dedupe source docs
-                        seen = set()
-                        unique_source_docs = []
-
-                        for source in source_docs:
-                            metadata_str = json.dumps(source.get('metadata'), sort_keys=True)
-                            if metadata_str not in seen:
-                                unique_source_docs.append(source)
-                                seen.add(metadata_str)
-
-                        for source in unique_source_docs:
-                            metadata_source = source.get('metadata')
-                            #if debug:
-                            source_message = f"**source**: {metadata_source.get('source')}"
-                            await chunk_send(new_thread, source_message)
-                            source_url = metadata_source.get('url', None)
-                            if source_url is not None:
-                                url_message = f"**url**: {source_url}"
-                                await chunk_send(new_thread, url_message)
-
-
-                        # Edit the thinking message to show the reply
-                        await thinking_message.edit(content=reply_content)
-
-                        # Check if the message was sent in a thread or a private message
-                        if isinstance(new_thread, discord.Thread):
-                            await new_thread.send(f"*Reply to {bot_mention} within this thread to continue. Use `!help` for special commands*")
-                        elif isinstance(new_thread, discord.DMChannel):
-                            # Its a DM
-                            await new_thread.send(f"*Use `!help` to see special commands*")
-                        else:
-                            print(f"I couldn't work out the channel type: {new_thread}")
-                    else:
-                        # Edit the thinking message to show an error
-                        await thinking_message.edit(content="Error in processing message.")
-        else:
+        if len(clean_content) < 10 and not clean_content.startswith("!"):
             print(f"Got a little message not worth sending: {clean_content}")
             await thinking_message.edit(content=f"May I ask you to reply with a bit more context?")
+
+            return
+
+        # Forward the message content to your Flask app
+        flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
+        print(f'Calling {flask_app_url}')
+        payload = {
+            'content': clean_content,
+            'chat_history': chat_history
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(flask_app_url, json=payload) as response:
+                print(f'chat response.status: {response.status}')
+                if response.status != 200:
+                    # Edit the thinking message to show an error
+                    await thinking_message.edit(content="Error in processing message.")
+                    return
+
+                response_data = await response.json()  # Get the response data as JSON
+                #print(f'response_data: {response_data}')
+
+                source_docs = response_data.get('source_documents', [])
+                reply_content = response_data.get('result')  # Get the 'result' field from the JSON
+
+                # dedupe source docs
+                seen = set()
+                unique_source_docs = []
+
+                for source in source_docs:
+                    metadata_str = json.dumps(source.get('metadata'), sort_keys=True)
+                    if metadata_str not in seen:
+                        unique_source_docs.append(source)
+                        seen.add(metadata_str)
+
+                for source in unique_source_docs:
+                    metadata_source = source.get('metadata')
+                    source_message = f"**source**: {metadata_source.get('source')}"
+                    if metadata_source.get('page_number', None) is not None:
+                        source_message += f" page: {metadata_source.get('page_number')}"
+                    if metadata_source.get('category', None) is not None:
+                        source_message += f" category: {metadata_source.get('category')}"
+                        
+                    await chunk_send(new_thread, source_message)
+                    source_url = metadata_source.get('url', None)
+                    if source_url is not None:
+                        url_message = f"**url**: {source_url}"
+                        await chunk_send(new_thread, url_message)
+
+
+                # Edit the thinking message to show the reply
+                await thinking_message.edit(content=reply_content)
+
+                # Check if the message was sent in a thread or a private message
+                if isinstance(new_thread, discord.Thread):
+                    await new_thread.send(f"*Reply to {bot_mention} within this thread to continue. Use `!help` for special commands*")
+                elif isinstance(new_thread, discord.DMChannel):
+                    # Its a DM
+                    await new_thread.send(f"*Use `!help` to see special commands*")
+                else:
+                    print(f"I couldn't work out the channel type: {new_thread}")
 
 client.run(TOKEN)
