@@ -17,7 +17,9 @@ import datetime
 from .database import setup_database
 from .database import delete_row_from_source
 from .database import return_sources_last24
-import loaders
+from .loaders import read_file_to_document
+from .loaders import read_gdrive_to_document
+from .loaders import read_url_to_document
 
 load_dotenv()
 
@@ -179,7 +181,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             }
             metadata.update(the_metadata)
 
-            docs = loaders.read_file_to_document(tmp_file_path, metadata=metadata)
+            docs = read_file_to_document(tmp_file_path, metadata=metadata)
             chunks = chunk_doc_to_docs(docs, file_name.suffix)
 
     elif message_data.startswith("https://drive.google.com") or message_data.startswith("https://docs.google.com"):
@@ -191,7 +193,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = loaders.read_gdrive_to_document(url, metadata=metadata)
+            doc = read_gdrive_to_document(url, metadata=metadata)
             docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
@@ -207,7 +209,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = loaders.read_url_to_document(url, metadata=metadata)
+            doc = read_url_to_document(url, metadata=metadata)
             docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
