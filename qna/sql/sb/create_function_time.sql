@@ -7,12 +7,12 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector(1536), match_count int)
+CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector({vector_size}), match_count int)
     RETURNS TABLE(
         id bigint,
         content text,
         metadata jsonb,
-        embedding vector(1536),
+        embedding vector({vector_size}),
         similarity float)
     LANGUAGE plpgsql
     AS $$

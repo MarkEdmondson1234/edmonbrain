@@ -18,7 +18,7 @@ def setup_supabase(vector_name:str, verbose:bool=False):
         vector_size = 768
     
     
-    params = {'vector_name': vector_name, vector_size: vector_size}
+    params = {'vector_name': vector_name, 'vector_size': vector_size}
 
     execute_sql_from_file("sql/sb/setup.sql", params)
     execute_sql_from_file("sql/sb/create_table.sql", params)
