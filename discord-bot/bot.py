@@ -63,6 +63,8 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         if msg.content.startswith("**url**:"):
             continue
+        if msg.content.startswith("*Response:*"):
+            continue
         if msg.content.startswith("Deleting source:"):
             continue
         history.append(msg)
@@ -241,9 +243,12 @@ async def on_message(message):
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
 
-
-                # Edit the thinking message to show the reply
-                await thinking_message.edit(content=reply_content)
+                if len(reply_content) > 2000:
+                    await thinking_message.edit(content="*Response:*")
+                    await chunk_send(new_thread, reply_content)
+                else:
+                    # Edit the thinking message to show the reply
+                    await thinking_message.edit(content=reply_content)
 
                 # Check if the message was sent in a thread or a private message
                 if isinstance(new_thread, discord.Thread):
