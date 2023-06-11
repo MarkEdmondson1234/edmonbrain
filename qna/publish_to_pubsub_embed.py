@@ -105,6 +105,9 @@ def remove_whitespace(page_content: str):
 
 def chunk_doc_to_docs(documents: list, extension: str = ".md"):
     """Turns a Document object into a list of many Document chunks"""
+    if documents is None:
+        return None
+    
     source_chunks = []
     for document in documents:
         splitter = choose_splitter(extension)
@@ -231,12 +234,18 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
         publish_if_urls(the_content, vector_name)
 
         chunks = chunk_doc_to_docs(docs)
+
+    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")
+    if chunks is None:
+        logging.info("No chunks found")
+        pubsub_manager.publish_message(f"Error: no chunks from for: {metadata} to {vector_name} embedding")
+        return None
         
     publish_chunks(chunks, vector_name=vector_name)
 
     logging.info(f"data_to_embed_pubsub published chunks with metadata: {metadata}")
-    pubsub_manager2 = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")
-    pubsub_manager2.publish_message(f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding")
+    
+    pubsub_manager.publish_message(f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding")
 
     return metadata
 
