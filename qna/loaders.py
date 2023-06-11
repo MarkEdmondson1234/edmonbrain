@@ -1,7 +1,8 @@
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
 from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
-from langchain.document_loaders import GoogleDriveLoader
+#from langchain.document_loaders import GoogleDriveLoader
+from qna.googledrive_patch import GoogleDriveLoader
 
 import logging
 import pathlib
