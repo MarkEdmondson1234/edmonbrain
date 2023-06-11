@@ -1,21 +1,25 @@
 # imports
-import os, json, re
+import os, json, re, sys
 import pathlib
 
-from langchain.docstore.document import Document
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+
 from google.cloud import storage
 import base64
-import langchain.text_splitter as text_splitter
-
+import datetime
+import logging
 from dotenv import load_dotenv
 import tempfile
 import hashlib
+
+import langchain.text_splitter as text_splitter
+from langchain.docstore.document import Document
 from langchain.schema import Document
-import logging
+
 from qna.pubsub_manager import PubSubManager
-import datetime
-import database
-import loaders
+import qna.database as database
+import qna.loaders as loaders
 
 load_dotenv()
 
