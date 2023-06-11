@@ -122,7 +122,8 @@ class GoogleDriveLoader(BaseLoader, BaseModel):
                 creds.refresh(Request())
             elif "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
                 creds, project = default()
-                self.token_path = Path("/tmp") / "token.json" # can only write to /tmp on Cloud run
+                # no need to write to a file
+                return creds
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     str(self.credentials_path), SCOPES
