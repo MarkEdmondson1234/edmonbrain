@@ -51,6 +51,7 @@ def read_gdoc_file(url):
     allowed_extensions = ["document","sheet","pdf"]
     for ext in allowed_extensions:
         try:
+            logging.info(f"Loading data from doc_id: {document_id} and extenion: {ext}")
             loader = GoogleDriveLoader(file_ids=[document_id], file_type=ext)
             return loader.load()
         except HttpError as e:
@@ -66,15 +67,17 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
     if url.startswith("https://drive.google.com"):
         folder_id = extract_folder_id(url)
         try:
+            logging.info(f"Loading data from folder_id: {folder_id}")
             loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
             docs = loader.load()
         except HttpError as e:
             logging.error(f"Could not load file: {str(e)}")
             return None
     elif url.startswith("https://docs.google.com/document"):
+        
         docs = read_gdoc_file(url)
     
-    if docs is None:
+    if docs is None or len(docs) == 0:
         return None
     
     if metadata is not None:
