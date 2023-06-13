@@ -15,11 +15,14 @@ from googleapiclient.errors import HttpError
 def extract_folder_id(url):
     parsed_url = urlparse(unquote(url))
     path_parts = parsed_url.path.split('/')
-    
+    print(path_parts)
     for part in path_parts:
         # IDs are typically alphanumeric and at least a few characters long
-        # So let's say that to be an ID, a part has to be at least 5 characters long
-        if part.isalnum() and len(part) >= 15:
+        # So let's say that to be an ID, a part has to be at least 15 characters long
+        print(part.isalnum())
+        print(len(part))
+
+        if len(part) >= 15:
             return part
     
     # Return None if no ID was found
