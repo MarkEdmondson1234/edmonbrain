@@ -66,8 +66,12 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
 
     if url.startswith("https://drive.google.com"):
         folder_id = extract_folder_id(url)
+        logging.info(f"Loading data from folder_id: {folder_id}")
+        if folder_id is None:
+            logging.error("Could not extract folder_id")
+            return None
         try:
-            logging.info(f"Loading data from folder_id: {folder_id}")
+            
             loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
             docs = loader.load()
         except HttpError as e:

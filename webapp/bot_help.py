@@ -100,7 +100,7 @@ def embeds_to_json(message):
     return json.dumps(message["embeds"]) if message["embeds"] else None
 
 def create_message_element(message):
-    return (message["content"] + 'Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"])
+    return (message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"])
 
 def is_human(message):
     return message["name"] == "Human"

@@ -243,6 +243,19 @@ def slack():
     
     return '', 204
 
+# needs to be done via Mailgun API
+@app.route('/email', methods=['POST'])
+def receive_email():
+    # The email data will be in the request.form dictionary.
+    # The exact structure of the data depends on how your email
+    # service sends it. Check the service's documentation for details.
+    email_data = request.form
+    print(email_data)
+
+    # Here you can add code to process the email data.
+
+    return '', 200
+
 if __name__ == "__main__":
     import os
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
