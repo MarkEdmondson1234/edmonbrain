@@ -19,10 +19,7 @@ def extract_folder_id(url):
     for part in path_parts:
         # IDs are typically alphanumeric and at least a few characters long
         # So let's say that to be an ID, a part has to be at least 15 characters long
-        print(part.isalnum())
-        print(len(part))
-
-        if len(part) >= 15:
+        if all(char.isalnum() or char == '_' for char in part) and len(part) >= 15:
             return part
     
     # Return None if no ID was found
@@ -35,7 +32,7 @@ def extract_document_id(url):
     for part in path_parts:
         # IDs are typically alphanumeric and at least a few characters long
         # So let's say that to be an ID, a part has to be at least 5 characters long
-        if len(part) >= 15:
+        if all(char.isalnum() or char == '_' for char in part) and len(part) >= 15:
             return part
     
     # Return None if no ID was found
