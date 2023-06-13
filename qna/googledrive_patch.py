@@ -123,6 +123,7 @@ class GoogleDriveLoader(BaseLoader, BaseModel):
             elif "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
                 creds, project = default()
                 # no need to write to a file
+                creds = creds.with_scopes(SCOPES)
                 if creds:
                     return creds
             else:
