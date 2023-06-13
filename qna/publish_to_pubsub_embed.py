@@ -194,7 +194,10 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             metadata["url"] = url
             metadata["type"] = "url_load"
             doc = loaders.read_gdrive_to_document(url, metadata=metadata)
-            docs.extend(doc)
+            if doc is None:
+                logging.info("Could not load any Google Drive docs")
+            else:
+                docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
         
