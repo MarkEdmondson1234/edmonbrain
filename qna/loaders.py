@@ -40,7 +40,7 @@ def read_gdoc_file(url):
     for ext in allowed_extensions:
         try:
             logging.info(f"Loading data from doc_id: {document_id} and extenion: {ext}")
-            loader = GoogleDriveLoader(file_ids=[document_id], file_type=ext)
+            loader = GoogleDriveLoader(document_ids=[document_id], file_type=ext)
             return loader.load()
         except HttpError as e:
             logging.error(f"Failed to load file with mime type {ext}: {str(e)}")
