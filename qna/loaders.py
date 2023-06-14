@@ -12,19 +12,47 @@ from urllib.parse import urlparse, unquote
 
 from googleapiclient.errors import HttpError
 
-def extract_id(url):
-    parsed_url = urlparse(unquote(url))
-    path_parts = parsed_url.path.split('/')
-    
-    # Iterate over the parts
-    for part in path_parts:
-        # IDs are typically alphanumeric and at least a few characters long
-        # So let's say that to be an ID, a part has to be at least 15 characters long
-        if all(char.isalnum() or char in ['_', '-'] for char in part) and len(part) >= 15:
-            return part
-    
-    # Return None if no ID was found
-    return None
+class MyGoogleDriveLoader(GoogleDriveLoader):
+
+    def _extract_id(self, url):
+        parsed_url = urlparse(unquote(url))
+        path_parts = parsed_url.path.split('/')
+        
+        # Iterate over the parts
+        for part in path_parts:
+            # IDs are typically alphanumeric and at least a few characters long
+            # So let's say that to be an ID, a part has to be at least 15 characters long
+            if all(char.isalnum() or char in ['_', '-'] for char in part) and len(part) >= 15:
+                return part
+        
+        # Return None if no ID was found
+        return None
+
+    def load_from_url(self, url: str):
+        id = self._extract_id(url)
+
+        from googleapiclient.discovery import build
+
+        # Identify type of URL
+        service = build("drive", "v3", credentials=self._load_credentials())
+        file = service.files().get(fileId=id).execute()
+        mime_type = file["mimeType"]
+
+        if "folder" in mime_type:
+            # If it's a folder, load documents from the folder
+            return self._load_documents_from_folder(id)
+        else:
+            # If it's not a folder, treat it as a single file
+            if mime_type == "application/vnd.google-apps.document":
+                return [self._load_document_from_id(id)]
+            elif mime_type == "application/vnd.google-apps.spreadsheet":
+                return self._load_sheet_from_id(id)
+            elif mime_type == "application/pdf":
+                return [self._load_file_from_id(id)]
+            else:
+                return []
+
+
 
 # utility functions
 def convert_to_txt(file_path):
@@ -34,40 +62,12 @@ def convert_to_txt(file_path):
     shutil.copyfile(file_path, txt_file)
     return txt_file
 
-def read_gdoc_file(url):
-    document_id = extract_id(url)
-    allowed_extensions = ["document","sheet","pdf"]
-    for ext in allowed_extensions:
-        try:
-            logging.info(f"Loading data from doc_id: {document_id} and extenion: {ext}")
-            loader = GoogleDriveLoader(document_ids=[document_id], file_type=ext)
-            return loader.load()
-        except HttpError as e:
-            logging.error(f"Failed to load file with mime type {ext}: {str(e)}")
-
-    logging.error("Failed to load file with all attempted mime types.")
-    return None
-
 def read_gdrive_to_document(url: str, metadata: dict = None):
 
     logging.info(f"Reading gdrive doc from {url}")
 
-    if url.startswith("https://drive.google.com"):
-        folder_id = extract_id(url)
-        logging.info(f"Loading data from folder_id: {folder_id}")
-        if folder_id is None:
-            logging.error("Could not extract folder_id")
-            return None
-        try:
-            
-            loader = GoogleDriveLoader(folder_id=folder_id, recursive=True)
-            docs = loader.load()
-        except HttpError as e:
-            logging.error(f"Could not load file: {str(e)}")
-            return None
-    elif url.startswith("https://docs.google.com/document"):
-        
-        docs = read_gdoc_file(url)
+    loader = MyGoogleDriveLoader.load_from_url(url)
+    docs = loader.load()
     
     if docs is None or len(docs) == 0:
         return None
@@ -79,7 +79,6 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
     logging.info(f"GoogleDriveLoader read {len(docs)} doc(s) from {url}")
 
     return docs
-
 
 def read_url_to_document(url: str, metadata: dict = None):
     
