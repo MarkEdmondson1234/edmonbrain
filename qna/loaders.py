@@ -10,9 +10,24 @@ import os
 import shutil
 from urllib.parse import urlparse, unquote
 
-from googleapiclient.errors import HttpError
+# utility functions
+def convert_to_txt(file_path):
+    file_dir, file_name = os.path.split(file_path)
+    file_base, file_ext = os.path.splitext(file_name)
+    txt_file = os.path.join(file_dir, f"{file_base}.txt")
+    shutil.copyfile(file_path, txt_file)
+    return txt_file
+
+
+from pydantic import BaseModel, Field
+from typing import Optional
 
 class MyGoogleDriveLoader(GoogleDriveLoader):
+    url: Optional[str] = Field(None)
+
+    def __init__(self, url, *args, **kwargs):
+        super().__init__(*args, **kwargs, file_ids=['dummy']) # Pass dummy value
+        self.url = url
 
     def _extract_id(self, url):
         parsed_url = urlparse(unquote(url))
@@ -53,21 +68,12 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
                 return []
 
 
-
-# utility functions
-def convert_to_txt(file_path):
-    file_dir, file_name = os.path.split(file_path)
-    file_base, file_ext = os.path.splitext(file_name)
-    txt_file = os.path.join(file_dir, f"{file_base}.txt")
-    shutil.copyfile(file_path, txt_file)
-    return txt_file
-
 def read_gdrive_to_document(url: str, metadata: dict = None):
 
     logging.info(f"Reading gdrive doc from {url}")
 
-    loader = MyGoogleDriveLoader.load_from_url(url)
-    docs = loader.load()
+    loader = MyGoogleDriveLoader(url=url)
+    docs = loader.load_from_url(url)
     
     if docs is None or len(docs) == 0:
         return None
