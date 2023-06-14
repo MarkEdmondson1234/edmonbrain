@@ -12,27 +12,15 @@ from urllib.parse import urlparse, unquote
 
 from googleapiclient.errors import HttpError
 
-def extract_folder_id(url):
+def extract_id(url):
     parsed_url = urlparse(unquote(url))
     path_parts = parsed_url.path.split('/')
-    print(path_parts)
+    
+    # Iterate over the parts
     for part in path_parts:
         # IDs are typically alphanumeric and at least a few characters long
         # So let's say that to be an ID, a part has to be at least 15 characters long
-        if all(char.isalnum() or char == '_' for char in part) and len(part) >= 15:
-            return part
-    
-    # Return None if no ID was found
-    return None
-
-def extract_document_id(url):
-    parsed_url = urlparse(unquote(url))
-    path_parts = parsed_url.path.split('/')
-    
-    for part in path_parts:
-        # IDs are typically alphanumeric and at least a few characters long
-        # So let's say that to be an ID, a part has to be at least 5 characters long
-        if all(char.isalnum() or char == '_' for char in part) and len(part) >= 15:
+        if all(char.isalnum() or char in ['_', '-'] for char in part) and len(part) >= 15:
             return part
     
     # Return None if no ID was found
@@ -47,7 +35,7 @@ def convert_to_txt(file_path):
     return txt_file
 
 def read_gdoc_file(url):
-    document_id = extract_document_id(url)
+    document_id = extract_id(url)
     allowed_extensions = ["document","sheet","pdf"]
     for ext in allowed_extensions:
         try:
@@ -65,7 +53,7 @@ def read_gdrive_to_document(url: str, metadata: dict = None):
     logging.info(f"Reading gdrive doc from {url}")
 
     if url.startswith("https://drive.google.com"):
-        folder_id = extract_folder_id(url)
+        folder_id = extract_id(url)
         logging.info(f"Loading data from folder_id: {folder_id}")
         if folder_id is None:
             logging.error("Could not extract folder_id")
