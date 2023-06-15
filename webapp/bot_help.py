@@ -101,7 +101,7 @@ def generate_output(bot_output):
     }
 
 def embeds_to_json(message):
-    return json.dumps(message["embeds"]) if message["embeds"] else None
+    return json.dumps(message.get("embeds")) if message.get("embeds", None) else None
 
 def create_message_element(message):
     return (message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"])
@@ -168,7 +168,8 @@ def handle_special_commands(user_input, vector_name, chat_history):
 * `!saveurl [https:// url]` - add the contents found at this URL to database. 
 * `!savethread` - save current Discord thread as a source to database
 * `!help`- see this message
-* Files attached to messages will be added as source to database
+* Files attached to discord messages will be added as source to database
+* Add files to the specified Cloud Storage folder to also add them to database
 * URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
 """}
 

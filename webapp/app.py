@@ -168,28 +168,31 @@ gchat_chat_history = []
 
 @app.route('/gchat/<vector_name>/message', methods=['POST'])
 def gchat_message(vector_name):
-    data = request.get_json()
-    if data['type'] != 'MESSAGE':
+    event = request.get_json()
+    if event['type'] == 'ADDED_TO_SPACE' and not event['space']['singleUserBotDm']:
+        text = 'Thanks for adding me to "%s"! Use !help to get started' % (event['space']['displayName'] if event['space']['displayName'] else 'this chat')
+  
+    elif event['type'] == 'MESSAGE':
+    
+        user_input = event['message']['text']  # Extract user input from the payload
+
+        paired_messages = bot_help.extract_chat_history(gchat_chat_history) # can this be filled?
+
+        command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+        if command_response is not None:
+            return jsonify(command_response)
+
+        bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+        # append user message to chat history
+        gchat_chat_history.append({'name': 'Human', 'content': user_input})
+        gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
+
+        logging.info(f"gbot_output: {bot_output}")
+        text = bot_output['answer']
+    else:
         return
     
-    user_input = data['message']['text']  # Extract user input from the payload
-
-    paired_messages = bot_help.extract_chat_history(gchat_chat_history) # can this be filled?
-
-    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
-    if command_response is not None:
-        return jsonify(command_response)
-
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    logging.info(f"gbot_output: {bot_output}")
-
-        # append user message to chat history
-    gchat_chat_history.append({'name': 'Human', 'content': user_input})
-    
-    # append bot message to chat history
-    gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
-    
-    gchat_output = {'text': bot_output['answer']}
+    gchat_output = {'text': text}
 
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)
