@@ -186,6 +186,12 @@ def generate_google_chat_card(bot_output, how_many = 1):
                 filtered_metadata["source"] = metadata["source"]
             if metadata.get("type", None) is not None:
                 filtered_metadata["type"] = metadata["type"]
+            if metadata.get("title", None) is not None:
+                filtered_metadata["title"] = metadata["title"]
+            if metadata.get("page", None) is not None:
+                filtered_metadata["page"] = metadata["page"]
+            if metadata.get("category", None) is not None:
+                filtered_metadata["category"] = metadata["category"]
             source_doc = {
                 'header': doc.page_content[:30],
                 'metadata': filtered_metadata
@@ -222,12 +228,15 @@ def generate_google_chat_card(bot_output, how_many = 1):
             'widgets': [
                 {
                     'textParagraph': {
-                        'text': 'source:' + source_doc['metadata'].get('source', '')
+                        'text': source_doc['metadata'].get('source', '')
                     }
                 },
                 {
                     'textParagraph': {
-                        'text': 'type:' + source_doc['metadata'].get('type', '')
+                        'text': source_doc['metadata'].get('type', '') + \
+                            ' ' + source_doc['metadata'].get('title', '') + \
+                            ' ' + source_doc['metadata'].get('category', '') + \
+                            ' ' + source_doc['metadata'].get('page', '')
                     }
                 }
             ]
