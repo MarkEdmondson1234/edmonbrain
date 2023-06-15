@@ -169,9 +169,12 @@ gchat_chat_history = []
 @app.route('/gchat/<vector_name>/message', methods=['POST'])
 def gchat_message(vector_name):
     data = request.get_json()
+    if data['type'] != 'MESSAGE':
+        return
+    
     user_input = data['message']['text']  # Extract user input from the payload
 
-    paired_messages = gchat_chat_history # can this be filled?
+    paired_messages = bot_help.extract_chat_history(gchat_chat_history) # can this be filled?
 
     command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
     if command_response is not None:
