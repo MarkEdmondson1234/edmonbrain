@@ -69,65 +69,14 @@ def discord_message(vector_name):
 
     logging.info(f"discord_message: {data} to {vector_name}")
 
-    now = datetime.datetime.now()
-    hourmin = now.strftime("%H%M")
-
     chat_history = data.get('chat_history', None)
     paired_messages = bot_help.extract_chat_history(chat_history)
 
-    if user_input.startswith("!savethread"):
-        # write chat history to a file
-        with tempfile.TemporaryDirectory() as temp_dir:
-            chat_file_path = os.path.join(temp_dir, f"{hourmin}_chat_history.txt")
-            with open(chat_file_path, 'w') as file:
-                for chat in chat_history:
-                    file.write(f"{chat['name']}: {chat['content']}\n")
-            gs_file = bot_help.app_to_store(chat_file_path, vector_name, via_bucket_pubsub=True)
-            result = {"result": f"Saved chat history to {gs_file}"}
-
-            return result
-    
-    if user_input.startswith("!saveurl"):
-        if pbembed.contains_url(user_input):
-            urls = pbembed.extract_urls(user_input)
-            for url in urls:
-                pbembed.publish_text(url, vector_name)
-            result = {"result": f"URLs sent for processing: {urls}"}
-        else:
-            result = {"result": f"No URLs were found"}
-        return jsonify(result)
-    
-    if user_input.startswith("!deletesource"):
-        source = user_input.replace("!deletesource", "")
-        source = source.replace("source:","").strip()
-        db.delete_row_from_source(source, vector_name=vector_name)
-        result = {"result": f"Deleting source: {source}"}
-        return jsonify(result)
-    
-    if user_input.startswith("!sources"):
-        rows = db.return_sources_last24(vector_name)
-
-        if rows is None:
-            result = {"result": "No sources were found"}
-        else:
-            msg = "\n".join([f"{row}" for row in rows])
-            result = {"result": f"*sources:*\n{msg}"}
-
-        return jsonify(result)
-    
-    if user_input.startswith("!help"):
-        result = {"result":f"""* `!sources` - get sources added in last 24hrs
-* `!deletesource [gs:// source]` - delete a source from database
-* `!saveurl [https:// url]` - add the contents found at this URL to database. 
-* `!savethread` - save current Discord thread as a source to database
-* `!help`- see this message
-* Files attached to messages will be added as source to database
-* URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
-"""}
-        return jsonify(result)
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        return jsonify(command_response)
 
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    
     logging.info(f"bot_output: {bot_output}")
     
     discord_output = bot_help.generate_output(bot_output)
@@ -215,12 +164,33 @@ def pubsub_to_discord():
         
         return 'ok', 200
 
+gchat_chat_history = []
+
 @app.route('/gchat/<vector_name>/message', methods=['POST'])
 def gchat_message(vector_name):
     data = request.get_json()
-    user_input = data['message'].strip()  # Extract user input from the payload
+    user_input = data['message']['text']  # Extract user input from the payload
 
-    return user_input + ' ' + vector_name
+    paired_messages = gchat_chat_history # can this be filled?
+
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        return jsonify(command_response)
+
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    logging.info(f"gbot_output: {bot_output}")
+
+        # append user message to chat history
+    gchat_chat_history.append({'name': 'Human', 'content': user_input})
+    
+    # append bot message to chat history
+    gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
+    
+    gchat_output = {'text': bot_output}
+
+    # may be over 4000 char limit for discord but discord bot chunks it up for output
+    return jsonify(gchat_output)
+
 
 
 @app.route('/slack', methods=['POST'])

@@ -1,9 +1,13 @@
 import os
-from qna import publish_to_pubsub_embed
 import logging
 import base64
 import json
+import datetime
 import requests
+import tempfile
+
+import qna.database as db
+import qna.publish_to_pubsub_embed as pbembed
 
 def discord_webhook(message_data):
     webhook_url = os.getenv('DISCORD_URL', None)  # replace with your webhook url
@@ -53,11 +57,11 @@ def process_pubsub(data):
 
 def app_to_store(safe_file_name, vector_name, via_bucket_pubsub=False, metadata:dict=None):
     
-    gs_file = publish_to_pubsub_embed.add_file_to_gcs(safe_file_name, vector_name, metadata=metadata)
+    gs_file = pbembed.add_file_to_gcs(safe_file_name, vector_name, metadata=metadata)
 
     # we send the gs:// to the pubsub ourselves
     if not via_bucket_pubsub:
-        publish_to_pubsub_embed.publish_text(gs_file, vector_name)
+        pbembed.publish_text(gs_file, vector_name)
 
     return gs_file
     
@@ -121,3 +125,52 @@ def extract_chat_history(chat_history=None):
         paired_messages = []
 
     return paired_messages
+
+def handle_special_commands(user_input, vector_name, chat_history):
+    now = datetime.datetime.now()
+    hourmin = now.strftime("%H%M")
+
+    if user_input.startswith("!savethread"):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            chat_file_path = os.path.join(temp_dir, f"{hourmin}_chat_history.txt")
+            with open(chat_file_path, 'w') as file:
+                for chat in chat_history:
+                    file.write(f"{chat['name']}: {chat['content']}\n")
+            gs_file = app_to_store(chat_file_path, vector_name, via_bucket_pubsub=True)
+            return {"result": f"Saved chat history to {gs_file}"}
+
+    elif user_input.startswith("!saveurl"):
+        if pbembed.contains_url(user_input):
+            urls = pbembed.extract_urls(user_input)
+            for url in urls:
+                pbembed.publish_text(url, vector_name)
+            return {"result": f"URLs sent for processing: {urls}"}
+        else:
+            return {"result": f"No URLs were found"}
+
+    elif user_input.startswith("!deletesource"):
+        source = user_input.replace("!deletesource", "")
+        source = source.replace("source:","").strip()
+        db.delete_row_from_source(source, vector_name=vector_name)
+        return {"result": f"Deleting source: {source}"}
+
+    elif user_input.startswith("!sources"):
+        rows = db.return_sources_last24(vector_name)
+        if rows is None:
+            return {"result": "No sources were found"}
+        else:
+            msg = "\n".join([f"{row}" for row in rows])
+            return {"result": f"*sources:*\n{msg}"}
+
+    elif user_input.startswith("!help"):
+        return {"result":f"""* `!sources` - get sources added in last 24hrs
+* `!deletesource [gs:// source]` - delete a source from database
+* `!saveurl [https:// url]` - add the contents found at this URL to database. 
+* `!savethread` - save current Discord thread as a source to database
+* `!help`- see this message
+* Files attached to messages will be added as source to database
+* URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
+"""}
+
+    # If no special commands were found, return None
+    return None
