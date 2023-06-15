@@ -196,15 +196,15 @@ def generate_google_chat_card(bot_output):
         'cards': [
             {
                 'header': {
-                    'title': 'Bot output',
+                    'title': 'Edmonbrain output'
                 },
                 'sections': [
                     {
-                        'widgets': [
+                    'header': 'Answer',
+                    'widgets':[
                             {
-                                'keyValue': {
-                                    'topLabel': 'Result',
-                                    'content': bot_output.get('answer', "No answer available")
+                                'textParagraph': {
+                                    'text': bot_output.get('answer', "No answer available")
                                 }
                             }
                         ]
@@ -216,18 +216,16 @@ def generate_google_chat_card(bot_output):
     
     for source_doc in source_documents:
         card['cards'][0]['sections'].append({
-            'header': source_doc['header'],
+            'header': source_doc['page_content'][:30],
             'widgets': [
                 {
-                    'keyValue': {
-                        'topLabel': 'Source',
-                        'content': source_doc['metadata'].get('source', '')
+                    'textParagraph': {
+                        'text': 'source:' + source_doc['metadata'].get('source', '')
                     }
                 },
                 {
-                    'keyValue': {
-                        'topLabel': 'Type',
-                        'content': source_doc['metadata'].get('type', '')
+                    'textParagraph': {
+                        'text': 'type:' + source_doc['metadata'].get('type', '')
                     }
                 }
             ]
