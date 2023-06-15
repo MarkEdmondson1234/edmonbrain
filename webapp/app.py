@@ -79,7 +79,7 @@ def discord_message(vector_name):
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     logging.info(f"bot_output: {bot_output}")
     
-    discord_output = bot_help.generate_output(bot_output)
+    discord_output = bot_help.generate_discord_output(bot_output)
 
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(discord_output)
@@ -188,11 +188,14 @@ def gchat_message(vector_name):
         gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
 
         logging.info(f"gbot_output: {bot_output}")
+
+        meta_card = bot_help.generate_google_chat_card(bot_output)
+
         text = bot_output['answer']
     else:
         return
     
-    gchat_output = {'text': text}
+    gchat_output = {'text': text, 'cards': meta_card['cards'] }
 
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)

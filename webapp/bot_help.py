@@ -78,7 +78,7 @@ def handle_files(uploaded_files, temp_dir, vector_name):
 
     return bot_output
 
-def generate_output(bot_output):
+def generate_discord_output(bot_output):
     source_documents = []
     if bot_output.get('source_documents', None) is not None:
         source_documents = []
@@ -175,3 +175,62 @@ def handle_special_commands(user_input, vector_name, chat_history):
 
     # If no special commands were found, return None
     return None
+
+def generate_google_chat_card(bot_output):
+    source_documents = []
+    if bot_output.get('source_documents', None) is not None:
+        for doc in bot_output['source_documents']:
+            metadata = doc.metadata
+            filtered_metadata = {}
+            if metadata.get("source", None) is not None:
+                filtered_metadata["source"] = metadata["source"]
+            if metadata.get("type", None) is not None:
+                filtered_metadata["type"] = metadata["type"]
+            source_doc = {
+                'header': doc.page_content,
+                'metadata': filtered_metadata
+            }
+            source_documents.append(source_doc)
+
+    card = {
+        'cards': [
+            {
+                'header': {
+                    'title': 'Bot output',
+                },
+                'sections': [
+                    {
+                        'widgets': [
+                            {
+                                'keyValue': {
+                                    'topLabel': 'Result',
+                                    'content': bot_output.get('answer', "No answer available")
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    
+    for source_doc in source_documents:
+        card['cards'][0]['sections'].append({
+            'header': source_doc['header'],
+            'widgets': [
+                {
+                    'keyValue': {
+                        'topLabel': 'Source',
+                        'content': source_doc['metadata'].get('source', '')
+                    }
+                },
+                {
+                    'keyValue': {
+                        'topLabel': 'Type',
+                        'content': source_doc['metadata'].get('type', '')
+                    }
+                }
+            ]
+        })
+
+    return card
