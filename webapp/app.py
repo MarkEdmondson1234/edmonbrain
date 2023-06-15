@@ -186,7 +186,7 @@ def gchat_message(vector_name):
     # append bot message to chat history
     gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
     
-    gchat_output = {'text': bot_output}
+    gchat_output = {'text': bot_output['answer']}
 
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)
