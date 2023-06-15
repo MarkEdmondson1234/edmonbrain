@@ -218,9 +218,9 @@ def pubsub_to_discord():
 @app.route('/gchat/<vector_name>/message', methods=['POST'])
 def gchat_message(vector_name):
     data = request.get_json()
-    user_input = data['content'].strip()  # Extract user input from the payload
+    user_input = data['message'].strip()  # Extract user input from the payload
 
-    return user_input
+    return user_input + ' ' + vector_name
 
 
 @app.route('/slack', methods=['POST'])
