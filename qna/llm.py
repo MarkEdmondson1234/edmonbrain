@@ -31,7 +31,7 @@ def pick_llm(vector_name):
         llm = OpenAI(temperature=0)
         embeddings = OpenAIEmbeddings()
     elif llm_str == 'vertex':
-        llm = VertexAI(temperature=0)
+        llm = VertexAI(temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
     else:
         raise NotImplementedError(f'No llm implemented for {llm_str}')   
