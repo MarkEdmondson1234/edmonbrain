@@ -172,6 +172,8 @@ def gchat_message(vector_name):
     if event['type'] == 'ADDED_TO_SPACE' and not event['space']['singleUserBotDm']:
         text = 'Thanks for adding me to "%s"! Use !help to get started' % (event['space']['displayName'] if event['space']['displayName'] else 'this chat')
   
+        return jsonify({'text': text})
+    
     elif event['type'] == 'MESSAGE':
     
         user_input = event['message']['text']  # Extract user input from the payload
@@ -189,13 +191,12 @@ def gchat_message(vector_name):
 
         logging.info(f"gbot_output: {bot_output}")
 
-        meta_card = bot_help.generate_google_chat_card(bot_output)
+        meta_card = bot_help.generate_google_chat_card(bot_output, how_many=1)
 
-        text = bot_output['answer']
     else:
         return
     
-    gchat_output = {'text': text, 'cards': meta_card['cards'] }
+    gchat_output = {'cards': meta_card['cards'] }
 
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)

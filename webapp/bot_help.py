@@ -176,7 +176,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
     # If no special commands were found, return None
     return None
 
-def generate_google_chat_card(bot_output):
+def generate_google_chat_card(bot_output, how_many = 1):
     source_documents = []
     if bot_output.get('source_documents', None) is not None:
         for doc in bot_output['source_documents']:
@@ -214,9 +214,11 @@ def generate_google_chat_card(bot_output):
         ]
     }
     
+    i = 0
     for source_doc in source_documents:
+        i += 1
         card['cards'][0]['sections'].append({
-            'header': source_doc['header'],
+            'header': 'Source',
             'widgets': [
                 {
                     'textParagraph': {
@@ -230,5 +232,7 @@ def generate_google_chat_card(bot_output):
                 }
             ]
         })
+        if i == how_many:
+            break
 
     return card
