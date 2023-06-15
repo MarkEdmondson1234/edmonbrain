@@ -182,7 +182,7 @@ def gchat_message(vector_name):
 
         command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
         if command_response is not None:
-            return jsonify(command_response)
+            return jsonify({'text': command_response['result']})
 
         bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
         # append user message to chat history
