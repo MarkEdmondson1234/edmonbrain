@@ -3,6 +3,7 @@ from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
 #from langchain.document_loaders import GoogleDriveLoader
 from qna.googledrive_patch import GoogleDriveLoader
+from googleapiclient.errors import HttpError
 
 import logging
 import pathlib
@@ -49,8 +50,13 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
         from googleapiclient.discovery import build
 
         # Identify type of URL
-        service = build("drive", "v3", credentials=self._load_credentials())
-        file = service.files().get(fileId=id).execute()
+        try:
+            service = build("drive", "v3", credentials=self._load_credentials())
+            file = service.files().get(fileId=id).execute()
+        except HttpError as err:
+            logging.error(f"Error loading file {file}: {str(err)}")
+            raise
+
         mime_type = file["mimeType"]
 
         if "folder" in mime_type:

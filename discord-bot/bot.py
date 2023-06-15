@@ -236,6 +236,8 @@ async def on_message(message):
                         source_message += f" page: {metadata_source.get('page_number')}"
                     if metadata_source.get('category', None) is not None:
                         source_message += f" category: {metadata_source.get('category')}"
+                    if metadata_source.get('title', None) is not None:
+                        source_message += f" title: {metadata_source.get('title')}"
                         
                     await chunk_send(new_thread, source_message)
                     source_url = metadata_source.get('url', None)

@@ -1,4 +1,5 @@
 
 .DS_Store
 discord-bot/.env
+env/.pdm-python
 env/

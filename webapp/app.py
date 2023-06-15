@@ -122,7 +122,7 @@ def discord_message(vector_name):
 * `!savethread` - save current Discord thread as a source to database
 * `!help`- see this message
 * Files attached to messages will be added as source to database
-* URLs of GoogleDrive work if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* or are *public*
+* URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
 """}
         return jsonify(result)
 
@@ -214,6 +214,14 @@ def pubsub_to_discord():
             logging.info(f'Request to discord returned {response.status_code}, the response is:\n{response.text}')
         
         return 'ok', 200
+
+@app.route('/gchat/<vector_name>/message', methods=['POST'])
+def gchat_message(vector_name):
+    data = request.get_json()
+    user_input = data['content'].strip()  # Extract user input from the payload
+
+    return user_input
+
 
 @app.route('/slack', methods=['POST'])
 def slack():

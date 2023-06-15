@@ -1,0 +1,42 @@
+
+[project]
+name = "Edmonbrain"
+version = "0.0.9000"
+description = "QnA LLM models for chat bots run via PubSub and Cloud Run"
+authors = [
+    {name = "Mark Edmondson", email = "edmonbrain@markedmondson.me"},
+]
+dependencies = [
+    "flask",
+    "requests",
+    "openai",
+    "chromadb",
+    "tiktoken",
+    "python-dateutil",
+    "google-cloud-bigquery",
+    "google-cloud-pubsub",
+    "google-auth",
+    "google-cloud-storage",
+    "unstructured[local-inference]",
+    "tabulate",
+    "pdf2image",
+    "pytesseract",
+    "supabase",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "psycopg2-binary",
+    "google-cloud-aiplatform",
+    "google-generativeai",
+    "python-dotenv",
+    "langchain>=0.0.195",
+    "google-cloud-aiplatform>=1.26.0",
+    "discord",
+    "aiohttp",
+]
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
