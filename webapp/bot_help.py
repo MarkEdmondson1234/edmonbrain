@@ -187,7 +187,7 @@ def generate_google_chat_card(bot_output):
             if metadata.get("type", None) is not None:
                 filtered_metadata["type"] = metadata["type"]
             source_doc = {
-                'header': doc.page_content,
+                'header': doc.page_content[:30],
                 'metadata': filtered_metadata
             }
             source_documents.append(source_doc)
@@ -216,7 +216,7 @@ def generate_google_chat_card(bot_output):
     
     for source_doc in source_documents:
         card['cards'][0]['sections'].append({
-            'header': source_doc['page_content'][:30],
+            'header': source_doc['header'],
             'widgets': [
                 {
                     'textParagraph': {
