@@ -245,3 +245,18 @@ def generate_google_chat_card(bot_output, how_many = 1):
             break
 
     return card
+
+def handle_slash_commands(slash_command):
+    commandId = slash_command.get('commandId', None)
+    if commandId is None:
+        logging.error('Got a slash_command with no commandId specified')
+        return None
+    
+    COMMAND_LOOKUP = {
+        "1": "codey" # used to change vector_name
+    }
+
+    if commandId in COMMAND_LOOKUP:
+        return COMMAND_LOOKUP[commandId]
+    
+    return None

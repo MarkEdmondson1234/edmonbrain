@@ -178,7 +178,13 @@ def gchat_message(vector_name):
     
         user_input = event['message']['text']  # Extract user input from the payload
 
-        paired_messages = bot_help.extract_chat_history(gchat_chat_history) # can this be filled?
+        if event['message'].get('slash_command', None) is not None:
+            response = bot_help.handle_slash_commands(event['message']['slash_command'])
+            if response is not None:
+                logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
+                vector_name = response
+
+        paired_messages = bot_help.extract_chat_history(gchat_chat_history)
 
         command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
         if command_response is not None:

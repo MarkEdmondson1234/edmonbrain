@@ -3,6 +3,10 @@
         "llm":"vertex",
         "vectorstore": "supabase"
     },
+    "codey":{
+        "llm":"codey",
+        "vectorstore": "supabase"
+    },
 	"fnd":{
         "llm":"openai",
         "vectorstore": "supabase"
