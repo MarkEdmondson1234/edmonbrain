@@ -208,35 +208,32 @@ def gchat_message(vector_name):
     return jsonify(gchat_output)
 
 
+import slack_sdk
+from slack_sdk.web import WebClient
+from slack_sdk.signature import SignatureVerifier
+from flask import Flask, request, make_response
 
-@app.route('/slack', methods=['POST'])
+slack_signing_secret = os.getenv('SLACK_SIGNING')
+verifier = SignatureVerifier(slack_signing_secret)
+
+@app.route('/slack/<vector_name>/message', methods=['POST'])
 def slack():
-    data = request.form
-    if data.get('type') == 'url_verification':  # Respond to Slack's URL verification challenge
-        return jsonify({'challenge': data['challenge']})
+    if not verifier.is_valid_request(request.get_data(), request.headers):
+        return make_response("invalid request", 403)
     
-    if data.get('type') == 'event_callback':
-        event = data['event']
-        if event['type'] == 'app_mention':  # The bot was mentioned in the message
-            user_input = event['text']
-            # Process the input and get the bot's response
-            bot_output = None #TODO 
+    slack_token = os.getenv('SLACK_TOKEN')
+    client = WebClient(token=slack_token)
 
-            # Format the response payload
-            response_payload = {
-                "text": bot_output
-            }
-            
-            # Send the response to the Slack channel
-            slack_api_url = 'https://slack.com/api/chat.postMessage'
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {os.environ["SLACK_BOT_TOKEN"]}'
-            }
-            requests.post(slack_api_url, headers=headers, json=response_payload)
-    
-    return '', 204
+    data = request.json
+    if data["type"] == "event_callback":
+        event = data["event"]
+        if event["type"] == "message" and "subtype" not in event:
+            channel_id = event["channel"]
+            user_id = event["user"]
+            client.chat_postMessage(channel=channel_id, text=f"Hello <@{user_id}>!")
 
+    return make_response("", 200)
+   
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])
 def receive_email():

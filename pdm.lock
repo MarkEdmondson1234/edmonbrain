@@ -1523,6 +1523,12 @@ requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 summary = "Python 2 and 3 compatibility utilities"
 
 [[package]]
+name = "slack-sdk"
+version = "3.21.3"
+requires_python = ">=3.6.0"
+summary = "The Slack API Platform SDK for Python"
+
+[[package]]
 name = "smmap"
 version = "5.0.0"
 requires_python = ">=3.6"
@@ -1928,7 +1934,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:59a9331c07370e391d4770182c4c10167edd9de7eb785c04b9febd942f131b9a"
+content_hash = "sha256:69a76d1814a873c6af98596eadd2b6bccd3ef1921cd683b150085d2fe9bc14da"
 
 [metadata.files]
 "aiohttp 3.8.4" = [
@@ -4156,6 +4162,10 @@ content_hash = "sha256:59a9331c07370e391d4770182c4c10167edd9de7eb785c04b9febd942
 "six 1.16.0" = [
     {url = "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
     {url = "https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+]
+"slack-sdk 3.21.3" = [
+    {url = "https://files.pythonhosted.org/packages/67/db/a684491e6d791aa4052ccc49d11dc492d37cb2c9261e53fa87871553960a/slack_sdk-3.21.3.tar.gz", hash = "sha256:20829bdc1a423ec93dac903470975ebf3bc76fd3fd91a4dadc0eeffc940ecb0c"},
+    {url = "https://files.pythonhosted.org/packages/97/f5/7071b22e77918bebb2e6729bd273fa1f2cc70be3a2bb089bc60f2ea2d8c1/slack_sdk-3.21.3-py2.py3-none-any.whl", hash = "sha256:de3c07b92479940b61cd68c566f49fbc9974c8f38f661d26244078f3903bb9cc"},
 ]
 "smmap 5.0.0" = [
     {url = "https://files.pythonhosted.org/packages/21/2d/39c6c57032f786f1965022563eec60623bb3e1409ade6ad834ff703724f3/smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
