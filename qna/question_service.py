@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def qna(question: str, vector_name: str, chat_history=None):
+def qna(question: str, vector_name: str, chat_history=[]):
 
     llm, embeddings = pick_llm(vector_name)
 
