@@ -33,7 +33,7 @@ dependencies = [
     "google-cloud-aiplatform>=1.26.0",
     "discord",
     "aiohttp",
-    "slack-sdk>=3.21.3",
+    "slack-bolt>=1.18.0",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}

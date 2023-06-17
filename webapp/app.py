@@ -207,32 +207,34 @@ def gchat_message(vector_name):
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)
 
+# https://github.com/slackapi/bolt-python/blob/main/examples/flask/app.py
+from slack_bolt import App
+from slack_bolt.adapter.flask import SlackRequestHandler
+sapp = App()
 
-import slack_sdk
-from slack_sdk.web import WebClient
-from slack_sdk.signature import SignatureVerifier
-from flask import Flask, request, make_response
 
-slack_signing_secret = os.getenv('SLACK_SIGNING')
-verifier = SignatureVerifier(slack_signing_secret)
+@sapp.middleware  # or app.use(log_request)
+def log_request(logger, body, next):
+    logger.debug(body)
+    return next()
 
+
+@sapp.event("app_mention")
+def event_test(body, say, logger):
+    logger.info(body)
+    say("What's up?")
+
+
+@sapp.event("message")
+def handle_message():
+    pass
+
+
+shandler = SlackRequestHandler(app)
 @app.route('/slack/<vector_name>/message', methods=['POST'])
 def slack(vector_name):
-    if not verifier.is_valid_request(request.get_data(), request.headers):
-        return make_response("invalid request", 403)
     
-    slack_token = os.getenv('SLACK_TOKEN')
-    client = WebClient(token=slack_token)
-
-    data = request.json
-    if data["type"] == "event_callback":
-        event = data["event"]
-        if event["type"] == "message" and "subtype" not in event:
-            channel_id = event["channel"]
-            user_id = event["user"]
-            client.chat_postMessage(channel=channel_id, text=f"Hello <@{user_id}>! Using {vector_name}")
-
-    return make_response("", 200)
+    return shandler.handle(request)
    
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])

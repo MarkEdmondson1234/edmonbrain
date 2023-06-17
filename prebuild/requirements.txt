@@ -22,4 +22,4 @@ google-generativeai
 discord
 aiohttp
 python-dotenv
-slack_sdk
+slack_bolt
