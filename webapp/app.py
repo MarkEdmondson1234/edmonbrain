@@ -217,7 +217,7 @@ slack_signing_secret = os.getenv('SLACK_SIGNING')
 verifier = SignatureVerifier(slack_signing_secret)
 
 @app.route('/slack/<vector_name>/message', methods=['POST'])
-def slack():
+def slack(vector_name):
     if not verifier.is_valid_request(request.get_data(), request.headers):
         return make_response("invalid request", 403)
     
@@ -230,7 +230,7 @@ def slack():
         if event["type"] == "message" and "subtype" not in event:
             channel_id = event["channel"]
             user_id = event["user"]
-            client.chat_postMessage(channel=channel_id, text=f"Hello <@{user_id}>!")
+            client.chat_postMessage(channel=channel_id, text=f"Hello <@{user_id}>! Using {vector_name}")
 
     return make_response("", 200)
    
