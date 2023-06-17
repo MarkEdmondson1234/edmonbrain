@@ -248,6 +248,8 @@ async def on_message(message):
                 if len(reply_content) > 2000:
                     await thinking_message.edit(content="*Response:*")
                     await chunk_send(new_thread, reply_content)
+                elif len(reply_content) == 0:
+                    await thinking_message.edit(content="No response")
                 else:
                     # Edit the thinking message to show the reply
                     await thinking_message.edit(content=reply_content)
