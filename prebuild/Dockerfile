@@ -9,5 +9,9 @@ RUN apt-get update && \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
+
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
+# Download the model files and cache them in Docker image
+RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('bert-base-uncased'); AutoModel.from_pretrained('bert-base-uncased')"
