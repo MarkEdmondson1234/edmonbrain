@@ -272,7 +272,7 @@ def event_test(body, say, logger):
 
 
 
-@sapp.event("message.im")
+@sapp.event("message")
 def handle_direct_message(body, say, logger):
     logger.info(body)
     team_id = body.get('team_id', None)
