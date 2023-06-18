@@ -329,12 +329,12 @@ def process_slack_message(sapp, body, say, logger, thread_ts=None):
         return
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
+    bot_output = "No answer found"
     try:
         bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+        logger.info(f"bot_output: {bot_output}")
     except Exception as e:
         logging.error(f'Error sending to QNA: {str(e)}')
-                      
-    logger.info(f"bot_output: {bot_output}")
 
     slack_output = bot_output.get("answer", "No answer available")
 
