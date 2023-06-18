@@ -210,6 +210,7 @@ def gchat_message(vector_name):
 # https://github.com/slackapi/bolt-python/blob/main/examples/flask/app.py
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
+from flask import g
 sapp = App()
 
 
@@ -221,7 +222,7 @@ def log_request(logger, body, next):
 
 @sapp.event("app_mention")
 def event_test(body, say, logger):
-    vector_name = request.view_args['vector_name']
+    vector_name = g.vector_name
     logger.info(body)
     say(f"What's up? {vector_name}")
 
@@ -234,7 +235,8 @@ def handle_message():
 shandler = SlackRequestHandler(sapp)
 @app.route('/slack/<vector_name>/message', methods=['POST'])
 def slack(vector_name):
-    request.view_args = {'vector_name': vector_name}
+
+    g.vector_name = vector_name
     return shandler.handle(request)
    
 # needs to be done via Mailgun API
