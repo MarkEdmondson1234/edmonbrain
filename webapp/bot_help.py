@@ -260,3 +260,15 @@ def handle_slash_commands(slash_command):
         return COMMAND_LOOKUP[commandId]
     
     return None
+
+def load_config(filename):
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    parent_dir = os.path.dirname(script_dir)
+
+    # Join the script directory with the filename
+    config_path = os.path.join(parent_dir, filename)
+
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    return config

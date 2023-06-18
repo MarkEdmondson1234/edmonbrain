@@ -1,0 +1,11 @@
+{
+    "team_ids": {
+        "T2599TY0H":{
+            "bot_users":{
+                "U259M6Q8Y":{
+                    "llm":"edmonbrain_vertex"
+                }
+            }
+        }
+    }
+}

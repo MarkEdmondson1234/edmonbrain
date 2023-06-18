@@ -209,8 +209,16 @@ def gchat_message(vector_name):
 # https://github.com/slackapi/bolt-python/blob/main/examples/flask/app.py
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import g
 sapp = App()
+
+slack_config = bot_help.load_config('slack_config.json')
+
+def get_slack_vector_name(team_id, bot_user):
+    try:
+        return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']
+    except KeyError:
+        return None
+
 
 
 @sapp.middleware  # or app.use(log_request)
@@ -223,13 +231,23 @@ def log_request(logger, body, next):
 def event_test(body, say, logger):
     logger.info(body)
     # TODO: will need to identify vector_name based on bot name
-    vector_name = "edmonbrain_vertex"
+    team_id = body.get('team_id', None)
+    if team_id is None:
+        raise ValueError('Team_id not specified')
+    event_text = body.get('event').get('text')
+    user = body.get('event').get('user')
+    bot_user = body.get('authorizations')[0].get('user_id')
+
+    vector_name = get_slack_vector_name(team_id, bot_user)
+    if vector_name is None:
+        raise ValueError('Could not derive vector_name from slack_config and {team_id}, {bot_user}')
+    
     say(f"What's up? {vector_name}")
 
 
 @sapp.event("message")
 def handle_message():
-    pass
+    say(f"Hows it going?")
 
 
 shandler = SlackRequestHandler(sapp)
