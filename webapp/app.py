@@ -10,7 +10,6 @@ from flask import Flask, render_template, request, jsonify
 import qna.question_service as qs
 import qna.publish_to_pubsub_embed as pbembed
 import qna.pubsub_chunk_to_store as pb
-import qna.database as db
 import logging
 import bot_help
 
@@ -222,8 +221,9 @@ def log_request(logger, body, next):
 
 @sapp.event("app_mention")
 def event_test(body, say, logger):
-    vector_name = g.vector_name
     logger.info(body)
+    # TODO: will need to identify vector_name based on bot name
+    vector_name = "edmonbrain_vertex"
     say(f"What's up? {vector_name}")
 
 
@@ -233,10 +233,8 @@ def handle_message():
 
 
 shandler = SlackRequestHandler(sapp)
-@app.route('/slack/<vector_name>/message', methods=['POST'])
-def slack(vector_name):
-
-    g.vector_name = vector_name
+@app.route('/slack/message', methods=['POST'])
+def slack():
     return shandler.handle(request)
    
 # needs to be done via Mailgun API
