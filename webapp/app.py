@@ -210,103 +210,23 @@ def gchat_message(vector_name):
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 sapp = App()
-
-slack_config = bot_help.load_config('slack_config.json')
-
-def get_slack_vector_name(team_id, bot_user):
-    try:
-        return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']
-    except KeyError:
-        return None
-
-
+import threading
 
 @sapp.middleware  # or app.use(log_request)
 def log_request(logger, body, next):
     logger.debug(body)
     return next()
 
-
 @sapp.event("app_mention")
-def event_test(body, say, logger):
-    logger.info(body)
-    team_id = body.get('team_id', None)
-    if team_id is None:
-        raise ValueError('Team_id not specified')
-    user_input = body.get('event').get('text').strip()
-    
-    user = body.get('event').get('user')
-    bot_user = body.get('authorizations')[0].get('user_id')
-
-    # Remove mention of the bot user from user_input
-    bot_mention = f"<@{bot_user}>"
-    user_input = user_input.replace(bot_mention, "").strip()
-
-    vector_name = get_slack_vector_name(team_id, bot_user)
-    if vector_name is None:
-        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
-
+def handle_app_mention(ack, body, say, logger):
+    ack()  # immediately acknowledge the event 
     thread_ts = body['event']['ts']  # The timestamp of the original message
-
-    chat_historys = sapp.client.conversations_replies(
-        channel=body['event']['channel'],
-        ts=thread_ts
-    )
-
-    thread_messages = chat_historys['messages']
-    logging.info('thread_messages: {}'.format(thread_messages))
-    paired_messages = bot_help.extract_chat_history(thread_messages)
-
-    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
-    if command_response is not None:
-        say(text=command_response, thread_ts=thread_ts)
-        return
-    
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    logger.info(f"bot_output: {bot_output}")
-
-    slack_output = bot_output.get("answer", "No answer available")
-
-    # Reply in the thread where the original message was posted
-    say(text=slack_output, thread_ts=thread_ts)
-
-
+    threading.Thread(target=bot_help.process_slack_message, args=(sapp, body, say, logger, thread_ts)).start()
 
 @sapp.event("message")
-def handle_direct_message(body, say, logger):
-    logger.info(body)
-    team_id = body.get('team_id', None)
-    if team_id is None:
-        raise ValueError('Team_id not specified')
-    user_input = body.get('event').get('text').strip()
-
-    user = body.get('event').get('user')
-    bot_user = body.get('authorizations')[0].get('user_id')
-
-    vector_name = get_slack_vector_name(team_id, bot_user)
-    if vector_name is None:
-        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
-
-    chat_historys = sapp.client.conversations_history(
-        channel=body['event']['channel'],
-    )
-
-    messages = chat_historys['messages']
-    logging.info('messages: {}'.format(messages))
-    paired_messages = bot_help.extract_chat_history(messages)
-
-    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
-    if command_response is not None:
-        say(text=command_response)
-        return
-
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    logger.info(f"bot_output: {bot_output}")
-
-    slack_output = bot_output.get("answer", "No answer available")
-
-    say(text=slack_output)
-
+def handle_direct_message(ack, body, say, logger):
+    ack()  # immediately acknowledge the event 
+    threading.Thread(target=bot_help.process_slack_message, args=(sapp, body, say, logger)).start()
 
 
 shandler = SlackRequestHandler(sapp)
