@@ -233,6 +233,7 @@ shandler = SlackRequestHandler(sapp)
 @app.route('/slack/message', methods=['POST'])
 def slack():
     return shandler.handle(request)
+
    
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])
