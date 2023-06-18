@@ -230,24 +230,83 @@ def log_request(logger, body, next):
 @sapp.event("app_mention")
 def event_test(body, say, logger):
     logger.info(body)
-    # TODO: will need to identify vector_name based on bot name
     team_id = body.get('team_id', None)
     if team_id is None:
         raise ValueError('Team_id not specified')
-    event_text = body.get('event').get('text')
+    user_input = body.get('event').get('text').strip()
+    
+    user = body.get('event').get('user')
+    bot_user = body.get('authorizations')[0].get('user_id')
+
+    # Remove mention of the bot user from user_input
+    bot_mention = f"<@{bot_user}>"
+    user_input = user_input.replace(bot_mention, "").strip()
+
+    vector_name = get_slack_vector_name(team_id, bot_user)
+    if vector_name is None:
+        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
+
+    thread_ts = body['event']['ts']  # The timestamp of the original message
+
+    chat_historys = sapp.client.conversations_replies(
+        channel=body['event']['channel'],
+        ts=thread_ts
+    )
+
+    thread_messages = chat_historys['messages']
+    logging.info('thread_messages: {}'.format(thread_messages))
+    paired_messages = bot_help.extract_chat_history(thread_messages)
+
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        say(text=command_response, thread_ts=thread_ts)
+        return
+    
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    logger.info(f"bot_output: {bot_output}")
+
+    slack_output = bot_output.get("answer", "No answer available")
+
+    # Reply in the thread where the original message was posted
+    say(text=slack_output, thread_ts=thread_ts)
+
+
+
+@sapp.event("message.im")
+def handle_direct_message(body, say, logger):
+    logger.info(body)
+    team_id = body.get('team_id', None)
+    if team_id is None:
+        raise ValueError('Team_id not specified')
+    user_input = body.get('event').get('text').strip()
+
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
 
     vector_name = get_slack_vector_name(team_id, bot_user)
     if vector_name is None:
-        raise ValueError('Could not derive vector_name from slack_config and {team_id}, {bot_user}')
-    
-    say(f"What's up? {vector_name}")
+        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
 
+    chat_historys = sapp.client.conversations_history(
+        channel=body['event']['channel'],
+    )
 
-@sapp.event("message")
-def handle_message():
-    say(f"Hows it going?")
+    messages = chat_historys['messages']
+    logging.info('messages: {}'.format(messages))
+    paired_messages = bot_help.extract_chat_history(messages)
+
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        say(text=command_response)
+        return
+
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    logger.info(f"bot_output: {bot_output}")
+
+    slack_output = bot_output.get("answer", "No answer available")
+
+    say(text=slack_output)
+
 
 
 shandler = SlackRequestHandler(sapp)

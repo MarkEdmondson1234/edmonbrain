@@ -107,10 +107,16 @@ def create_message_element(message):
     return (message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"])
 
 def is_human(message):
-    return message["name"] == "Human"
+    if 'name' in message:
+        return message["name"] == "Human"
+    else:
+        return 'user' in message # Slack
 
 def is_ai(message):
-    return message["name"] == "AI"
+    if 'name' in message:
+        return message["name"] == "AI"
+    else:
+        return 'bot_id' in message # Slack
 
 def extract_chat_history(chat_history=None):
     
