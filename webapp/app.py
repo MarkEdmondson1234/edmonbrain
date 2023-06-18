@@ -221,8 +221,9 @@ def log_request(logger, body, next):
 
 @sapp.event("app_mention")
 def event_test(body, say, logger):
+    vector_name = request.view_args['vector_name']
     logger.info(body)
-    say("What's up?")
+    say(f"What's up? {vector_name}")
 
 
 @sapp.event("message")
@@ -230,10 +231,10 @@ def handle_message():
     pass
 
 
-shandler = SlackRequestHandler(app)
+shandler = SlackRequestHandler(sapp)
 @app.route('/slack/<vector_name>/message', methods=['POST'])
 def slack(vector_name):
-    
+    request.view_args = {'vector_name': vector_name}
     return shandler.handle(request)
    
 # needs to be done via Mailgun API
