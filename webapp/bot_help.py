@@ -104,7 +104,10 @@ def embeds_to_json(message):
     return json.dumps(message.get("embeds")) if message.get("embeds", None) else None
 
 def create_message_element(message):
-    return (message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"])
+    if 'text' in message:  # This is a Slack message
+        return message['text']
+    else:  # This is a message in Discord format
+        return message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"]
 
 def is_human(message):
     if 'name' in message:
