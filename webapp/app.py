@@ -168,7 +168,8 @@ gchat_chat_history = []
 @app.route('/gchat/<vector_name>/message', methods=['POST'])
 def gchat_message(vector_name):
     event = request.get_json()
-    if event['type'] == 'ADDED_TO_SPACE' and not event['space']['singleUserBotDm']:
+    logging.info(f'gchat_event: {event}')
+    if event['type'] == 'ADDED_TO_SPACE' and not event['space'].get('singleUserBotDm', False):
         text = 'Thanks for adding me to "%s"! Use !help to get started' % (event['space']['displayName'] if event['space']['displayName'] else 'this chat')
   
         return jsonify({'text': text})
