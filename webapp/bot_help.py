@@ -256,6 +256,22 @@ def generate_google_chat_card(bot_output, how_many = 1):
 
     return card
 
+def get_gchat_bot_name_from_event(event):
+    """Extract bot name from GChat event.
+
+    Args:
+        event (dict): GChat event.
+
+    Returns:
+        str: Bot name if found, None otherwise.
+    """
+    annotations = event['message'].get('annotations', [])
+    for annotation in annotations:
+        if annotation['type'] == 'USER_MENTION':
+            return annotation['userMention']['user']['displayName']
+    return None
+
+
 def handle_slash_commands(slash_command):
     commandId = slash_command.get('commandId', None)
     if commandId is None:
