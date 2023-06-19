@@ -4,6 +4,7 @@ import os
 from langchain.docstore.document import Document
 import base64
 import json
+import datetime
 
 from langchain.vectorstores import SupabaseVectorStore
 from supabase import Client, create_client
@@ -42,6 +43,10 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
         return "No page content"
     
     metadata = the_json.get("metadata", None)
+
+    if 'eventTime' not in metadata:
+        metadata['eventTime'] = datetime.utcnow().isoformat(timespec='microseconds') + "Z"
+
 
     doc = Document(page_content=page_content, metadata=metadata)
 
