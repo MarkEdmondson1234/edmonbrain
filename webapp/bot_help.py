@@ -309,7 +309,7 @@ def get_slack_vector_name(team_id, bot_user):
         return None
 
 
-def process_slack_message(sapp, body, say, logger, thread_ts=None):
+def process_slack_message(sapp, body, logger, thread_ts=None):
     logger.info(body)
     team_id = body.get('team_id', None)
     if team_id is None:
