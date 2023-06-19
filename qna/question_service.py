@@ -40,6 +40,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     Question: {question}
     Helpful Answer:"""
+    
     QA_PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )

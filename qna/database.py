@@ -53,6 +53,7 @@ def do_sql(sql, sql_params=None, return_rows=False):
         connection = psycopg2.connect(connection_string)
         cursor = connection.cursor()
 
+        logging.info(f"SQL: {sql}")
         # execute the SQL - raise the error if already found
         cursor.execute(sql, sql_params)
 
