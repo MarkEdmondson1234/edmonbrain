@@ -224,18 +224,44 @@ def log_request(logger, body, next):
 def handle_app_mention(ack, body, say, logger):
     ack()  # immediately acknowledge the event 
     thread_ts = body['event']['ts']  # The timestamp of the original message
-    threading.Thread(target=bot_help.process_slack_message, args=(sapp, body, say, logger, thread_ts)).start()
+    bot_help.process_slack_message(sapp, body, logger, thread_ts)
 
 @sapp.event("message")
 def handle_direct_message(ack, body, say, logger):
     ack()  # immediately acknowledge the event 
-    threading.Thread(target=bot_help.process_slack_message, args=(sapp, body, say, logger)).start()
+    bot_help.process_slack_message(sapp, body, logger)
 
 
 shandler = SlackRequestHandler(sapp)
 @app.route('/slack/message', methods=['POST'])
 def slack():
     return shandler.handle(request)
+
+@app.route('/pubsub/slack-response', methods=['POST'])
+def pubsub_to_slack():
+    # Parse incoming Pub/Sub message
+    message = request.get_json()
+    
+    # Check message format
+    if not all (k in message for k in ('thread_ts', 'channel_id', 'bot_response')):
+        return 'Bad Request: Invalid Pub/Sub message format', 400
+
+    # Extract relevant info from message
+    thread_ts = message['thread_ts']
+    channel_id = message['channel_id']
+    bot_response = message['bot_response']
+
+    # Send response to Slack using Bolt App's client
+    try:
+        sapp.client.chat_postMessage(
+            channel=channel_id,
+            text=bot_response,
+            thread_ts=thread_ts  # Comment this line if you want to send the message outside a thread
+        )
+        return '', 204
+    except Exception as e:
+        logging.error(f'Error sending message to Slack: {str(e)}')
+        return 'Internal Server Error', 500
 
    
 # needs to be done via Mailgun API

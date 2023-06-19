@@ -9,6 +9,7 @@ import tempfile
 import qna.database as db
 import qna.publish_to_pubsub_embed as pbembed
 import qna.question_service as qs
+import qna.pubsub_manager as pubsub
 
 def discord_webhook(message_data):
     webhook_url = os.getenv('DISCORD_URL', None)  # replace with your webhook url
@@ -307,6 +308,7 @@ def get_slack_vector_name(team_id, bot_user):
     except KeyError:
         return None
 
+
 def process_slack_message(sapp, body, say, logger, thread_ts=None):
     logger.info(body)
     team_id = body.get('team_id', None)
@@ -338,10 +340,12 @@ def process_slack_message(sapp, body, say, logger, thread_ts=None):
 
     command_response = handle_special_commands(user_input, vector_name, paired_messages)
     if command_response is not None:
-        if thread_ts:
-            say(text=command_response, thread_ts=thread_ts)
-        else:
-            say(text=command_response)
+        payload = {
+            "response": command_response,
+            "thread_ts": thread_ts
+        }
+        pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
+        pubsub_manager.publish_message(json.dumps(payload))
         return
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
@@ -354,8 +358,17 @@ def process_slack_message(sapp, body, say, logger, thread_ts=None):
 
     slack_output = bot_output.get("answer", "No answer available")
 
-    # Reply in the thread where the original message was posted
-    if thread_ts:
-        say(text=slack_output, thread_ts=thread_ts)
-    else:
-        say(text=slack_output)
+    payload = {
+        "response": slack_output,
+        "thread_ts": thread_ts,
+        "channel_id": body['event']['channel']  # Add the channel ID to the payload
+    }
+    pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
+    sub_name = f"pubsub_slack_response_{vector_name}"
+
+    sub_exists = pubsub_manager.subscription_exists(sub_name)
+
+    if not sub_exists:
+        pubsub_manager.create_subscription(sub_name, push_endpoint="/pubsub/slack-response")
+
+    pubsub_manager.publish_message(json.dumps(payload))
