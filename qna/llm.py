@@ -16,6 +16,8 @@ def load_config(filename):
     # Join the script directory with the filename
     config_path = os.path.join(parent_dir, filename)
 
+    logging.info(f"Config_path: {config_path}")
+
     with open(config_path, 'r') as f:
         config = json.load(f)
     return config
@@ -24,7 +26,11 @@ def pick_llm(vector_name):
     logging.info('Picking llm')
     # located in the parent directory e.g. config.json, qna/llm.py
     config = load_config("config.json")
+    logging.info('Loaded config.json: {config}')
     llm_config = config.get(vector_name, None)
+    if llm_config is None:
+        raise ValueError("No llm_config was found")
+    
     llm_str = llm_config.get("llm", None)
     if llm_str is None:
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
