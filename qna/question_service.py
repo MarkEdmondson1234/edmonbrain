@@ -5,6 +5,7 @@ from qna.llm import pick_llm
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
 from langchain.chains import ConversationalRetrievalChain
+from langchain.prompts.prompt import PromptTemplate
 
 from supabase import Client, create_client
 from dotenv import load_dotenv
@@ -33,11 +34,22 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     retriever = vectorstore.as_retriever(search_kwargs=dict(k=4))
 
+    prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.
+
+    {context}
+
+    Question: {question}
+    Helpful Answer:"""
+    QA_PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
     qa = ConversationalRetrievalChain.from_llm(llm, 
                                                retriever=retriever, 
                                                return_source_documents=True,
                                                verbose=True,
                                                output_key='answer',
+                                               combine_docs_chain_kwargs={'prompt': QA_PROMPT},
                                                max_tokens_limit=3500)
 
     result = qa({"question": question, "chat_history": chat_history})
