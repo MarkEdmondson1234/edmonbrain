@@ -14,6 +14,8 @@ load_dotenv()
 
 def qna(question: str, vector_name: str, chat_history=[]):
 
+    logging.info("Calling qna")
+
     llm, embeddings = pick_llm(vector_name)
 
     logging.info(f"Initiating Supabase store: {vector_name}")
@@ -40,7 +42,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     Question: {question}
     Helpful Answer:"""
-    
+
     QA_PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )

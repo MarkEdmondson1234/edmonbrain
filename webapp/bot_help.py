@@ -8,8 +8,6 @@ import tempfile
 
 import qna.database as db
 import qna.publish_to_pubsub_embed as pbembed
-import qna.question_service as qs
-import qna.pubsub_manager as pubsub
 
 def discord_webhook(message_data):
     webhook_url = os.getenv('DISCORD_URL', None)  # replace with your webhook url
@@ -307,68 +305,3 @@ def get_slack_vector_name(team_id, bot_user):
         return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']
     except KeyError:
         return None
-
-
-def process_slack_message(sapp, body, logger, thread_ts=None):
-    logger.info(body)
-    team_id = body.get('team_id', None)
-    if team_id is None:
-        raise ValueError('Team_id not specified')
-    user_input = body.get('event').get('text').strip()
-
-    user = body.get('event').get('user')
-    bot_user = body.get('authorizations')[0].get('user_id')
-
-    # Remove mention of the bot user from user_input
-    bot_mention = f"<@{bot_user}>"
-    user_input = user_input.replace(bot_mention, "").strip()
-
-    vector_name = get_slack_vector_name(team_id, bot_user)
-    if vector_name is None:
-        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
-
-    chat_historys = sapp.client.conversations_replies(
-        channel=body['event']['channel'],
-        ts=thread_ts
-    ) if thread_ts else sapp.client.conversations_history(
-        channel=body['event']['channel']
-    )
-
-    messages = chat_historys['messages']
-    logging.debug('messages: {}'.format(messages))
-    paired_messages = extract_chat_history(messages)
-
-    command_response = handle_special_commands(user_input, vector_name, paired_messages)
-    if command_response is not None:
-        payload = {
-            "response": command_response,
-            "thread_ts": thread_ts
-        }
-        pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
-        pubsub_manager.publish_message(json.dumps(payload))
-        return
-
-    logging.info(f'Sending from Slack: {user_input} to {vector_name}')
-    bot_output = "No answer found"
-    try:
-        bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-        logger.info(f"bot_output: {bot_output}")
-    except Exception as e:
-        logging.error(f'Error sending to QNA: {str(e)}')
-
-    slack_output = bot_output.get("answer", "No answer available")
-
-    payload = {
-        "response": slack_output,
-        "thread_ts": thread_ts,
-        "channel_id": body['event']['channel']  # Add the channel ID to the payload
-    }
-    pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
-    sub_name = f"pubsub_slack_response_{vector_name}"
-
-    sub_exists = pubsub_manager.subscription_exists(sub_name)
-
-    if not sub_exists:
-        pubsub_manager.create_subscription(sub_name, push_endpoint="/pubsub/slack-response")
-
-    pubsub_manager.publish_message(json.dumps(payload))

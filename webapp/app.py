@@ -1,6 +1,6 @@
 import sys, os, requests
 import tempfile
-import datetime
+import json
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify
 import qna.question_service as qs
 import qna.publish_to_pubsub_embed as pbembed
 import qna.pubsub_chunk_to_store as pb
+import qna.pubsub_manager as pubsub
 import logging
 import bot_help
 
@@ -213,7 +214,68 @@ def gchat_message(vector_name):
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 sapp = App()
-import threading
+
+
+def process_slack_message(sapp, body, logger, thread_ts=None):
+    logger.info(body)
+    team_id = body.get('team_id', None)
+    if team_id is None:
+        raise ValueError('Team_id not specified')
+    user_input = body.get('event').get('text').strip()
+
+    user = body.get('event').get('user')
+    bot_user = body.get('authorizations')[0].get('user_id')
+
+    # Remove mention of the bot user from user_input
+    bot_mention = f"<@{bot_user}>"
+    user_input = user_input.replace(bot_mention, "").strip()
+
+    vector_name = bot_help.get_slack_vector_name(team_id, bot_user)
+    if vector_name is None:
+        raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
+
+    chat_historys = sapp.client.conversations_replies(
+        channel=body['event']['channel'],
+        ts=thread_ts
+    ) if thread_ts else sapp.client.conversations_history(
+        channel=body['event']['channel']
+    )
+
+    messages = chat_historys['messages']
+    logging.debug('messages: {}'.format(messages))
+    paired_messages = bot_help.extract_chat_history(messages)
+
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        payload = {
+            "response": command_response,
+            "thread_ts": thread_ts
+        }
+        pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
+        pubsub_manager.publish_message(json.dumps(payload))
+        return
+
+    logging.info(f'Sending from Slack: {user_input} to {vector_name}')
+    # it just gets stuck here and never progresses further
+    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    logger.info(f"bot_output: {bot_output}")
+
+    slack_output = bot_output.get("answer", "No answer available")
+
+    payload = {
+        "response": slack_output,
+        "thread_ts": thread_ts,
+        "channel_id": body['event']['channel']  # Add the channel ID to the payload
+    }
+    pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
+    sub_name = f"pubsub_slack_response_{vector_name}"
+
+    sub_exists = pubsub_manager.subscription_exists(sub_name)
+
+    if not sub_exists:
+        pubsub_manager.create_subscription(sub_name, push_endpoint="/pubsub/slack-response")
+
+    pubsub_manager.publish_message(json.dumps(payload))
 
 @sapp.middleware  # or app.use(log_request)
 def log_request(logger, body, next):
@@ -224,12 +286,12 @@ def log_request(logger, body, next):
 def handle_app_mention(ack, body, say, logger):
     ack()  # immediately acknowledge the event 
     thread_ts = body['event']['ts']  # The timestamp of the original message
-    bot_help.process_slack_message(sapp, body, logger, thread_ts)
+    process_slack_message(sapp, body, logger, thread_ts)
 
 @sapp.event("message")
 def handle_direct_message(ack, body, say, logger):
     ack()  # immediately acknowledge the event 
-    bot_help.process_slack_message(sapp, body, logger)
+    process_slack_message(sapp, body, logger)
 
 
 shandler = SlackRequestHandler(sapp)
