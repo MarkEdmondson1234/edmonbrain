@@ -19,6 +19,7 @@ def process_qna(vector_name):
     paired_messages = data['paired_messages']
     logging.info(f'Processing {user_input}\n{paired_messages}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    logging.info(f'Bot output: {bot_output}')
     return jsonify(bot_output)
 
 # can only take up to 10 minutes to ack

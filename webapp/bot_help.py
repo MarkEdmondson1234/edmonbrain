@@ -312,7 +312,7 @@ def send_to_qa(user_input, vector_name, chat_history):
     #TODO: add os.environ("QA_URL")
     qna_url = os.getenv('QNA_URL', None)
     if qna_url is None:
-        ValueError('QNA_URL not found in environment')
+       raise ValueError('QNA_URL not found in environment')
 
     qna_endpoint = f'{qna_url}/qna/{vector_name}'
     qna_data = {
