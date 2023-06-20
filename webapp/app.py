@@ -301,19 +301,25 @@ shandler = SlackRequestHandler(sapp)
 def slack():
     return shandler.handle(request)
 
+import base64
+
 @app.route('/pubsub/slack-response', methods=['POST'])
 def pubsub_to_slack():
     # Parse incoming Pub/Sub message
-    message = request.get_json()
+    data = request.get_json()
+    logging.info(f'pubsub_to_slack message: {data}')
+    message_data = base64.b64decode(data['message']['data']).decode('utf-8')
+    messageId = data['message'].get('messageId')
+    publishTime = data['message'].get('publishTime')
     
     # Check message format
-    if not all (k in message for k in ('thread_ts', 'channel_id', 'bot_response')):
+    if not all (k in message_data for k in ('thread_ts', 'channel_id', 'bot_response')):
         return 'Bad Request: Invalid Pub/Sub message format', 400
 
     # Extract relevant info from message
-    thread_ts = message['thread_ts']
-    channel_id = message['channel_id']
-    bot_response = message['bot_response']
+    thread_ts = message_data['thread_ts']
+    channel_id = message_data['channel_id']
+    bot_response = message_data['bot_response']
 
     # Send response to Slack using Bolt App's client
     try:

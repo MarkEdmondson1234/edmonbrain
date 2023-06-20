@@ -23,4 +23,4 @@ discord
 aiohttp
 python-dotenv
 slack_bolt
-transformers
+transformers>=4.30.2

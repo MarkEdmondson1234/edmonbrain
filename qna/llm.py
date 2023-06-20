@@ -39,12 +39,15 @@ def pick_llm(vector_name):
     if llm_str == 'openai':
         llm = OpenAI(temperature=0)
         embeddings = OpenAIEmbeddings()
+        logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
         llm = VertexAI(model_name = "text-bison@001", temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
+        logging.info("Chose VertexAI text-bison@001")
     elif llm_str == 'codey':
         llm = VertexAI(model_name = "codechat-bison@001", temperature=0.5, max_output_tokens=2048)
         embeddings = VertexAIEmbeddings()
+        logging.info("Chose VertexAI codechat-bison@001")
     else:
         raise NotImplementedError(f'No llm implemented for {llm_str}')   
     
