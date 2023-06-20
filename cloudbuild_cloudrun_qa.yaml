@@ -4,12 +4,11 @@ substitutions:
   _REGION: your-region
   _GCS_BUCKET: your-gcs-bucket
   _SERVICE_ACCOUNT: your-service@your-project.iam.gserviceaccount.com
-  _DISCORD_URL: https://webhook-discord-url-to-send-to-discord
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    secretEnv: ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_KEY", "DB_CONNECTION_STRING", "SLACK_SIGNING", "SLACK_TOKEN"]
+    secretEnv: ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_KEY", "DB_CONNECTION_STRING"]
     args:
     - '-c'
     - |
@@ -23,12 +22,9 @@ steps:
       ENV SUPABASE_KEY=$$SUPABASE_KEY
       ENV OPENAI_API_KEY=$$OPENAI_API_KEY
       ENV GCS_BUCKET=${_GCS_BUCKET}
-      ENV DISCORD_URL=${_DISCORD_URL}
       ENV DB_CONNECTION_STRING=$$DB_CONNECTION_STRING
-      ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
-      ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
 
-      CMD ["python", "webapp/app.py"]
+      CMD ["python", "qna/app.py"]
       EOF
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -74,26 +70,6 @@ steps:
           --update-env-vars=SERVICE_URL=$(cat service_url.txt) && \
            gcloud run services update-traffic ${_SERVICE_NAME} --region ${_REGION} --to-latest
 
-  # Get service URL
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: get service url for qna
-    entrypoint: bash
-    args:
-      - "-c"
-      - |
-        echo $(gcloud run services describe edmonbrain-qna --region ${_REGION} --format 'value(status.url)') \
-          > service_urlqna.txt && cat service_urlqna.txt
-
-  # Update the service with SERVICE_URL environment variable
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: update service qna
-    entrypoint: bash
-    args:
-      - "-c"
-      - |
-        gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
-          --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
-
 availableSecrets:
   secretManager:
   - versionName: projects/$PROJECT_ID/secrets/OPENAI_API_KEY/versions/latest
@@ -104,7 +80,3 @@ availableSecrets:
     env: SUPABASE_KEY
   - versionName: projects/$PROJECT_ID/secrets/DB_CONNECTION_STRING/versions/latest
     env: DB_CONNECTION_STRING
-  - versionName: projects/$PROJECT_ID/secrets/SLACK_TOKEN/versions/latest
-    env: SLACK_TOKEN
-  - versionName: projects/$PROJECT_ID/secrets/SLACK_SIGNING/versions/latest
-    env: SLACK_SIGNING

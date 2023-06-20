@@ -307,3 +307,19 @@ def get_slack_vector_name(team_id, bot_user):
     except KeyError:
         logging.error('Could not find slack config')
         return None
+
+def send_to_qa(user_input, vector_name, chat_history):
+    #TODO: add os.environ("QA_URL")
+    qna_url = os.getenv('QNA_URL', None)
+    if qna_url is None:
+        ValueError('QNA_URL not found in environment')
+
+    qna_endpoint = f'{qna_url}/qna/{vector_name}'
+    qna_data = {
+        'user_input': user_input,
+        'paired_messages': chat_history,
+    }
+    logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
+    qna_response = requests.post(qna_endpoint, json=qna_data)
+    logging.info(f"Got back QA response: {qna_response}")
+    return qna_response.json()
