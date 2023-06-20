@@ -14,7 +14,7 @@ load_dotenv()
 
 def qna(question: str, vector_name: str, chat_history=[]):
 
-    logging.info("Calling qna")
+    logging.debug("Calling qna")
 
     llm, embeddings = pick_llm(vector_name)
 

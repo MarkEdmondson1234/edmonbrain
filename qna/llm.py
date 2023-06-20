@@ -8,7 +8,7 @@ from langchain.llms import VertexAI
 from langchain.embeddings import VertexAIEmbeddings
 
 def load_config(filename):
-    logging.info("Loading config for llm")
+    logging.debug("Loading config for llm")
     # Get the directory of the current script
     script_dir = os.path.dirname(os.path.realpath(__file__))
     parent_dir = os.path.dirname(script_dir)
@@ -23,15 +23,16 @@ def load_config(filename):
     return config
 
 def pick_llm(vector_name):
-    logging.info('Picking llm')
+    logging.debug('Picking llm')
     # located in the parent directory e.g. config.json, qna/llm.py
     config = load_config("config.json")
-    logging.info('Loaded config.json: {config}')
+    logging.info(f'Loaded config.json: {config} for {vector_name}')
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
-    
+    logging.info(f'llm_config: {llm_config} for {vector_name}')
     llm_str = llm_config.get("llm", None)
+    logging.info(f'llm_str is: {llm_str}')
     if llm_str is None:
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
     

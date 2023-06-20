@@ -301,7 +301,7 @@ def load_config(filename):
 slack_config = load_config('slack_config.json')
 
 def get_slack_vector_name(team_id, bot_user):
-    logging.info('getting slack vector_name: {team_id} - {bot_user}')
+    logging.info(f'getting slack vector_name: {team_id} - {bot_user}')
     try:
         return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']
     except KeyError:

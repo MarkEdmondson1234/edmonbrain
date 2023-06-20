@@ -234,7 +234,7 @@ def process_slack_message(sapp, body, logger, thread_ts=None):
     if vector_name is None:
         raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
     
-    logging.info(f'Slack vector_name: {vector_name}')
+    logging.debug(f'Slack vector_name: {vector_name}')
 
     chat_historys = sapp.client.conversations_replies(
         channel=body['event']['channel'],
