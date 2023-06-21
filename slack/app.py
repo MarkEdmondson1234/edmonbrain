@@ -64,12 +64,14 @@ async def log_request(logger, body, next):
 async def handle_app_mention(ack, body, say, logger):
     await ack() 
     thread_ts = body['event']['ts']
-    await say(process_slack_message(app, body, logger, thread_ts))
+    slack_output = await process_slack_message(app, body, logger, thread_ts)
+    await say(slack_output)
 
 @app.event("message")
 async def handle_direct_message(ack, body, say, logger):
     await ack()
-    await say(process_slack_message(app, body, logger))
+    slack_output = await process_slack_message(app, body, logger)
+    await say(slack_output)
 
 @api.post('/slack/message')
 async def slack(req: Request):
