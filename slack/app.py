@@ -80,23 +80,20 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     return slack_output
 
-@app.middleware  
-async def log_request(logger, body, next):
-    logger.debug(body)
-    return next()
-
 @app.event("app_mention")
 async def handle_app_mention(ack, body, say, logger):
     await ack() 
+    logger.info("app_mention")
     thread_ts = body['event']['ts']
     slack_output = await process_slack_message(app, body, logger, thread_ts)
-    await say(slack_output)
+    await say(text=slack_output)
 
 @app.event("message")
 async def handle_direct_message(ack, body, say, logger):
     await ack()
+    logger.info("message")
     slack_output = await process_slack_message(app, body, logger)
-    await say(slack_output)
+    await say(text=slack_output)
 
 @api.post('/slack/message')
 async def slack(req: Request):
