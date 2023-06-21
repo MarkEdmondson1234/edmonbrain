@@ -1,6 +1,5 @@
 import sys, os, requests
 import tempfile
-import json
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
@@ -10,7 +9,6 @@ from flask import Flask, render_template, request, jsonify
 import qna.question_service as qs
 import qna.publish_to_pubsub_embed as pbembed
 import qna.pubsub_chunk_to_store as pb
-import qna.pubsub_manager as pubsub
 import logging
 import bot_help
 

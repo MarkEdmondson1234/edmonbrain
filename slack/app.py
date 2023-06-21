@@ -1,3 +1,8 @@
+import sys, os
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+
 from flask import Flask, request
 import logging
 from webapp import bot_help
