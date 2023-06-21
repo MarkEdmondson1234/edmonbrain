@@ -6,6 +6,7 @@ from langchain.llms import OpenAI
 
 from langchain.llms import VertexAI
 from langchain.embeddings import VertexAIEmbeddings
+from langchain.chat_models import ChatVertexAI
 
 def load_config(filename):
     logging.debug("Loading config for llm")
@@ -41,11 +42,13 @@ def pick_llm(vector_name):
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
-        llm = VertexAI(temperature=0, max_output_tokens=1024)
+        #llm = VertexAI(temperature=0, max_output_tokens=1024)
+        llm = ChatVertexAI(temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
         logging.info("Chose VertexAI text-bison")
     elif llm_str == 'codey':
-        llm = VertexAI(model_name = "code-bison", temperature=0.5, max_output_tokens=2048)
+        #llm = VertexAI(model_name = "code-bison", temperature=0.5, max_output_tokens=2048)
+        llm = ChatVertexAI(model_name="codechat-bison", max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
         logging.info("Chose VertexAI code-bison")
     else:
