@@ -45,7 +45,7 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
         raise ValueError('Team_id not specified')
     user_input = body.get('event').get('text').strip()
 
-    return user_input
+    
 
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
@@ -67,6 +67,8 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     )
 
     messages = chat_historys['messages']
+
+    return user_input + messages
     
     #command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
     #if command_response is not None:
