@@ -16,7 +16,7 @@ steps:
       FROM gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}
 
       ENV APP_HOME /app
-      WORKDIR $APP_HOME
+      WORKDIR $$APP_HOME
 
       COPY . ./
 
