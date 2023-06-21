@@ -22,6 +22,8 @@ async def send_to_qa_async(user_input, vector_name, chat_history):
     qna_url = os.getenv('QNA_URL', None)
     if qna_url is None:
        raise ValueError('QNA_URL not found in environment')
+    
+    return f'send_to_qa_async - {user_input} {vector_name}'
 
     qna_endpoint = f'{qna_url}/qna/{vector_name}'
     qna_data = {
@@ -68,13 +70,10 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     messages = chat_historys['messages']
 
-    
-    
     command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
     if command_response is not None:
         return command_response['result']
     
-    return user_input + vector_name
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
     bot_output = await send_to_qa_async(user_input, vector_name, chat_history=messages)
