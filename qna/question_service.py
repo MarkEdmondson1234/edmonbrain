@@ -52,12 +52,12 @@ def qna(question: str, vector_name: str, chat_history=[]):
     # File "/usr/local/lib/python3.9/site-packages/langchain/chat_models/vertexai.py", line 136, in _generate
     #response = chat.send_message(question.content, **params)
     # TypeError: send_message() got an unexpected keyword argument 'context'"
-    qa = ConversationalRetrievalChain.from_llm(llm,
+    qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                return_source_documents=True,
                                                verbose=True,
                                                output_key='answer',
-                                               combine_docs_chain_kwargs={'prompt': QA_PROMPT},
+                                               #combine_docs_chain_kwargs={'prompt': QA_PROMPT},
                                                condense_question_llm=llm,
                                                max_tokens_limit=3500)
 
