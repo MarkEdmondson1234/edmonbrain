@@ -22,8 +22,6 @@ async def send_to_qa_async(user_input, vector_name, chat_history):
     qna_url = os.getenv('QNA_URL', None)
     if qna_url is None:
        raise ValueError('QNA_URL not found in environment')
-    
-    return f'send_to_qa_async - {user_input} {vector_name}'
 
     qna_endpoint = f'{qna_url}/qna/{vector_name}'
     qna_data = {
@@ -32,6 +30,7 @@ async def send_to_qa_async(user_input, vector_name, chat_history):
     }
     logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
     
+    # this breaks it?
     async with aiohttp.ClientSession() as session:
         async with session.post(qna_endpoint, json=qna_data) as resp:
             qna_response = await resp.json()
