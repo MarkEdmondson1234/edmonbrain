@@ -63,7 +63,6 @@ def process_qna(vector_name):
     paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'Processing {user_input}\n{paired_messages}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    logging.info(f'Bot output: {bot_output}')
     bot_output = parse_output(bot_output)
     logging.info(f'Bot output2: {bot_output}')
     return jsonify(bot_output)

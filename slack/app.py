@@ -1,9 +1,7 @@
 from flask import Flask, request
-import logging, json
+import logging
 from webapp import bot_help
-from qna import pubsub_manager as pubsub
 
-# https://github.com/slackapi/bolt-python/blob/main/examples/flask/app.py
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 
@@ -21,7 +19,6 @@ def process_slack_message(sapp, body, logger, thread_ts=None):
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
 
-    # Remove mention of the bot user from user_input
     bot_mention = f"<@{bot_user}>"
     user_input = user_input.replace(bot_mention, "").strip()
 
@@ -39,56 +36,34 @@ def process_slack_message(sapp, body, logger, thread_ts=None):
     )
 
     messages = chat_historys['messages']
-    logging.debug('messages: {}'.format(messages))
-    paired_messages = bot_help.extract_chat_history(messages)
-
-    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    
+    command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
     if command_response is not None:
-        payload = {
-            "response": command_response,
-            "thread_ts": thread_ts
-        }
-        pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
-        pubsub_manager.publish_message(json.dumps(payload))
-        return
+        return command_response['result']
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
-    # it just gets stuck here and never progresses further
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    logger.info(f"bot_output: {bot_output}")
+    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=messages)
+    logging.info(f"Slack bot_output: {bot_output}")
 
     slack_output = bot_output.get("answer", "No answer available")
 
-    payload = {
-        "response": slack_output,
-        "thread_ts": thread_ts,
-        "channel_id": body['event']['channel']  # Add the channel ID to the payload
-    }
-    pubsub_manager = pubsub.PubSubManager(vector_name, pubsub_topic=f"slack_response_{vector_name}")
-    sub_name = f"pubsub_slack_response_{vector_name}"
+    return slack_output
 
-    sub_exists = pubsub_manager.subscription_exists(sub_name)
-
-    if not sub_exists:
-        pubsub_manager.create_subscription(sub_name, push_endpoint="/pubsub/slack-response")
-
-    pubsub_manager.publish_message(json.dumps(payload))
-
-@sapp.middleware  # or app.use(log_request)
+@sapp.middleware  
 def log_request(logger, body, next):
     logger.debug(body)
     return next()
 
 @sapp.event("app_mention")
 def handle_app_mention(ack, body, say, logger):
-    ack()  # immediately acknowledge the event 
-    thread_ts = body['event']['ts']  # The timestamp of the original message
-    process_slack_message(sapp, body, logger, thread_ts)
+    ack() 
+    thread_ts = body['event']['ts']
+    say(process_slack_message(sapp, body, logger, thread_ts))
 
 @sapp.event("message")
 def handle_direct_message(ack, body, say, logger):
-    ack()  # immediately acknowledge the event 
-    process_slack_message(sapp, body, logger)
+    ack()
+    say(process_slack_message(sapp, body, logger))
 
 
 shandler = SlackRequestHandler(sapp)
@@ -99,4 +74,3 @@ def slack():
 if __name__ == "__main__":
     import os
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
-
