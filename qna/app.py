@@ -23,12 +23,44 @@ def parse_output(bot_output):
         bot_output['source_documents'] = [document_to_dict(doc) for doc in bot_output['source_documents']]
     return bot_output
 
+def create_message_element(message):
+    if 'text' in message:  # This is a Slack message
+        return message['text']
+    else:  # This is a message in Discord format
+        return message["content"]
+
+def is_human(message):
+    if 'name' in message:
+        return message["name"] == "Human"
+    else:
+        return 'user' in message # Slack
+
+def is_ai(message):
+    if 'name' in message:
+        return message["name"] == "AI"
+    else:
+        return 'bot_id' in message # Slack
+
+def extract_chat_history(chat_history=None):
+    
+    if chat_history:
+        # Separate the messages into human and AI messages
+        human_messages = [create_message_element(message) for message in chat_history if is_human(message)]
+        ai_messages = [create_message_element(message) for message in chat_history if is_ai(message)]
+        # Pair up the human and AI messages into tuples
+        paired_messages = list(zip(human_messages, ai_messages))
+    else:
+        print("No chat history found")
+        paired_messages = []
+
+    return paired_messages
+
 
 @app.route('/qna/<vector_name>', methods=['POST'])
 def process_qna(vector_name):
     data = request.get_json()
     user_input = data['user_input']
-    paired_messages = data['paired_messages']
+    paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'Processing {user_input}\n{paired_messages}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     logging.info(f'Bot output: {bot_output}')

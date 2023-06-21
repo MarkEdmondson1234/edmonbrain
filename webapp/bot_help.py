@@ -107,7 +107,7 @@ def create_message_element(message):
     if 'text' in message:  # This is a Slack message
         return message['text']
     else:  # This is a message in Discord format
-        return message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else message["content"]
+        return message["content"] + ' Embeds: ' + embeds_to_json(message) if embeds_to_json(message) else None
 
 def is_human(message):
     if 'name' in message:
@@ -139,6 +139,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
     now = datetime.datetime.now()
     hourmin = now.strftime("%H%M")
 
+    chat_history = extract_chat_history(chat_history)
     if user_input.startswith("!savethread"):
         with tempfile.TemporaryDirectory() as temp_dir:
             chat_file_path = os.path.join(temp_dir, f"{hourmin}_chat_history.txt")

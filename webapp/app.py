@@ -187,13 +187,11 @@ def gchat_message(vector_name):
                 logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
                 vector_name = response
 
-        paired_messages = bot_help.extract_chat_history(gchat_chat_history)
-
-        command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+        command_response = bot_help.handle_special_commands(user_input, vector_name, gchat_chat_history)
         if command_response is not None:
             return jsonify({'text': command_response['result']})
 
-        bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_messages)
+        bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=gchat_chat_history)
         # append user message to chat history
         gchat_chat_history.append({'name': 'Human', 'content': user_input})
         gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
