@@ -21,7 +21,7 @@ steps:
       ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
       ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
 
-      CMD ["python", "webapp/app.py"]
+      CMD ["python", "slack/app.py"]
       EOF
 
   - name: 'gcr.io/cloud-builders/docker'

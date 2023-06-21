@@ -208,39 +208,6 @@ def gchat_message(vector_name):
     # may be over 4000 char limit for discord but discord bot chunks it up for output
     return jsonify(gchat_output)
 
-
-import base64
-
-@app.route('/pubsub/slack-response', methods=['POST'])
-def pubsub_to_slack():
-    # Parse incoming Pub/Sub message
-    data = request.get_json()
-    logging.info(f'pubsub_to_slack message: {data}')
-    message_data = base64.b64decode(data['message']['data']).decode('utf-8')
-    messageId = data['message'].get('messageId')
-    publishTime = data['message'].get('publishTime')
-    
-    # Check message format
-    if not all (k in message_data for k in ('thread_ts', 'channel_id', 'bot_response')):
-        return 'Bad Request: Invalid Pub/Sub message format', 400
-
-    # Extract relevant info from message
-    thread_ts = message_data['thread_ts']
-    channel_id = message_data['channel_id']
-    bot_response = message_data['bot_response']
-
-    # Send response to Slack using Bolt App's client
-    try:
-        sapp.client.chat_postMessage(
-            channel=channel_id,
-            text=bot_response,
-            thread_ts=thread_ts  # Comment this line if you want to send the message outside a thread
-        )
-        return '', 204
-    except Exception as e:
-        logging.error(f'Error sending message to Slack: {str(e)}')
-        return 'Internal Server Error', 500
-
    
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])
