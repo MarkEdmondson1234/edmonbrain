@@ -16,7 +16,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     logging.debug("Calling qna")
 
-    llm, embeddings = pick_llm(vector_name)
+    llm, embeddings, llm_chat = pick_llm(vector_name)
 
     logging.info(f"Initiating Supabase store: {vector_name}")
     # init embedding and vector store
@@ -47,12 +47,13 @@ def qna(question: str, vector_name: str, chat_history=[]):
         template=prompt_template, input_variables=["context", "question"]
     )
 
-    qa = ConversationalRetrievalChain.from_llm(llm, 
+    qa = ConversationalRetrievalChain.from_llm(llm_chat, 
                                                retriever=retriever, 
                                                return_source_documents=True,
                                                verbose=True,
                                                output_key='answer',
                                                combine_docs_chain_kwargs={'prompt': QA_PROMPT},
+                                               condense_question_llm=llm,
                                                max_tokens_limit=3500)
 
     result = qa({"question": question, "chat_history": chat_history})

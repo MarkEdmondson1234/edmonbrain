@@ -17,12 +17,17 @@ steps:
 
       COPY . .
 
+      RUN pip install -r qna/requirements.txt
+
       EXPOSE 8080
       ENV SUPABASE_URL=$$SUPABASE_URL
       ENV SUPABASE_KEY=$$SUPABASE_KEY
       ENV OPENAI_API_KEY=$$OPENAI_API_KEY
       ENV GCS_BUCKET=${_GCS_BUCKET}
       ENV DB_CONNECTION_STRING=$$DB_CONNECTION_STRING
+
+      RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('bert-base-uncased'); AutoModel.from_pretrained('bert-base-uncased')"
+      RUN python -c "from transformers import GPT2TokenizerFast; GPT2TokenizerFast.from_pretrained('gpt2')"
 
       CMD ["python", "qna/app.py"]
       EOF
