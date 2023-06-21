@@ -12,6 +12,12 @@ import logging
 
 app = Flask(__name__)
 
+def parse_output(bot_output):
+    if 'source_documents' in bot_output:
+        bot_output['source_documents'] = [doc.to_dict() for doc in bot_output['source_documents']]
+    return bot_output
+
+
 @app.route('/qna/<vector_name>', methods=['POST'])
 def process_qna(vector_name):
     data = request.get_json()
@@ -20,6 +26,8 @@ def process_qna(vector_name):
     logging.info(f'Processing {user_input}\n{paired_messages}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     logging.info(f'Bot output: {bot_output}')
+    bot_output = parse_output(bot_output)
+    logging.info(f'Bot output2: {bot_output}')
     return jsonify(bot_output)
 
 # can only take up to 10 minutes to ack
