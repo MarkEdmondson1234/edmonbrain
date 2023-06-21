@@ -39,8 +39,9 @@ def pick_llm(vector_name):
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
     
     if llm_str == 'openai':
-        llm = OpenAI(temperature=0)
+        #llm = OpenAI(temperature=0)
         llm_chat = ChatOpenAI(temperature=0)
+        llm = llm_chat
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
