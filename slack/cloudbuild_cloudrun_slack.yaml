@@ -46,6 +46,24 @@ steps:
            --max-instances 2 \
            --service-account ${_SERVICE_ACCOUNT}
 
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: get service url for qna
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        echo $(gcloud run services describe edmonbrain-qna --region ${_REGION} --format 'value(status.url)') \
+          > service_urlqna.txt && cat service_urlqna.txt
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: update service qna
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
+          --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
+
 availableSecrets:
   secretManager:
   - versionName: projects/$PROJECT_ID/secrets/SLACK_TOKEN/versions/latest
