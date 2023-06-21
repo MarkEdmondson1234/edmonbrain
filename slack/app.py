@@ -9,18 +9,43 @@ import logging
 from webapp import bot_help
 from slack_bolt.async_app import AsyncApp
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+import aiohttp
+import asyncio
 
 app = AsyncApp()
 app_handler = AsyncSlackRequestHandler(app)
 
 api = FastAPI()
 
+async def send_to_qa_async(user_input, vector_name, chat_history):
+
+    qna_url = os.getenv('QNA_URL', None)
+    if qna_url is None:
+       raise ValueError('QNA_URL not found in environment')
+
+    qna_endpoint = f'{qna_url}/qna/{vector_name}'
+    qna_data = {
+        'user_input': user_input,
+        'chat_history': chat_history,
+    }
+    logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(qna_endpoint, json=qna_data) as resp:
+            qna_response = await resp.json()
+
+    logging.info(f"Got back QA response: {qna_response}")
+    return qna_response
+
 async def process_slack_message(sapp, body, logger, thread_ts=None):
     logger.info(body)
+    logging.info("Calling async process_slack_message")
     team_id = body.get('team_id', None)
     if team_id is None:
         raise ValueError('Team_id not specified')
     user_input = body.get('event').get('text').strip()
+
+    return user_input
 
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
@@ -43,12 +68,12 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     messages = chat_historys['messages']
     
-    command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
-    if command_response is not None:
-        return command_response['result']
+    #command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
+    #if command_response is not None:
+    #    return command_response['result']
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
-    bot_output = await bot_help.send_to_qa_async(user_input, vector_name, chat_history=messages)
+    bot_output = await send_to_qa_async(user_input, vector_name, chat_history=messages)
     logging.info(f"Slack bot_output: {bot_output}")
 
     slack_output = bot_output.get("answer", "No answer available")
