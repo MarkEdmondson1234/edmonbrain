@@ -46,8 +46,6 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
         raise ValueError('Team_id not specified')
     user_input = body.get('event').get('text').strip()
 
-    
-
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
 

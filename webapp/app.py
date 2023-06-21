@@ -179,8 +179,8 @@ def gchat_message(vector_name):
         user_input = event['message']['text']  # Extract user input from the payload
         user_input = user_input.replace(f'@{bot_name}','').strip()
 
-        if event['message'].get('slash_command', None) is not None:
-            response = bot_help.handle_slash_commands(event['message']['slash_command'])
+        if event['message'].get('slashCommand', None) is not None:
+            response = bot_help.handle_slash_commands(event['message']['slashCommand'])
             if response is not None:
                 logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
                 vector_name = response

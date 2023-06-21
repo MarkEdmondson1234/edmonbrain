@@ -275,8 +275,8 @@ def get_gchat_bot_name_from_event(event):
     return None
 
 
-def handle_slash_commands(slash_command):
-    commandId = slash_command.get('commandId', None)
+def handle_slash_commands(slashCommand):
+    commandId = slashCommand.get('commandId', None)
     logging.info(f'CommandId: {commandId}')
     if commandId is None:
         logging.error('Got a slash_command with no commandId specified')
