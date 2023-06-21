@@ -17,6 +17,8 @@ steps:
 
       COPY . .
 
+      RUN pip install -r slack/requirements.txt
+
       EXPOSE 8080
       ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
       ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING

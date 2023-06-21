@@ -327,3 +327,26 @@ def send_to_qa(user_input, vector_name, chat_history):
     qna_response = requests.post(qna_endpoint, json=qna_data)
     logging.info(f"Got back QA response: {qna_response}")
     return qna_response.json()
+
+import aiohttp
+import asyncio
+
+async def send_to_qa_async(user_input, vector_name, chat_history):
+
+    qna_url = os.getenv('QNA_URL', None)
+    if qna_url is None:
+       raise ValueError('QNA_URL not found in environment')
+
+    qna_endpoint = f'{qna_url}/qna/{vector_name}'
+    qna_data = {
+        'user_input': user_input,
+        'chat_history': chat_history,
+    }
+    logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(qna_endpoint, json=qna_data) as resp:
+            qna_response = await resp.json()
+
+    logging.info(f"Got back QA response: {qna_response}")
+    return qna_response

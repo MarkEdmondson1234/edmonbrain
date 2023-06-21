@@ -22,5 +22,4 @@ google-generativeai
 discord
 aiohttp
 python-dotenv
-slack_bolt
 transformers>=4.30.2
