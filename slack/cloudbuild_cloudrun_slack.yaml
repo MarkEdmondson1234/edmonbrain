@@ -15,7 +15,10 @@ steps:
       cat <<EOF >Dockerfile_cloudrun
       FROM gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}
 
-      COPY . .
+      ENV APP_HOME /app
+      WORKDIR $APP_HOME
+
+      COPY . ./
 
       RUN pip install -r slack/requirements.txt
 
@@ -24,6 +27,7 @@ steps:
       ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
 
       CMD ["python", "slack/app.py"]
+
       EOF
 
   - name: 'gcr.io/cloud-builders/docker'

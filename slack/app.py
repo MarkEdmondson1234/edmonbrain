@@ -1,18 +1,19 @@
 import sys, os
-
+# https://github.com/slackapi/bolt-python/blob/main/examples/fastapi/async_app.py
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
-from fastapi import FastAPI
+import uvicorn
+from fastapi import FastAPI, Request
 import logging
 from webapp import bot_help
-from slack_bolt import App
-from slack_bolt.adapter.fastapi import SlackRequestHandler
-from fastapi import Request
-from slack_bolt.request import BoltRequest
+from slack_bolt.async_app import AsyncApp
+from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 
-sapp = App()
-app = FastAPI()
+app = AsyncApp()
+app_handler = AsyncSlackRequestHandler(app)
+
+api = FastAPI()
 
 async def process_slack_message(sapp, body, logger, thread_ts=None):
     logger.info(body)
@@ -54,30 +55,25 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     return slack_output
 
-@sapp.middleware  
+@app.middleware  
 async def log_request(logger, body, next):
     logger.debug(body)
     return next()
 
-@sapp.event("app_mention")
+@app.event("app_mention")
 async def handle_app_mention(ack, body, say, logger):
     await ack() 
     thread_ts = body['event']['ts']
-    await say(process_slack_message(sapp, body, logger, thread_ts))
+    await say(process_slack_message(app, body, logger, thread_ts))
 
-@sapp.event("message")
+@app.event("message")
 async def handle_direct_message(ack, body, say, logger):
     await ack()
-    await say(process_slack_message(sapp, body, logger))
+    await say(process_slack_message(app, body, logger))
 
-shandler = SlackRequestHandler(sapp)
-@app.post('/slack/message')
-async def slack(request: Request):
-    bolt_req = BoltRequest(request_body=(await request.body()).decode(), headers=dict(request.headers))
-    return await shandler.handle(bolt_req)
-
+@api.post('/slack/message')
+async def slack(req: Request):
+    return await app_handler.handle(req)
 
 if __name__ == "__main__":
-    import os
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), log_level="info")
+    uvicorn.run(app, port=int(os.environ.get("PORT", 8080)), host="0.0.0.0")
