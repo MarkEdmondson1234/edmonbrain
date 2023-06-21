@@ -68,11 +68,13 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     messages = chat_historys['messages']
 
-    return user_input + messages
     
-    #command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
-    #if command_response is not None:
-    #    return command_response['result']
+    
+    command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
+    if command_response is not None:
+        return command_response['result']
+    
+    return user_input + vector_name
 
     logging.info(f'Sending from Slack: {user_input} to {vector_name}')
     bot_output = await send_to_qa_async(user_input, vector_name, chat_history=messages)
