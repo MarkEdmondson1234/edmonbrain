@@ -76,4 +76,4 @@ async def slack(req: Request):
     return await app_handler.handle(req)
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=int(os.environ.get("PORT", 8080)), host="0.0.0.0")
+    uvicorn.run(api, port=int(os.environ.get("PORT", 8080)), host="0.0.0.0")
