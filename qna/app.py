@@ -12,9 +12,15 @@ import logging
 
 app = Flask(__name__)
 
+def document_to_dict(document):
+    return {
+        "page_content": document.page_content,
+        "metadata": document.metadata
+    }
+
 def parse_output(bot_output):
     if 'source_documents' in bot_output:
-        bot_output['source_documents'] = [doc.to_dict() for doc in bot_output['source_documents']]
+        bot_output['source_documents'] = [document_to_dict(doc) for doc in bot_output['source_documents']]
     return bot_output
 
 
