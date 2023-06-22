@@ -61,7 +61,7 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
 
     logging.info(f"Supabase URL: {supabase_url}")
 
-    _, embeddings = pick_llm(vector_name)
+    llm, embeddings, llm_chat = pick_llm(vector_name)
 
     supabase: Client = create_client(supabase_url, supabase_key)
 
