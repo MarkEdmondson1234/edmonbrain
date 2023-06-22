@@ -85,7 +85,11 @@ def read_git_repo(clone_url, branch="main", metadata=None):
         logging.info("Using private GIT_PAT")
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-            loader = GitLoader(repo_path=tmp_dir, clone_url=clone_url, branch=branch)
+            try:    
+                loader = GitLoader(repo_path=tmp_dir, clone_url=clone_url, branch=branch)
+            except Exception as err:
+                logging.error(f"Failed to load repository: {str(err)}")
+                return None
             docs = loader.load()
 
             if not docs:
