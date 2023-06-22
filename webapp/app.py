@@ -198,17 +198,19 @@ def gchat_message(vector_name):
 
         # text supports code formatting, cards do not
         if vector_name  == 'codey':
-            return jsonify({'text': bot_output['result']})
+            return jsonify({'text': bot_output['answer']})
 
         meta_card = bot_help.generate_google_chat_card(bot_output, how_many=1)
+        gchat_output = {'cards': meta_card['cards'] }
+
+        # may be over 4000 char limit for discord but discord bot chunks it up for output
+        return jsonify(gchat_output)
 
     else:
+        logging.info(f"Not implemented event: {event}")
         return
     
-    gchat_output = {'cards': meta_card['cards'] }
 
-    # may be over 4000 char limit for discord but discord bot chunks it up for output
-    return jsonify(gchat_output)
 
    
 # needs to be done via Mailgun API
