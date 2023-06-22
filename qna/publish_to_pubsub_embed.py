@@ -200,6 +200,24 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
                 docs.extend(doc)
 
         chunks = chunk_doc_to_docs(docs)
+    
+    #TODO: support more git service URLs
+    elif message_data.startswith("https://github.com"):
+        logging.info("Got GitHub URL")
+        urls = extract_urls(message_data)
+
+        docs = []
+        for url in urls:
+            metadata["source"] = url
+            metadata["url"] = url
+            metadata["type"] = "url_load"
+            doc = loaders.read_git_repo(url, metadata=metadata)
+            if doc is None:
+                logging.info("Could not load GitHub files")
+            else:
+                docs.extend(doc)
+
+        chunks = chunk_doc_to_docs(docs)
         
     elif message_data.startswith("http"):
         logging.info(f"Got http message: {message_data}")

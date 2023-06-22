@@ -1,6 +1,7 @@
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
 from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
+from langchain.document_loaders.git import GitLoader
 #from langchain.document_loaders import GoogleDriveLoader
 from qna.googledrive_patch import GoogleDriveLoader
 from googleapiclient.errors import HttpError
@@ -10,6 +11,7 @@ import pathlib
 import os
 import shutil
 from urllib.parse import urlparse, unquote
+import tempfile
 
 # utility functions
 def convert_to_txt(file_path):
@@ -72,6 +74,23 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
                 return [self._load_file_from_id(id)]
             else:
                 return []
+
+def read_git_repo(clone_url, branch="main", metadata=None):
+    logging.info(f"Reading git repo from {clone_url} - {branch}")
+    with tempfile.TemporaryDirectory() as tmp_dir:
+            loader = GitLoader(repo_path=tmp_dir, clone_url=clone_url, branch=branch)
+            docs = loader.load()
+
+            if not docs:
+                return None
+            
+            if metadata is not None:
+                for doc in docs:
+                    doc.metadata.update(metadata)
+            
+    logging.info(f"GitLoader read {len(docs)} doc(s) from {clone_url}")
+        
+    return docs
 
 
 def read_gdrive_to_document(url: str, metadata: dict = None):
