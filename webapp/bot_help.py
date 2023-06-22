@@ -36,12 +36,12 @@ def discord_webhook(message_data):
 
 def process_pubsub(data):
 
-    logging.info(f'process_pubsub: {data}')
+    logging.debug(f'process_pubsub: {data}')
     message_data = base64.b64decode(data['message']['data']).decode('utf-8')
     messageId = data['message'].get('messageId')
     publishTime = data['message'].get('publishTime')
 
-    logging.info(f"This Function was triggered by messageId {messageId} published at {publishTime}")
+    logging.debug(f"This Function was triggered by messageId {messageId} published at {publishTime}")
     #logging.info(f"bot_help.process_pubsub message data: {message_data}")
 
     try:
@@ -154,7 +154,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
             urls = pbembed.extract_urls(user_input)
             for url in urls:
                 pbembed.publish_text(url, vector_name)
-            return {"result": f"URLs sent for processing: {urls}"}
+            return {"result": f"URLs sent for processing: {urls} to {vector_name}."}
         else:
             return {"result": f"No URLs were found"}
 

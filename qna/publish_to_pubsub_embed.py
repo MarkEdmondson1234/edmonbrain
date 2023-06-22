@@ -312,7 +312,7 @@ def publish_text(text:str, vector_name: str):
     
     if not sub_exists:
         pubsub_manager.create_subscription(sub_name,
-                                           push_endpoint=f"/pubsub_chunk_to_store/{vector_name}")
+                                           push_endpoint=f"/pubsub_to_store/{vector_name}")
         database.setup_database(vector_name)
     
     pubsub_manager.publish_message(text)
