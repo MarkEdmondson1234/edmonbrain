@@ -23,3 +23,4 @@ discord
 aiohttp
 python-dotenv
 transformers>=4.30.2
+GitPython>=3.1.31

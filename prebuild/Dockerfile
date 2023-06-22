@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential poppler-utils tesseract-ocr-all libmagic1 \
-    g++ \
+    g++ git \
     && rm -rf /var/lib/apt/lists/*
 
 
