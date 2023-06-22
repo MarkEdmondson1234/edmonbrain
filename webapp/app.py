@@ -198,7 +198,7 @@ def gchat_message(vector_name):
 
         # text supports code formatting, cards do not
         if vector_name  == 'codey':
-            return jsonify({'text': bot_output})
+            return jsonify({'text': bot_output['result']})
 
         meta_card = bot_help.generate_google_chat_card(bot_output, how_many=1)
 
