@@ -35,8 +35,6 @@ def qna(question: str, vector_name: str, chat_history=[]):
                                       table_name=vector_name,
                                       query_name=f'match_documents_{vector_name}')
 
-    logging.info(f"vectorstore.table_name {vectorstore.table_name}")
-
     retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 
     prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.

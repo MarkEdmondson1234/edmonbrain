@@ -18,8 +18,6 @@ def load_config(filename):
     # Join the script directory with the filename
     config_path = os.path.join(parent_dir, filename)
 
-    logging.info(f"Config_path: {config_path}")
-
     with open(config_path, 'r') as f:
         config = json.load(f)
     return config
@@ -28,7 +26,6 @@ def pick_llm(vector_name):
     logging.debug('Picking llm')
     # located in the parent directory e.g. config.json, qna/llm.py
     config = load_config("config.json")
-    logging.info(f'Loaded config.json for {vector_name}')
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
@@ -55,7 +52,5 @@ def pick_llm(vector_name):
         logging.info("Chose VertexAI code-bison")
     else:
         raise NotImplementedError(f'No llm implemented for {llm_str}')   
-    
-    logging.info(f'Using {llm_str}')
 
     return llm, embeddings, llm_chat

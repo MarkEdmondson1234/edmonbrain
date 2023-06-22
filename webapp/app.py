@@ -185,6 +185,7 @@ def gchat_message(vector_name):
             if response is not None:
                 logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
                 vector_name = response
+                user_input = bot_help.remove_slash_command(user_input)
 
         command_response = bot_help.handle_special_commands(user_input, vector_name, gchat_chat_history)
         if command_response is not None:

@@ -275,6 +275,11 @@ def get_gchat_bot_name_from_event(event):
             return annotation['userMention']['user']['displayName']
     return None
 
+import re
+
+def remove_slash_command(text):
+    """'/chat blah foo' will become: 'blah foo'"""
+    return re.sub(r'^/\w+\b', '', text).strip()
 
 def handle_slash_commands(slashCommand):
     commandId = slashCommand.get('commandId', None)
