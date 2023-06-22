@@ -325,10 +325,19 @@ def send_to_qa(user_input, vector_name, chat_history):
         'user_input': user_input,
         'chat_history': chat_history,
     }
-    logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
-    qna_response = requests.post(qna_endpoint, json=qna_data)
-    logging.info(f"Got back QA response: {qna_response}")
-    return qna_response.json()
+    try:
+        logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
+        qna_response = requests.post(qna_endpoint, json=qna_data)
+        qna_response.raise_for_status()  # Raises a HTTPError if the response status is 4xx, 5xx
+    except requests.exceptions.HTTPError as err:
+        logging.error(f"HTTP error occurred: {err}")
+        return {"answer": f"There was an error processing your request. Please try again later. {str(err)}"}
+    except Exception as err:
+        logging.error(f"Other error occurred: {str(err)}")
+        return {"answer": f"Something went wrong. Please try again later. {str(err)}"}
+    else:
+        logging.info(f"Got back QA response: {qna_response}")
+        return qna_response.json()
 
 import aiohttp
 import asyncio
