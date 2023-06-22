@@ -20,9 +20,9 @@ def setup_supabase(vector_name:str, verbose:bool=False):
     
     params = {'vector_name': vector_name, 'vector_size': vector_size}
 
-    execute_sql_from_file("sql/sb/setup.sql", params)
-    execute_sql_from_file("sql/sb/create_table.sql", params)
-    execute_sql_from_file("sql/sb/create_function.sql", params)
+    execute_sql_from_file("sql/sb/setup.sql", params, verbose=verbose)
+    execute_sql_from_file("sql/sb/create_table.sql", params, verbose=verbose)
+    execute_sql_from_file("sql/sb/create_function.sql", params, verbose=verbose)
 
     if verbose: print("Ran all setup SQL statements")
     
@@ -43,7 +43,7 @@ def delete_row_from_source(source: str, vector_name:str):
 
     do_sql(sql, sql_params=sql_params)
 
-def do_sql(sql, sql_params=None, return_rows=False):
+def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
     rows = []
     connection_string = os.getenv('DB_CONNECTION_STRING', None)
     if connection_string is None:
@@ -53,7 +53,10 @@ def do_sql(sql, sql_params=None, return_rows=False):
         connection = psycopg2.connect(connection_string)
         cursor = connection.cursor()
 
-        logging.info(f"SQL: {sql}")
+        if verbose:
+            logging.info(f"SQL: {sql}")
+        else:
+            logging.debug(f"SQL: {sql}")
         # execute the SQL - raise the error if already found
         cursor.execute(sql, sql_params)
 
@@ -84,10 +87,10 @@ def do_sql(sql, sql_params=None, return_rows=False):
     return None
 
 
-def execute_sql_from_file(filename, params, return_rows=False):
-    return execute_supabase_from_file(filename, params, return_rows)
+def execute_sql_from_file(filename, params, return_rows=False, verbose=False):
+    return execute_supabase_from_file(filename, params, return_rows, verbose=verbose)
 
-def execute_supabase_from_file(filepath, params, return_rows=False):
+def execute_supabase_from_file(filepath, params, return_rows=False, verbose=False):
 
      # Get the directory of this Python script
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -100,7 +103,7 @@ def execute_supabase_from_file(filepath, params, return_rows=False):
 
     # substitute placeholders in the SQL
     sql = sql.format(**params)
-    rows = do_sql(sql, return_rows=return_rows)
+    rows = do_sql(sql, return_rows=return_rows, verbose=verbose)
     
     if return_rows:
         if rows is None: return None

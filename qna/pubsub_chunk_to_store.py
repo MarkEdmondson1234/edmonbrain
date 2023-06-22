@@ -33,7 +33,11 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
     logging.debug(f"This Function was triggered by messageId {messageId} published at {publishTime}")
     logging.debug(f"from_pubsub_to_supabase message data: {message_data}")
 
-    the_json = json.loads(message_data)
+    try:
+        the_json = json.loads(message_data)
+    except Exception as err:
+        logging.error(f"Error - could not parse message_data: {err}: {message_data}")
+        return "Could not parse message_data"
 
     if not isinstance(the_json, dict):
         raise ValueError(f"Could not parse message_data from json to a dict: got {message_data} or type: {type(the_json)}")

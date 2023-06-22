@@ -304,7 +304,7 @@ def publish_chunks(chunks: list[Document], vector_name: str):
     
 
 def publish_text(text:str, vector_name: str):
-    logging.info(f"Publishing text to app_to_pubsub_{vector_name}")
+    logging.info(f"Publishing text: {text} to app_to_pubsub_{vector_name}")
     pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"app_to_pubsub_{vector_name}")
     sub_name = f"pubsub_to_store_{vector_name}"
 
