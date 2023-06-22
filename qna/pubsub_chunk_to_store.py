@@ -45,7 +45,7 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
     metadata = the_json.get("metadata", None)
 
     if 'eventTime' not in metadata:
-        metadata['eventTime'] = datetime.utcnow().isoformat(timespec='microseconds') + "Z"
+        metadata['eventTime'] = datetime.datetime.utcnow().isoformat(timespec='microseconds') + "Z"
 
 
     doc = Document(page_content=page_content, metadata=metadata)
