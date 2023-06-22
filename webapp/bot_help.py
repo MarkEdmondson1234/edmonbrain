@@ -83,7 +83,7 @@ def generate_discord_output(bot_output):
     if bot_output.get('source_documents', None) is not None:
         source_documents = []
         for doc in bot_output['source_documents']:
-            metadata = doc.metadata
+            metadata = doc.get("metadata",{})
             filtered_metadata = {}
             if metadata.get("source", None) is not None:
                 filtered_metadata["source"] = metadata["source"]

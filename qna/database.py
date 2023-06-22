@@ -9,7 +9,7 @@ def setup_database(vector_name:str, verbose:bool=False):
 def setup_supabase(vector_name:str, verbose:bool=False):
 
     hello = f"Setting up database: {vector_name}"
-    logging.info(hello)
+    logging.debug(hello)
     if verbose:
         print(hello)
 
@@ -69,8 +69,9 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
     except (psycopg2.errors.DuplicateObject, 
             psycopg2.errors.DuplicateTable, 
             psycopg2.errors.DuplicateFunction) as e:
-        logging.info(str(e))
-        print(str(e))
+        logging.debug(str(e))
+        if verbose:
+            print(str(e))
 
     except (Exception, psycopg2.Error) as error:
         logging.error("Error while connecting to PostgreSQL", exc_info=True)
@@ -79,7 +80,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
         if (connection):
             cursor.close()
             connection.close()
-            logging.info("PostgreSQL connection is closed")
+            logging.debug("PostgreSQL connection is closed")
     
     if rows:
         return rows

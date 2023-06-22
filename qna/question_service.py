@@ -19,7 +19,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     llm, embeddings, llm_chat = pick_llm(vector_name)
 
-    logging.info(f"Initiating Supabase store: {vector_name}")
+    logging.debug(f"Initiating Supabase store: {vector_name}")
     setup_supabase(vector_name)
     # init embedding and vector store
     supabase_url = os.getenv('SUPABASE_URL')
