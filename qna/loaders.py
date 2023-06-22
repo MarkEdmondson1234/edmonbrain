@@ -77,6 +77,13 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
 
 def read_git_repo(clone_url, branch="main", metadata=None):
     logging.info(f"Reading git repo from {clone_url} - {branch}")
+    GIT_PAT = os.getenv('GIT_PAT', None)
+    if GIT_PAT is None:
+        logging.warning("No GIT_PAT is specified, won't be able to clone private git repositories")
+    else:
+        clone_url = clone_url.replace('https://', f'https://{GIT_PAT}@')
+        logging.info("Using private GIT_PAT")
+
     with tempfile.TemporaryDirectory() as tmp_dir:
             loader = GitLoader(repo_path=tmp_dir, clone_url=clone_url, branch=branch)
             docs = loader.load()

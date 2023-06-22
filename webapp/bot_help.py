@@ -178,9 +178,10 @@ def handle_special_commands(user_input, vector_name, chat_history):
 * `!saveurl [https:// url]` - add the contents found at this URL to database. 
 * `!savethread` - save current Discord thread as a source to database
 * `!help`- see this message
-* Files attached to discord messages will be added as source to database
-* Add files to the specified Cloud Storage folder to also add them to database
+* Files attached to Discord messages will be added as source to database
+* Add files to a configured Cloud Storage folder to add them via PubSub subscriptions
 * URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
+* URLs of GitHub (https://github.com/*) work and get the whole repository indexed. For private repositories, the app has a GitHub PAT that will need access
 """}
 
     # If no special commands were found, return None
