@@ -6,7 +6,6 @@ sys.path.append(parent_dir)
 
 # app.py
 from flask import Flask, render_template, request, jsonify
-import qna.question_service as qs
 import qna.publish_to_pubsub_embed as pbembed
 import qna.pubsub_chunk_to_store as pb
 import logging
@@ -47,7 +46,7 @@ def process_input():
     paired_messages = bot_help.extract_chat_history(app_chat_history)
 
     # ask the bot a question about the documents in the vectorstore
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_messages)
 
     # append user message to chat history
     app_chat_history.append({'name': 'Human', 'content': user_input})
@@ -74,7 +73,7 @@ def discord_message(vector_name):
     if command_response is not None:
         return jsonify(command_response)
 
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_messages)
     logging.info(f"bot_output: {bot_output}")
     
     discord_output = bot_help.generate_discord_output(bot_output)
@@ -115,6 +114,8 @@ def discord_files(vector_name):
 
     return response_payload, 200
 
+
+#TODO: Delete these pubsub endpoints so its self contained within qna.app.py
 # can only take up to 10 minutes to ack
 @app.route('/pubsub_chunk_to_store/<vector_name>', methods=['POST'])
 def pubsub_chunk_to_store(vector_name):
@@ -127,7 +128,7 @@ def pubsub_chunk_to_store(vector_name):
 
         return {'status': 'Success'}, 200
 
-
+#TODO: delete this pubsub endpoint and recreate the pubsub subscriptions to point to QNA service
 @app.route('/pubsub_to_store/<vector_name>', methods=['POST'])
 def pubsub_to_store(vector_name):
     """

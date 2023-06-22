@@ -55,27 +55,6 @@ steps:
 
   # Get service URL
   - name: "gcr.io/cloud-builders/gcloud"
-    id: get service url
-    entrypoint: bash
-    args:
-      - "-c"
-      - |
-        echo $(gcloud run services describe ${_SERVICE_NAME} --region ${_REGION} --format 'value(status.url)') \
-          > service_url.txt && cat service_url.txt
-
-  # Update the service with SERVICE_URL environment variable
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: update service
-    entrypoint: bash
-    args:
-      - "-c"
-      - |
-        gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
-          --update-env-vars=SERVICE_URL=$(cat service_url.txt) && \
-           gcloud run services update-traffic ${_SERVICE_NAME} --region ${_REGION} --to-latest
-
-  # Get service URL
-  - name: "gcr.io/cloud-builders/gcloud"
     id: get service url for qna
     entrypoint: bash
     args:

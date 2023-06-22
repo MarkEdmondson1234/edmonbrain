@@ -80,12 +80,12 @@ class PubSubManager:
             if push_endpoint.startswith("https://"):
                 logging.info(f"Using full URL for push endpoint")
             else:
-                service_url = os.getenv('SERVICE_URL', None)
+                service_url = os.getenv('QNA_URL', None)
                 if service_url is None:
-                    logging.info("No SERVICE_URL env specified and not a http endpoint")
+                    logging.info("No QNA_URL env specified and not a http endpoint")
                     return
                 else:
-                    logging.info(f"Found service URL: {service_url}")
+                    logging.info(f"Found service QNA_URL: {service_url}")
                     if push_endpoint.startswith("/"):
                         push_endpoint = service_url + push_endpoint
                     else:
