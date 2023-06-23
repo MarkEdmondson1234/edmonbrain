@@ -21,3 +21,4 @@ google-cloud-aiplatform
 google-generativeai
 python-dotenv
 GitPython>=3.1.31
+gunicorn
