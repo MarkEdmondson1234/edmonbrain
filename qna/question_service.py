@@ -11,6 +11,8 @@ from supabase import Client, create_client
 from dotenv import load_dotenv
 from qna.database import setup_supabase
 
+logging.basicConfig(level=logging.DEBUG)
+
 load_dotenv()
 
 def qna(question: str, vector_name: str, chat_history=[]):
