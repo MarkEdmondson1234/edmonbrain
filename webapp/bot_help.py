@@ -90,7 +90,7 @@ def generate_discord_output(bot_output):
             if metadata.get("type", None) is not None:
                 filtered_metadata["type"] = metadata["type"]
             source_doc = {
-                'page_content': doc.page_content,
+                'page_content': doc["page_content"],
                 'metadata': filtered_metadata
             }
             source_documents.append(source_doc)

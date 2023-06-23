@@ -6,8 +6,6 @@ sys.path.append(parent_dir)
 
 # app.py
 from flask import Flask, render_template, request, jsonify
-import qna.publish_to_pubsub_embed as pbembed
-import qna.pubsub_chunk_to_store as pb
 import logging
 import bot_help
 
@@ -115,33 +113,6 @@ def discord_files(vector_name):
     return response_payload, 200
 
 
-#TODO: Delete these pubsub endpoints so its self contained within qna.app.py
-# can only take up to 10 minutes to ack
-@app.route('/pubsub_chunk_to_store/<vector_name>', methods=['POST'])
-def pubsub_chunk_to_store(vector_name):
-    """
-    Final PubSub destination for each chunk that sends data to Supabase vectorstore"""
-    if request.method == 'POST':
-        data = request.get_json()
-
-        meta = pb.from_pubsub_to_supabase(data, vector_name)
-
-        return {'status': 'Success'}, 200
-
-#TODO: delete this pubsub endpoint and recreate the pubsub subscriptions to point to QNA service
-@app.route('/pubsub_to_store/<vector_name>', methods=['POST'])
-def pubsub_to_store(vector_name):
-    """
-    splits up text or gs:// file into chunks and sends to pubsub topic 
-      that pushes back to /pubsub_chunk_to_store/<vector_name>
-    """
-    if request.method == 'POST':
-        data = request.get_json()
-
-        meta = pbembed.data_to_embed_pubsub(data, vector_name)
-        file_uploaded = str(meta.get("source", "Could not find a source"))
-        return jsonify({'status': 'Success', 'source': file_uploaded}), 200
-
 @app.route('/pubsub_to_discord', methods=['POST'])
 def pubsub_to_discord():
     if request.method == 'POST':
@@ -211,9 +182,6 @@ def gchat_message(vector_name):
     else:
         logging.info(f"Not implemented event: {event}")
         return
-    
-
-
    
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])
