@@ -21,6 +21,8 @@ def document_to_dict(document):
 def parse_output(bot_output):
     if 'source_documents' in bot_output:
         bot_output['source_documents'] = [document_to_dict(doc) for doc in bot_output['source_documents']]
+    if bot_output.get("answer", None) is None or bot_output.get("answer") == "":
+        bot_output['answer'] = "(No text was returned)"
     return bot_output
 
 def create_message_element(message):
@@ -61,10 +63,10 @@ def process_qna(vector_name):
     data = request.get_json()
     user_input = data['user_input']
     paired_messages = extract_chat_history(data['chat_history'])
-    logging.info(f'Processing {user_input}\n{paired_messages}')
+    logging.info(f'QNA got: {user_input}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     bot_output = parse_output(bot_output)
-    logging.info(f'LLM output: {bot_output}')
+    logging.info(f'LLM Q:{bot_output["question"]} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
 # can only take up to 10 minutes to ack
