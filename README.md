@@ -9,3 +9,8 @@ python3 -m venv env
 source env/bin/activate
 ./env/bin/python3 -m pip install -r prebuild/requirements.txt
 ```
+
+## Architecture
+
+![](llm-arch.png)
+

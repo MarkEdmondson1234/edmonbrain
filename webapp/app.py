@@ -10,6 +10,7 @@ import logging
 import bot_help
 
 app = Flask(__name__)
+app.config['TRAP_HTTP_EXCEPTIONS'] = True
 
 @app.route('/', methods=['GET'])
 def index():

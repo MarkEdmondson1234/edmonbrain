@@ -11,6 +11,7 @@ import qna.pubsub_chunk_to_store as pb
 import logging
 
 app = Flask(__name__)
+app.config['TRAP_HTTP_EXCEPTIONS'] = True
 
 def document_to_dict(document):
     return {
@@ -66,7 +67,7 @@ def process_qna(vector_name):
     logging.info(f'QNA got: {user_input}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     bot_output = parse_output(bot_output)
-    logging.info(f'LLM Q:{bot_output["question"]} - A:{bot_output["answer"]}')
+    logging.info(f'==LLM Q:{bot_output["question"]} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
 # can only take up to 10 minutes to ack
