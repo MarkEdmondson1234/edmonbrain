@@ -203,6 +203,9 @@ def send_to_gchat(gchat_output, space_id):
         print('Error in sending message: %s' % e)
 
 def list_messages(space_id):
+    #this is not possible without user authentication
+    return None
+    #TODO: figure out how to authenticate in a chat flow 
     creds=get_creds()
     chat = build('chat', 'v1', credentials=creds)
     result = chat.spaces().messages().list(
