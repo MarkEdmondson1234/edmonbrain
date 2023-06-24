@@ -33,8 +33,6 @@ def send_to_pubsub(the_data, vector_name):
 def process_pubsub_data(data):
     event = base64.b64decode(data['message']['data']).decode('utf-8')
 
-
-
     logging.info(f'process_pubsub_data for gchat got event: {event} {type(event)}')
 
     event = json.loads(event)
@@ -198,7 +196,7 @@ def list_messages(space_id):
     creds, _ = default()
     chat = build('chat', 'v1', credentials=creds)
     result = chat.spaces().messages().list(
-        parent = f'spaces/{space_id}',
+        parent = space_id,
     ).execute()
 
     if len(result) == 0:

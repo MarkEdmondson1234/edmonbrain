@@ -25,7 +25,7 @@ def gchat_message(vector_name):
         
         gchat_help.send_to_pubsub(event, vector_name=vector_name)
 
-        user_name = event['message']['user']['displayName']
+        user_name = event['message']['sender']['displayName']
         
         return jsonify({'text':f"I'm consulting {vector_name} for an answer, {user_name}..."})
     else:
