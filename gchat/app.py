@@ -31,7 +31,12 @@ def gchat_message(vector_name):
         return
 
 @app.route('/pubsub/callback', methods=['POST'])
-def gchat_send(event):
+def gchat_send():
+
+    if request.method != 'POST':
+        return "Unsupported method", 404
+    
+    event = request.get_json()    
     
     bot_output, vector_name, space_id = gchat_help.process_pubsub_data(event)
 
