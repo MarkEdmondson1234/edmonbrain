@@ -50,15 +50,15 @@ def process_pubsub_data(data):
             vector_name = response
             user_input = remove_slash_command(user_input)
 
+    #TODO: not implemented as needs user auth
     chat_history = list_messages(space_id)
 
     command_response = bot_help.handle_special_commands(user_input, vector_name, chat_history)
     if command_response is not None:
         bot_output = command_response
     else:
-        paired_history = bot_help.extract_chat_history(chat_history)
         logging.info(f"Asking for reply for: {user_input}")
-        bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_history)
+        bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=chat_history)
         logging.info(f"Got back reply for: {user_input}")
 
     return bot_output, vector_name, space_id

@@ -35,14 +35,18 @@ def create_message_element(message):
 def is_human(message):
     if 'name' in message:
         return message["name"] == "Human"
+    elif 'sender' in message:  # Google Chat
+        return message['sender']['type'] == 'HUMAN'
     else:
-        return 'user' in message # Slack
+        return 'user' in message  # Slack
 
 def is_ai(message):
     if 'name' in message:
         return message["name"] == "AI"
+    elif 'sender' in message:  # Google Chat
+        return message['sender']['type'] == 'BOT'
     else:
-        return 'bot_id' in message # Slack
+        return 'bot_id' in message  # Slack
 
 def extract_chat_history(chat_history=None):
     
@@ -67,7 +71,7 @@ def process_qna(vector_name):
     logging.info(f'QNA got: {user_input}')
     bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
     bot_output = parse_output(bot_output)
-    logging.info(f'==LLM Q:{bot_output["question"]} - A:{bot_output["answer"]}')
+    logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
 # can only take up to 10 minutes to ack
