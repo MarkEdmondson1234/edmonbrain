@@ -8,6 +8,7 @@ sys.path.append(parent_dir)
 from flask import Flask, render_template, request, jsonify
 import logging
 import bot_help
+import gchat_help
 
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
@@ -148,16 +149,16 @@ def gchat_message(vector_name):
     
     elif event['type'] == 'MESSAGE':
     
-        bot_name = bot_help.get_gchat_bot_name_from_event(event)
+        bot_name = gchat_help.get_gchat_bot_name_from_event(event)
         user_input = event['message']['text']  # Extract user input from the payload
         user_input = user_input.replace(f'@{bot_name}','').strip()
 
         if event['message'].get('slashCommand', None) is not None:
-            response = bot_help.handle_slash_commands(event['message']['slashCommand'])
+            response = gchat_help.handle_slash_commands(event['message']['slashCommand'])
             if response is not None:
                 logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
                 vector_name = response
-                user_input = bot_help.remove_slash_command(user_input)
+                user_input = gchat_help.remove_slash_command(user_input)
 
         command_response = bot_help.handle_special_commands(user_input, vector_name, gchat_chat_history)
         if command_response is not None:
@@ -174,7 +175,7 @@ def gchat_message(vector_name):
         if vector_name  == 'codey':
             return jsonify({'text': bot_output['answer']})
 
-        meta_card = bot_help.generate_google_chat_card(bot_output, how_many=1)
+        meta_card = gchat_help.generate_google_chat_card(bot_output, how_many=1)
         gchat_output = {'cards': meta_card['cards'] }
 
         # may be over 4000 char limit for discord but discord bot chunks it up for output

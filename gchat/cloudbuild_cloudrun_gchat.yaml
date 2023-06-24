@@ -1,0 +1,85 @@
+substitutions:
+  _IMAGE_NAME: your-image-name
+  _SERVICE_NAME: your-service-name
+  _REGION: your-region
+  _GCS_BUCKET: your-gcs-bucket
+  _SERVICE_ACCOUNT: your-service@your-project.iam.gserviceaccount.com
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      cat <<EOF >Dockerfile_cloudrun
+      FROM gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}
+
+      COPY . ./
+
+      RUN pip install -r gchat/requirements.txt
+
+      EXPOSE 8080
+      ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
+      ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
+
+      CMD ["python", "gchat/app.py"]
+
+      EOF
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}/gchat', '-f', 'Dockerfile_cloudrun', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}/gchat']
+
+  # Deploy the image to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: deploy cloud run
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud run deploy ${_SERVICE_NAME} --image gcr.io/$PROJECT_ID/${_IMAGE_NAME}/gchat \
+           --region ${_REGION} \
+           --platform managed \
+           --allow-unauthenticated \
+           --memory 2Gi \
+           --cpu 1 \
+           --max-instances 2 \
+           --service-account ${_SERVICE_ACCOUNT}
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: get service url for gchat
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        echo $(gcloud run services describe ${_SERVICE_NAME} --region ${_REGION} --format 'value(status.url)') \
+          > service_urlgchat.txt && cat service_urlgchat.txt
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: update service gchat
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
+          --update-env-vars=GCHAT_URL=$(cat service_urlgchat.txt)
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: get service url for qna
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        echo $(gcloud run services describe edmonbrain-qna --region ${_REGION} --format 'value(status.url)') \
+          > service_urlqna.txt && cat service_urlqna.txt
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: update service qna
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
+          --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
