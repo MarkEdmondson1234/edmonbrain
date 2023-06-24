@@ -24,8 +24,10 @@ def gchat_message(vector_name):
     elif event['type'] == 'MESSAGE':
         
         gchat_help.send_to_pubsub(event, vector_name=vector_name)
+
+        user_name = event['message']['user']['displayName']
         
-        return jsonify({'text':'--Thinking via {vector_name}...'})
+        return jsonify({'text':f"I'm consulting {vector_name} for an answer, {user_name}..."})
     else:
         logging.info(f"Not implemented event: {event}")
         return

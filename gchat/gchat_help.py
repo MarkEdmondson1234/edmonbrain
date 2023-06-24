@@ -1,4 +1,4 @@
-import re, os, base64
+import re, os, base64, json
 import logging
 from webapp import bot_help
 from qna.pubsub_manager import PubSubManager
@@ -33,7 +33,11 @@ def send_to_pubsub(the_data, vector_name):
 def process_pubsub_data(data):
     event = base64.b64decode(data['message']['data']).decode('utf-8')
 
-    logging.info('process_pubsub_data for gchat got event: {event}')
+
+
+    logging.info(f'process_pubsub_data for gchat got event: {event} {type(event)}')
+
+    event = json.loads(event)
 
     user_input = clean_user_input(event)
     vector_name = event['vector_name']
@@ -55,7 +59,9 @@ def process_pubsub_data(data):
         bot_output = command_response
     else:
         paired_history = bot_help.extract_chat_history(chat_history)
+        logging.info(f"Asking for reply for: {user_input}")
         bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_history)
+        logging.info(f"Got back reply for: {user_input}")
 
     return bot_output, vector_name, space_id
 
