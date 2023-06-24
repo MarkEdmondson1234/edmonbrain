@@ -28,7 +28,7 @@ def send_to_pubsub(the_data, vector_name):
 
     pubsub_manager.publish_message(the_data)
 
-    return True
+    return "Ok"
 
 def process_pubsub_data(data):
     event = base64.b64decode(data['message']['data']).decode('utf-8')
