@@ -22,15 +22,15 @@ def gchat_message(vector_name):
         return jsonify({'text': text})
     
     elif event['type'] == 'MESSAGE':
-
-        # Get the spaceId from the event
-        space_id = event['space']['name']
         
         gchat_help.send_to_pubsub(event, vector_name=vector_name)
 
+        space_id = event['space']['name']
         user_name = event['message']['sender']['displayName']
+
+        logging.info(f"Received from {space_id}:{user_name}")
         
-        return jsonify({'text':f"Received from {space_id}:{user_name}.  Thinking..."})
+        return jsonify({'text':"Thinking..."})
     else:
         logging.info(f"Not implemented event: {event}")
         return
@@ -46,9 +46,13 @@ def gchat_send():
     bot_output, vector_name, space_id = gchat_help.process_pubsub_data(event)
 
     logging.info(f"bot_output: {bot_output} {vector_name}")
-
-    # text supports code formatting, cards do not
-    if vector_name  == 'codey':
+    
+    if bot_output.get("result", None) != None:
+        # result from !slash commands
+        gchat_output = {'text': bot_output["result"]}
+    
+    elif vector_name  == 'codey':
+        # text supports code formatting, cards do not
         gchat_output = {'text': bot_output['answer']}
     else:
         meta_card = gchat_help.generate_google_chat_card(bot_output, how_many=1)
