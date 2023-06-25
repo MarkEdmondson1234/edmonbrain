@@ -23,7 +23,7 @@ steps:
       ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
       ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
 
-      CMD ["python", "slack/app.py"]
+      CMD exec uvicorn slack.app:api --port \$$PORT --timeout 0 
 
       EOF
 
