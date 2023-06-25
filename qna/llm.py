@@ -41,8 +41,8 @@ def pick_llm(vector_name):
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
-        llm = VertexAI(temperature=0, max_output_tokens=2048)
-        llm_chat = ChatVertexAI(temperature=0, max_output_tokens=2048)
+        llm = VertexAI(temperature=0, max_output_tokens=1024)
+        llm_chat = ChatVertexAI(temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
         logging.info("Chose VertexAI text-bison")
     elif llm_str == 'codey':

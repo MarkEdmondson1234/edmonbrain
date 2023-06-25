@@ -27,7 +27,7 @@ def gchat_message(vector_name):
 
         user_name = event['message']['sender']['displayName']
         
-        return jsonify({'text':f"I'm consulting {vector_name} for an answer, {user_name}..."})
+        return jsonify({'text':f"Thinking..."})
     else:
         logging.info(f"Not implemented event: {event}")
         return
@@ -54,7 +54,7 @@ def gchat_send():
     # send gchat_output to gchat
     gchat_help.send_to_gchat(gchat_output, space_id=space_id)
 
-    return True
+    return "Ok"
 
 
 if __name__ == "__main__":
