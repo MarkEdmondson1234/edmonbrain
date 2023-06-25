@@ -174,36 +174,26 @@ def generate_google_chat_card(bot_output, how_many = 1):
     return card
 
 
-from httplib2 import Http
-from google.auth import exceptions
+from google.auth import exceptions, default
 from googleapiclient.discovery import build
-from oauth2client.service_account import ServiceAccountCredentials
-
 
 SCOPES = ['https://www.googleapis.com/auth/chat.messages']
-
-def chat_client():
-    CREDENTIALS = ServiceAccountCredentials.from_json_keyfile_name(
-    'service_account.json', SCOPES)
-
-    chat = build('chat', 'v1', http=CREDENTIALS.authorize(Http()))
-
-    return chat
-
 
 def send_to_gchat(gchat_output, space_id):
     logging.info(f"Sending gchat output {gchat_output} to {space_id}")
     try:
-        chat = chat_client()
+        creds, _ = default()
+        creds = creds.with_scopes(SCOPES)
+        chat = build('chat', 'v1', credentials=creds)
         message = chat.spaces().messages().create(
             parent=space_id,
             body=gchat_output
         ).execute()
-        print('Message sent: %s' % message)
+        logging.info(f'Message sent: {message}')
     except exceptions.DefaultCredentialsError as e:
-        print('Error in creating credentials: %s' % e)
+        logging.error('Error in creating credentials: %s' % e)
     except Exception as e:
-        print('Error in sending message: %s' % e)
+        logging.error('Error in sending message: %s' % e)
 
 def list_messages(space_id):
     #this is not possible without user authentication

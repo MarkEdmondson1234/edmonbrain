@@ -22,12 +22,15 @@ def gchat_message(vector_name):
         return jsonify({'text': text})
     
     elif event['type'] == 'MESSAGE':
+
+        # Get the spaceId from the event
+        space_id = event['space']['name']
         
         gchat_help.send_to_pubsub(event, vector_name=vector_name)
 
         user_name = event['message']['sender']['displayName']
         
-        return jsonify({'text':f"Thinking..."})
+        return jsonify({'text':f"Received from {space_id}:{user_name}.  Thinking..."})
     else:
         logging.info(f"Not implemented event: {event}")
         return
