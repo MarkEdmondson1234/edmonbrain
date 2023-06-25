@@ -174,24 +174,27 @@ def generate_google_chat_card(bot_output, how_many = 1):
     return card
 
 
+from httplib2 import Http
 from google.auth import exceptions
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+from oauth2client.service_account import ServiceAccountCredentials
+
 
 SCOPES = ['https://www.googleapis.com/auth/chat.messages']
 
-def get_creds():
-    flow = InstalledAppFlow.from_client_secrets_file(
-                      'gchat/client_secrets.json', SCOPES)
-    creds = flow.run_local_server()
+def chat_client():
+    CREDENTIALS = ServiceAccountCredentials.from_json_keyfile_name(
+    'service_account.json', SCOPES)
 
-    return creds
+    chat = build('chat', 'v1', http=CREDENTIALS.authorize(Http()))
+
+    return chat
 
 
 def send_to_gchat(gchat_output, space_id):
+    logging.info(f"Sending gchat output {gchat_output} to {space_id}")
     try:
-        creds=get_creds()
-        chat = build('chat', 'v1', credentials=creds)
+        chat = chat_client()
         message = chat.spaces().messages().create(
             parent=space_id,
             body=gchat_output
