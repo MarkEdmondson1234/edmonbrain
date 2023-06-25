@@ -30,7 +30,7 @@ async def send_to_qa_async(user_input, vector_name, chat_history):
     }
     logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
     
-    # this breaks it?
+    # this breaks it? Its sending it multiple times though
     async with aiohttp.ClientSession() as session:
         async with session.post(qna_endpoint, json=qna_data) as resp:
             qna_response = await resp.json()
@@ -44,13 +44,13 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     team_id = body.get('team_id', None)
     if team_id is None:
         raise ValueError('Team_id not specified')
-    user_input = body.get('event').get('text').strip()
+    user_input = body.get('event').get('text','').strip()
 
     user = body.get('event').get('user')
     bot_user = body.get('authorizations')[0].get('user_id')
 
     bot_mention = f"<@{bot_user}>"
-    user_input = user_input.replace(bot_mention, "").strip()
+    user_input = user_input.replace(bot_mention, '').strip()
 
     vector_name = bot_help.get_slack_vector_name(team_id, bot_user)
     if vector_name is None:
