@@ -136,54 +136,6 @@ def pubsub_to_discord():
         
         return 'ok', 200
 
-gchat_chat_history = []
-
-@app.route('/gchat/<vector_name>/message', methods=['POST'])
-def gchat_message(vector_name):
-    event = request.get_json()
-    logging.info(f'gchat_event: {event}')
-    if event['type'] == 'ADDED_TO_SPACE' and not event['space'].get('singleUserBotDm', False):
-        text = 'Thanks for adding me to "%s"! Use !help to get started' % (event['space']['displayName'] if event['space']['displayName'] else 'this chat')
-  
-        return jsonify({'text': text})
-    
-    elif event['type'] == 'MESSAGE':
-    
-        bot_name = gchat_help.get_gchat_bot_name_from_event(event)
-        user_input = event['message']['text']  # Extract user input from the payload
-        user_input = user_input.replace(f'@{bot_name}','').strip()
-
-        if event['message'].get('slashCommand', None) is not None:
-            response = gchat_help.handle_slash_commands(event['message']['slashCommand'])
-            if response is not None:
-                logging.info(f'Changing to vector_name: {vector_name} in response to slash_command')
-                vector_name = response
-                user_input = gchat_help.remove_slash_command(user_input)
-
-        command_response = bot_help.handle_special_commands(user_input, vector_name, gchat_chat_history)
-        if command_response is not None:
-            return jsonify({'text': command_response['result']})
-
-        bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=gchat_chat_history)
-        # append user message to chat history
-        gchat_chat_history.append({'name': 'Human', 'content': user_input})
-        gchat_chat_history.append({'name': 'AI', 'content': bot_output['answer']})
-
-        logging.info(f"gbot_output: {bot_output}")
-
-        # text supports code formatting, cards do not
-        if vector_name  == 'codey':
-            return jsonify({'text': bot_output['answer']})
-
-        meta_card = gchat_help.generate_google_chat_card(bot_output, how_many=1)
-        gchat_output = {'cards': meta_card['cards'] }
-
-        # may be over 4000 char limit for discord but discord bot chunks it up for output
-        return jsonify(gchat_output)
-
-    else:
-        logging.info(f"Not implemented event: {event}")
-        return
    
 # needs to be done via Mailgun API
 @app.route('/email', methods=['POST'])
