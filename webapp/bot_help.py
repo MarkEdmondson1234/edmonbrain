@@ -9,6 +9,28 @@ import tempfile
 import qna.database as db
 import qna.publish_to_pubsub_embed as pbembed
 
+def generate_webapp_output(bot_output):
+    source_documents = []
+    if bot_output.get('source_documents', None) is not None:
+        source_documents = []
+        for doc in bot_output['source_documents']:
+            metadata = doc.metadata
+            filtered_metadata = {}
+            if metadata.get("source", None) is not None:
+                filtered_metadata["source"] = metadata["source"]
+            if metadata.get("type", None) is not None:
+                filtered_metadata["type"] = metadata["type"]
+            source_doc = {
+                'page_content': doc.page_content,
+                'metadata': filtered_metadata
+            }
+            source_documents.append(source_doc)
+
+    return {
+        'result': bot_output.get('answer', "No answer available"),
+        'source_documents': source_documents
+    }
+
 def discord_webhook(message_data):
     webhook_url = os.getenv('DISCORD_URL', None)  # replace with your webhook url
     if webhook_url is None:

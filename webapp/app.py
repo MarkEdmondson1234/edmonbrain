@@ -56,7 +56,7 @@ def process_input():
 
     logging.info(f"bot_output: {bot_output}")
 
-    return jsonify(bot_help.generate_output(bot_output))
+    return jsonify(bot_help.generate_webapp_output(bot_output))
 
 
 @app.route('/discord/<vector_name>/message', methods=['POST'])
