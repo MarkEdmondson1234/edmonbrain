@@ -123,19 +123,20 @@ def pubsub_to_discord():
             message_data = bot_help.process_pubsub(data)
         
             if isinstance(message_data, str):
+                logging.info(f'message_data is a string: {message_data}')
                 the_data = message_data
             elif isinstance(message_data, dict):
+                logging.info(f'message_data is a dict: {message_data}')
                 # cloud build
                 if message_data.get('status', None) is not None:
                     cloud_build_status = message_data.get('status')
                     the_data = {'type': 'cloud_build', 'status': cloud_build_status}
                     if cloud_build_status not in ['SUCCESS','FAILED']:
+                        # don't send WORKING as it floods 
                         return cloud_build_status, 200
-            elif data.get('textPayload', None) is not None:
-                # logging sink
-                the_data = {'type': 'logging_sink', 'textPayload': message_data.get('textPayload')}
-            else:
-                return "No action", 200
+                elif message_data.get('textPayload', None) is not None:
+                    # logging sink
+                    the_data = {'type': 'logging_sink', 'textPayload': message_data.get('textPayload')}
 
             response = bot_help.discord_webhook(the_data)
 
@@ -143,6 +144,7 @@ def pubsub_to_discord():
                 logging.info(f'Request to discord returned {response.status_code}, the response is:\n{response.text}')
             
             return 'ok', 200
+        
         except Exception as err:
             logging.error(f'pubsub_to_discord error: {str(err)}')
             return 'error', 200
