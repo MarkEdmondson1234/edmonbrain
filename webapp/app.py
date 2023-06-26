@@ -139,6 +139,8 @@ def pubsub_to_discord():
                 elif message_data.get('textPayload', None) is not None:
                     # textPayload
                     the_data = {'type': 'textPayload', 'textPayload': message_data.get('textPayload')}
+                else:
+                    the_data = message_data
 
             response = bot_help.discord_webhook(the_data)
 
