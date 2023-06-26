@@ -14,3 +14,7 @@ source env/bin/activate
 
 ![](llm-arch.png)
 
+
+## Logs
+
+https://cloudlogging.app.goo.gl/CN7XgmoKShYT2kLPA
