@@ -120,6 +120,9 @@ def pubsub_to_discord():
     if request.method == 'POST':
         data = request.get_json()
         message_data = bot_help.process_pubsub(data)
+        if not message_data:
+            return 'No response', 204
+        
         if isinstance(message_data, str):
             the_data = message_data
         elif isinstance(message_data, dict):

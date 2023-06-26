@@ -59,7 +59,7 @@ def discord_webhook(message_data):
 
 def process_pubsub(data):
 
-    logging.debug(f'process_pubsub: {data}')
+    logging.info(f'process_pubsub: {data}')
     message_data = base64.b64decode(data['message']['data']).decode('utf-8')
     messageId = data['message'].get('messageId')
     publishTime = data['message'].get('publishTime')
