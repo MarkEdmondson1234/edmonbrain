@@ -133,7 +133,7 @@ def pubsub_to_discord():
                         return cloud_build_status, 200
             elif data.get('textPayload', None) is not None:
                 # logging sink
-                the_data = {'type': 'logging_sink', 'textPayload': data.get('textPayload')}
+                the_data = {'type': 'logging_sink', 'textPayload': message_data.get('textPayload')}
             else:
                 return "No action", 200
 
