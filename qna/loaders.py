@@ -56,7 +56,7 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
             service = build("drive", "v3", credentials=self._load_credentials())
             file = service.files().get(fileId=id).execute()
         except HttpError as err:
-            logging.error(f"Error loading file {file}: {str(err)}")
+            logging.error(f"Error loading file {url}: {str(err)}")
             raise
 
         mime_type = file["mimeType"]
