@@ -131,6 +131,11 @@ def pubsub_to_discord():
                     the_data = {'type': 'cloud_build', 'status': cloud_build_status}
                     if cloud_build_status not in ['SUCCESS','FAILED']:
                         return cloud_build_status, 200
+            elif data.get('textPayload', None) is not None:
+                # logging sink
+                the_data = {'type': 'logging_sink', 'textPayload': data.get('textPayload')}
+            else:
+                return "No action", 200
 
             response = bot_help.discord_webhook(the_data)
 
