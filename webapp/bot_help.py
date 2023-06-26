@@ -59,13 +59,13 @@ def discord_webhook(message_data):
 
 def process_pubsub(data):
 
-    logging.info(f'process_pubsub: {data}')
+    logging.debug(f'process_pubsub: {data}')
     message_data = base64.b64decode(data['message']['data']).decode('utf-8')
     messageId = data['message'].get('messageId')
     publishTime = data['message'].get('publishTime')
 
     logging.debug(f"This Function was triggered by messageId {messageId} published at {publishTime}")
-    #logging.info(f"bot_help.process_pubsub message data: {message_data}")
+    logging.info(f"bot_help.process_pubsub message data: {message_data}")
 
     try:
         message_data = json.loads(message_data)
