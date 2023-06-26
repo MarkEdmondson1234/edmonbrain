@@ -139,6 +139,13 @@ def pubsub_to_discord():
                 elif message_data.get('textPayload', None) is not None:
                     # textPayload
                     the_data = {'type': 'textPayload', 'textPayload': message_data.get('textPayload')}
+                elif message_data.get('incident', None) is not None:
+                    incident_data = message_data.get('incident', {})
+
+                    the_data = {'type': 'incident', 
+                                'incident': incident_data.get('policy_name'),
+                                'url': incident_data.get('url')
+                                }
                 else:
                     the_data = message_data
 
