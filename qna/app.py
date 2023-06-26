@@ -73,7 +73,7 @@ def process_qna(vector_name):
         bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
         bot_output = parse_output(bot_output)
     except Exception as err:
-        bot_output = {'answer': f'An error occurred while processing /qna/{vector_name}: {str(err)}'}
+        bot_output = {'answer': f'QNA_ERROR: An error occurred while processing /qna/{vector_name}: {str(err)}'}
     logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
@@ -89,7 +89,7 @@ def pubsub_chunk_to_store(vector_name):
             meta = pb.from_pubsub_to_supabase(data, vector_name)
             return {'status': 'Success', 'message': meta}, 200
         except Exception as err:
-            logging.error(f'Error when sending {data} to {vector_name} pubsub_chunk_to_store: {str(err)}')
+            logging.error(f'QNA_ERROR_EMBED: Error when sending {data} to {vector_name} pubsub_chunk_to_store: {str(err)}')
             return {'status': 'error', 'message':f'{str(err)}'}, 200
 
 
@@ -108,7 +108,7 @@ def pubsub_to_store(vector_name):
             file_uploaded = str(meta.get("source", "Could not find a source"))
             return jsonify({'status': 'Success', 'source': file_uploaded}), 200
         except Exception as err:
-            logging.error(f'Error when sending {data} to {vector_name} pubsub_to_store: {str(err)}')
+            logging.error(f'QNA_ERROR_EMBED: Error when sending {data} to {vector_name} pubsub_to_store: {str(err)}')
             return {'status': 'error', 'message':f'{str(err)}'}, 200
 
 if __name__ == "__main__":
