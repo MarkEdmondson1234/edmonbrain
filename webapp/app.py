@@ -137,8 +137,8 @@ def pubsub_to_discord():
                         # don't send WORKING as it floods 
                         return cloud_build_status, 200
                 elif message_data.get('textPayload', None) is not None:
-                    # logging sink
-                    the_data = {'type': 'logging_sink', 'textPayload': message_data.get('textPayload')}
+                    # textPayload
+                    the_data = {'type': 'textPayload', 'textPayload': message_data.get('textPayload')}
 
             response = bot_help.discord_webhook(the_data)
 
