@@ -14,14 +14,14 @@ def generate_webapp_output(bot_output):
     if bot_output.get('source_documents', None) is not None:
         source_documents = []
         for doc in bot_output['source_documents']:
-            metadata = doc.metadata
+            metadata = doc.get("metadata",{})
             filtered_metadata = {}
             if metadata.get("source", None) is not None:
                 filtered_metadata["source"] = metadata["source"]
             if metadata.get("type", None) is not None:
                 filtered_metadata["type"] = metadata["type"]
             source_doc = {
-                'page_content': doc.page_content,
+                'page_content': doc["page_content"],
                 'metadata': filtered_metadata
             }
             source_documents.append(source_doc)
