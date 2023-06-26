@@ -69,8 +69,11 @@ def process_qna(vector_name):
     user_input = data['user_input']
     paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'QNA got: {user_input}')
-    bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
-    bot_output = parse_output(bot_output)
+    try:
+        bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+        bot_output = parse_output(bot_output)
+    except Exception as err:
+        bot_output = {'answer': f'An error occurred while processing /qna/{vector_name}: {str(err)}'}
     logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
@@ -82,9 +85,13 @@ def pubsub_chunk_to_store(vector_name):
     if request.method == 'POST':
         data = request.get_json()
 
-        meta = pb.from_pubsub_to_supabase(data, vector_name)
+        try:
+            meta = pb.from_pubsub_to_supabase(data, vector_name)
+            return {'status': 'Success', 'message': meta}, 200
+        except Exception as err:
+            logging.error(f'Error when sending {data} to {vector_name} pubsub_chunk_to_store: {str(err)}')
+            return {'status': 'error', 'message':f'{str(err)}'}, 200
 
-        return {'status': 'Success'}, 200
 
 
 @app.route('/pubsub_to_store/<vector_name>', methods=['POST'])
@@ -96,9 +103,13 @@ def pubsub_to_store(vector_name):
     if request.method == 'POST':
         data = request.get_json()
 
-        meta = pbembed.data_to_embed_pubsub(data, vector_name)
-        file_uploaded = str(meta.get("source", "Could not find a source"))
-        return jsonify({'status': 'Success', 'source': file_uploaded}), 200
+        try:
+            meta = pbembed.data_to_embed_pubsub(data, vector_name)
+            file_uploaded = str(meta.get("source", "Could not find a source"))
+            return jsonify({'status': 'Success', 'source': file_uploaded}), 200
+        except Exception as err:
+            logging.error(f'Error when sending {data} to {vector_name} pubsub_to_store: {str(err)}')
+            return {'status': 'error', 'message':f'{str(err)}'}, 200
 
 if __name__ == "__main__":
     import os
