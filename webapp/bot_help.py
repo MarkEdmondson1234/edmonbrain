@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import base64
 import json
@@ -179,8 +180,13 @@ def handle_special_commands(user_input, vector_name, chat_history):
     elif user_input.startswith("!saveurl"):
         if pbembed.contains_url(user_input):
             urls = pbembed.extract_urls(user_input)
+            branch="main"
+            if "branch:" in user_input:
+                match = re.search(r'branch:(\w+)', user_input)
+                if match:
+                    branch = match.group(1)
             for url in urls:
-                pbembed.publish_text(url, vector_name)
+                pbembed.publish_text(f"{url} branch:{branch}", vector_name)
             return {"result": f"URLs sent for processing: {urls} to {vector_name}."}
         else:
             return {"result": f"No URLs were found"}
