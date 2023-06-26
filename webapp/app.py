@@ -123,9 +123,11 @@ def pubsub_to_discord():
             message_data = bot_help.process_pubsub(data)
         
             if isinstance(message_data, str):
+                # DANGER: message_data logged will trigger this function again recursivly
                 #logging.info(f'message_data is a string: {message_data}')
                 the_data = message_data
             elif isinstance(message_data, dict):
+                # DANGER: message_data logged will trigger this function again recursivly
                 #logging.info(f'message_data is a dict: {message_data}')
                 # cloud build
                 if message_data.get('status', None) is not None:
