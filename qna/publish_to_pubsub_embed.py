@@ -206,12 +206,20 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
         logging.info("Got GitHub URL")
         urls = extract_urls(message_data)
 
+        branch="main"
+        if "branch:" in message_data:
+            match = re.search(r'branch:(\w+)', message_data)
+            if match:
+                branch = match.group(1)
+        
+        logging.info(f"Using branch: {branch}")
+
         docs = []
         for url in urls:
             metadata["source"] = url
             metadata["url"] = url
             metadata["type"] = "url_load"
-            doc = loaders.read_git_repo(url, metadata=metadata)
+            doc = loaders.read_git_repo(url, branch=branch, metadata=metadata)
             if doc is None:
                 logging.info("Could not load GitHub files")
             else:

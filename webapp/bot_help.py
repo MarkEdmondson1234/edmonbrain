@@ -209,6 +209,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
 * Add files to a configured Cloud Storage folder to add them via PubSub subscriptions
 * URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
 * URLs of GitHub (https://github.com/*) work and get the whole repository indexed. For private repositories, the app has a GitHub PAT that will need access
+* Default GitHub branch will be "main" - if you want another indexed use 'branch:master' instead e.g. '!saveurl https://github.com/me/repo branch:master'
 """}
 
     # If no special commands were found, return None
