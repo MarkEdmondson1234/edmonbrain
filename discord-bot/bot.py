@@ -34,7 +34,8 @@ def select_vectorname(message, bot_mention):
             return vector_name
 
         raise ValueError(f"Could not find a configured vector for server_name: {server_name}")
-    return None
+    
+    raise ValueError(f"Could not find a guild in message: {message}")
 
 
 
@@ -193,6 +194,8 @@ Need this info:
                     await chunk_send(message.channel, 
                                      "Hello Master. Use !vectorname <vector_name> 'clean content' to debug")
             else:
+                await chunk_send(message.channel,
+                                 f"Don't DM me {str(message.author)}, please @me in a channel")
                 return
 
         # Send a thinking message
