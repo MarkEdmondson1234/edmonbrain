@@ -122,6 +122,13 @@ async def on_message(message):
         VECTORNAME = select_vectorname(message, bot_mention)
     except ValueError as e:
         print(e)
+        new_thread.send(f"""
+Hi {message.author}
+This Discord is not yet configured to use the bot. \
+Need this info: 
+- bot_id: {bot_mention}
+- guild_id: {message.guild.name}
+""")
         return  # exit the event handler
 
     if message.attachments:
