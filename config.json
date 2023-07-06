@@ -18,5 +18,9 @@
     "edmonbrain":{
         "llm":"openai",
         "vectorstore": "supabase"
+    },
+    "jesper":{
+        "llm":"openai",
+        "vectorstore": "supabase"
     }
 }
