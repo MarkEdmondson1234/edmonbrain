@@ -237,16 +237,6 @@ def load_config(filename):
         config = json.load(f)
     return config
 
-slack_config = load_config('slack_config.json')
-
-def get_slack_vector_name(team_id, bot_user):
-    logging.info(f'getting slack vector_name: {team_id} - {bot_user}')
-    try:
-        return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']
-    except KeyError:
-        logging.error('Could not find slack config')
-        return None
-
 def send_to_qa(user_input, vector_name, chat_history):
 
     qna_url = os.getenv('QNA_URL', None)
