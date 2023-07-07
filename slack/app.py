@@ -7,7 +7,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from slack_bolt.async_app import AsyncApp
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
-import slack_help
+import slack.slack_help as slack_help
 
 app = AsyncApp()
 app_handler = AsyncSlackRequestHandler(app)
