@@ -8,7 +8,6 @@ sys.path.append(parent_dir)
 from flask import Flask, render_template, request, jsonify
 import logging
 import bot_help
-import gchat_help
 
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True

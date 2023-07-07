@@ -1,5 +1,9 @@
+import sys, os
+# https://github.com/slackapi/bolt-python/blob/main/examples/fastapi/async_app.py
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_dir)
+
 import logging
-import os
 import json
 from webapp import bot_help
 import aiohttp
