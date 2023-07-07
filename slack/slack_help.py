@@ -1,7 +1,8 @@
 import logging
 import os
 import json
-import bot_help
+from webapp import bot_help
+import aiohttp
 
 async def send_to_qa_async(user_input, vector_name, chat_history):
 
@@ -38,7 +39,7 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     bot_mention = f"<@{bot_user}>"
     user_input = user_input.replace(bot_mention, '').strip()
 
-    vector_name = slack_help.get_slack_vector_name(team_id, bot_user)
+    vector_name = get_slack_vector_name(team_id, bot_user)
     if vector_name is None:
         raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
     
