@@ -36,7 +36,7 @@ def pick_llm(vector_name):
     
     if llm_str == 'openai':
         #llm = OpenAI(temperature=0)
-        llm_chat = ChatOpenAI(temperature=0)
+        llm_chat = ChatOpenAI(model="gpt-4", temperature=0)
         llm = llm_chat
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
