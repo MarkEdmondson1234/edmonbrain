@@ -128,7 +128,7 @@ Hi {message.author}
 This Discord is not yet configured to use the bot. \
 Need this info: 
 - bot_id: {bot_mention}
-- guild_id: {message.guild.name}
+- guild_id: Your-Guild-Name
 """)
         return  # exit the event handler
 
