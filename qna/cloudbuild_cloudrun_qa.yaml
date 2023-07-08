@@ -8,7 +8,6 @@ substitutions:
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    secretEnv: ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_KEY", "DB_CONNECTION_STRING", "GIT_PAT"]
     args:
     - '-c'
     - |
@@ -20,12 +19,8 @@ steps:
       RUN pip install --no-cache-dir -r qna/requirements.txt
 
       EXPOSE 8080
-      ENV SUPABASE_URL=$$SUPABASE_URL
-      ENV SUPABASE_KEY=$$SUPABASE_KEY
-      ENV OPENAI_API_KEY=$$OPENAI_API_KEY
       ENV GCS_BUCKET=${_GCS_BUCKET}
-      ENV DB_CONNECTION_STRING=$$DB_CONNECTION_STRING
-      ENV GIT_PAT=$$GIT_PAT
+      ENV UNSTRUCTURED_PARALLEL_MODE_ENABLED=true
 
       RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('bert-base-uncased'); AutoModel.from_pretrained('bert-base-uncased')"
       RUN python -c "from transformers import GPT2TokenizerFast; GPT2TokenizerFast.from_pretrained('gpt2')"
@@ -52,8 +47,16 @@ steps:
            --allow-unauthenticated \
            --memory 2Gi \
            --cpu 1 \
-           --max-instances 2 \
-           --service-account ${_SERVICE_ACCOUNT}
+           --min-instances 0 \
+           --max-instances 3 \
+           --service-account ${_SERVICE_ACCOUNT} \
+           --update-secrets=GIT_PAT=GIT_PAT:latest \
+           --update-secrets=UNSTRUCTURED_KEY=UNSTRUCTURED_KEY:latest \
+           --update-secrets=SUPABASE_URL=SUPABASE_URL:latest \
+           --update-secrets=SUPABASE_KEY=SUPABASE_KEY:latest \
+           --update-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest \
+           --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest \
+           --timeout=25m
 
   # Get service URL
   - name: "gcr.io/cloud-builders/gcloud"
@@ -75,15 +78,4 @@ steps:
         gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
           --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
 
-availableSecrets:
-  secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/OPENAI_API_KEY/versions/latest
-    env: OPENAI_API_KEY
-  - versionName: projects/$PROJECT_ID/secrets/SUPABASE_URL/versions/latest
-    env: SUPABASE_URL
-  - versionName: projects/$PROJECT_ID/secrets/SUPABASE_KEY/versions/latest
-    env: SUPABASE_KEY
-  - versionName: projects/$PROJECT_ID/secrets/DB_CONNECTION_STRING/versions/latest
-    env: DB_CONNECTION_STRING
-  - versionName: projects/$PROJECT_ID/secrets/gitpython_PAT/versions/latest
-    env: GIT_PAT
+
