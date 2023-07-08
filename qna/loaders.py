@@ -13,6 +13,8 @@ import shutil
 from urllib.parse import urlparse, unquote
 import tempfile
 
+UNSTRUCTURED_KEY=os.getenv('UNSTRUCTURED_KEY')
+
 # utility functions
 def convert_to_txt(file_path):
     file_dir, file_name = os.path.split(file_path)
@@ -136,9 +138,16 @@ def read_url_to_document(url: str, metadata: dict = None):
 
 def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = None):
     
+    docs = []
     try:
         logging.info(f"Sending {gs_file} to UnstructuredAPIFileLoader")
-        loader = UnstructuredAPIFileLoader(gs_file, mode="elements", api_key="FAKE_API_KEY")
+        UNSTRUCTURED_URL = os.getenv("UNSTRUCTURED_URL", None)
+        if UNSTRUCTURED_URL is not None:
+            logging.info(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
+            the_endpoint = f"{UNSTRUCTURED_URL}/general/v0/general"
+            loader = UnstructuredAPIFileLoader(gs_file, mode="elements", url=the_endpoint)
+        else:
+            loader = UnstructuredAPIFileLoader(gs_file, mode="elements", api_key=UNSTRUCTURED_KEY)
         
         if split:
             # only supported for some file types
