@@ -50,7 +50,7 @@ steps:
            --min-instances 0 \
            --max-instances 3 \
            --service-account ${_SERVICE_ACCOUNT} \
-           --update-secrets=GIT_PAT=GIT_PAT:latest \
+           --update-secrets=GIT_PAT=gitpython_PAT:latest \
            --update-secrets=UNSTRUCTURED_KEY=UNSTRUCTURED_KEY:latest \
            --update-secrets=SUPABASE_URL=SUPABASE_URL:latest \
            --update-secrets=SUPABASE_KEY=SUPABASE_KEY:latest \
