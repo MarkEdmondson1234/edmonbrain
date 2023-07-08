@@ -3,26 +3,63 @@ from psycopg2.extensions import adapt
 import logging
 import os
 
-def setup_database(vector_name:str, verbose:bool=False):
-    setup_supabase(vector_name, verbose)
+logging.basicConfig(level=logging.INFO)
 
 def setup_supabase(vector_name:str, verbose:bool=False):
-
-    hello = f"Setting up database: {vector_name}"
+    hello = f"Setting up supabase database: {vector_name}"
     logging.debug(hello)
     if verbose:
         print(hello)
+    setup_database(vector_name, verbose)
 
-    vector_size = 1536 # openai
-    if vector_name.endswith('_vertex'):
-        vector_size = 768
-    
-    
-    params = {'vector_name': vector_name, 'vector_size': vector_size}
+def setup_cloudsql(vector_name:str, verbose:bool=False):
+    hello = f"Setting up cloudsql database: {vector_name}"
+    logging.debug(hello)
+    if verbose:
+        print(hello)
+    setup_database(vector_name, verbose)
 
-    execute_sql_from_file("sql/sb/setup.sql", params, verbose=verbose)
-    execute_sql_from_file("sql/sb/create_table.sql", params, verbose=verbose)
-    execute_sql_from_file("sql/sb/create_function.sql", params, verbose=verbose)
+def lookup_connection_env(vector_name:str):
+    from qna.llm import load_config
+    config = load_config("config.json")
+    llm_config = config.get(vector_name, None)
+    if llm_config is None:
+        raise ValueError("No llm_config was found")
+    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    vs_str = llm_config.get("vectorstore", None)
+    if vs_str == "supabase":
+        return "DB_CONNECTION_STRING"
+    elif vs_str == "cloudsql":
+        return "PGVECTOR_CONNECTION_STRING"
+    
+    raise ValueError("Could not find vectorstore for {vs_str}")
+
+
+def get_vector_size(vector_name: str):
+    from qna.llm import load_config
+    config = load_config("config.json")
+    llm_config = config.get(vector_name, None)
+    if llm_config is None:
+        raise ValueError("No llm_config was found")
+    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    llm_str = llm_config.get("llm", None)
+
+    vector_size = 768
+    if llm_str == 'openai':
+        vector_size = 1536 # openai
+
+    logging.info(f'vector size: {vector_size}')
+    return vector_size
+
+def setup_database(vector_name:str, verbose:bool=False):
+
+    connection_env = lookup_connection_env(vector_name)
+    
+    params = {'vector_name': vector_name, 'vector_size': get_vector_size(vector_name)}
+
+    execute_sql_from_file("sql/sb/setup.sql", params, verbose=verbose, connection_env=connection_env)
+    execute_sql_from_file("sql/sb/create_table.sql", params, verbose=verbose, connection_env=connection_env)
+    execute_sql_from_file("sql/sb/create_function.sql", params, verbose=verbose, connection_env=connection_env)
 
     if verbose: print("Ran all setup SQL statements")
     
@@ -30,7 +67,8 @@ def setup_supabase(vector_name:str, verbose:bool=False):
 
 def return_sources_last24(vector_name:str):
     params = {'vector_name': vector_name, 'time_period':'1 day'}
-    return execute_sql_from_file("sql/sb/return_sources.sql", params, return_rows=True)
+    return execute_sql_from_file("sql/sb/return_sources.sql", params, return_rows=True, 
+                                 connection_env=lookup_connection_env(vector_name))
 
 def delete_row_from_source(source: str, vector_name:str):
     # adapt the user input and decode from bytes to string to protect against sql injection
@@ -41,11 +79,15 @@ def delete_row_from_source(source: str, vector_name:str):
         WHERE metadata->>'source' = %(source_delete)s
     """
 
-    do_sql(sql, sql_params=sql_params)
+    do_sql(sql, sql_params=sql_params, connection_env=lookup_connection_env(vector_name))
 
-def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
+def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_env='DB_CONNECTION_STRING'):
+
+    if connection_env is None:
+        raise ValueError("Need to specify connection_env to connect to DB")
+
     rows = []
-    connection_string = os.getenv('DB_CONNECTION_STRING', None)
+    connection_string = os.getenv(connection_env, None)
     if connection_string is None:
         raise ValueError("No connection string")
 
@@ -56,7 +98,8 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
         if verbose:
             logging.info(f"SQL: {sql}")
         else:
-            logging.debug(f"SQL: {sql}")
+           # logging.debug(f"SQL: {sql}")
+           pass
         # execute the SQL - raise the error if already found
         cursor.execute(sql, sql_params)
 
@@ -74,7 +117,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
             print(str(e))
 
     except (Exception, psycopg2.Error) as error:
-        logging.error("Error while connecting to PostgreSQL", exc_info=True)
+        logging.error(f"Error while connecting to PostgreSQL: {str(error)}", exc_info=True)
 
     finally:
         if (connection):
@@ -87,11 +130,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False):
     
     return None
 
-
-def execute_sql_from_file(filename, params, return_rows=False, verbose=False):
-    return execute_supabase_from_file(filename, params, return_rows, verbose=verbose)
-
-def execute_supabase_from_file(filepath, params, return_rows=False, verbose=False):
+def execute_sql_from_file(filepath, params, return_rows=False, verbose=False, connection_env=None):
 
      # Get the directory of this Python script
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -104,7 +143,7 @@ def execute_supabase_from_file(filepath, params, return_rows=False, verbose=Fals
 
     # substitute placeholders in the SQL
     sql = sql.format(**params)
-    rows = do_sql(sql, return_rows=return_rows, verbose=verbose)
+    rows = do_sql(sql, return_rows=return_rows, verbose=verbose, connection_env=connection_env)
     
     if return_rows:
         if rows is None: return None
@@ -114,9 +153,10 @@ def execute_supabase_from_file(filepath, params, return_rows=False, verbose=Fals
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Setup a supabase database",
+    parser = argparse.ArgumentParser(description="Setup a database",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("vectorname", help="The namespace for Supabase vectorstore")
+    parser.add_argument("vectorname", help="The namespace for vectorstore")
+    parser.add_argument("connection_env", help="The connection environment string", default="DB_CONNECTION_STRING")
 
     args = parser.parse_args()
     config = vars(args)
@@ -125,4 +165,5 @@ if __name__ == "__main__":
     if vector_name is None:
         raise ValueError("Must provide a vectorname")
     
-    setup_supabase(vector_name, verbose=True)
+    setup_database(vector_name, verbose=True, connection_env=config.get("connection_env"))
+

@@ -7,14 +7,6 @@ substitutions:
 
 steps:
  # Retrieve the secret
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: Get secret
-    entrypoint: 'bash'
-    args:
-    - '-c'
-    - |
-      gcloud secrets versions access latest --secret=gchat_client --out-file=gchat/client_secrets.json
-
   - name: 'gcr.io/cloud-builders/docker'
     secretEnv: ["DB_CONNECTION_STRING"]
     entrypoint: 'bash'

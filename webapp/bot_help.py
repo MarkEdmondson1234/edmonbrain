@@ -207,16 +207,18 @@ def handle_special_commands(user_input, vector_name, chat_history):
             return {"result": f"*sources:*\n{msg}"}
 
     elif user_input.startswith("!help"):
-        return {"result":f"""* `!sources` - get sources added in last 24hrs
-* `!deletesource [gs:// source]` - delete a source from database
-* `!saveurl [https:// url]` - add the contents found at this URL to database. 
-* `!savethread` - save current Discord thread as a source to database
-* `!help`- see this message
-* Files attached to Discord messages will be added as source to database
-* Add files to a configured Cloud Storage folder to add them via PubSub subscriptions
-* URLs of GoogleDrive work only if shared with *edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com* in your own drive
-* URLs of GitHub (https://github.com/*) work and get the whole repository indexed. For private repositories, the app has a GitHub PAT that will need access
-* Default GitHub branch will be "main" - if you want another indexed use 'branch:master' instead e.g. '!saveurl https://github.com/me/repo branch:master'
+        return {"result":f"""*Commands*
+- `!saveurl [https:// url]` - add the contents found at this URL to database. 
+- `!help`- see this message
+- `!sources` - get sources added in last 24hrs
+- `!deletesource [gs:// source]` - delete a source from database
+*Tips*
+- Add files to bucket folder `gs://gcloud-brain/{vector_name}` to add them via PubSub subscription
+- URLs of GoogleDrive work only if shared with **gcloud-brain-app@gcloud-brain.iam.gserviceaccount.com** in your own drive
+- URLs of GitHub (https://github.com/* branch:main) will git clone and add all repo files. e.g. `!saveurl https://github.com/me/repo branch:master`. 
+- For private GitHub repositories, the app has a GitHub PAT that will need access linked to MarkEdmondson1234 account
+*Slash Commands*
+- `/code` will switch from Vertex model `text-bison` to `code-bison`.
 """}
 
     # If no special commands were found, return None
