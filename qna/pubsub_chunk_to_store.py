@@ -1,17 +1,16 @@
 # imports
-import os
+import traceback
 
 from langchain.docstore.document import Document
 import base64
 import json
 import datetime
 
-from langchain.vectorstores import SupabaseVectorStore
-from supabase import Client, create_client
 from dotenv import load_dotenv
 from langchain.schema import Document
 import logging
 from qna.llm import pick_llm
+from qna.llm import pick_vectorstore
 
 load_dotenv()
 
@@ -54,25 +53,16 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
 
     doc = Document(page_content=page_content, metadata=metadata)
 
-    logging.debug("Initiating Supabase store")
     # init embedding and vector store
-    supabase_url = os.getenv('SUPABASE_URL')
-    supabase_key = os.getenv('SUPABASE_KEY')
+    _, embeddings, _ = pick_llm(vector_name)
+    vector_store = pick_vectorstore(vector_name, embeddings=embeddings)
 
-    logging.info(f"Supabase URL: {supabase_url}")
-
-    llm, embeddings, llm_chat = pick_llm(vector_name)
-
-    supabase: Client = create_client(supabase_url, supabase_key)
-
-    # ensure the supabase sql function and table has been created before using this
-    vector_store = SupabaseVectorStore(supabase, embeddings, 
-                                       table_name=vector_name,
-                                       query_name=f"match_documents_{vector_name}")
-
-    logging.debug("Adding single document to Supabase")
-    vector_store.add_documents([doc])
-
-    logging.info(f"Added doc with metadata: {metadata}")
+    logging.debug("Adding single document to vector store")
+    try:
+        vector_store.add_documents([doc])
+        logging.info(f"Added doc with metadata: {metadata}")
+    except Exception as err:
+        error_message = traceback.format_exc()
+        logging.error(f"Could not add document {doc} to vector store: {str(err)} traceback: {error_message}")
 
     return metadata
