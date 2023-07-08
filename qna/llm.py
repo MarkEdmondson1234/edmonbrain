@@ -94,9 +94,8 @@ def pick_vectorstore(vector_name, embeddings):
         logging.info("Chose Supabase")
     elif vs_str == 'cloudsql':
         from qna.database import setup_cloudsql
-        from qna.pgvector_patch import PGVector
         # needs this merged in https://github.com/hwchase17/langchain/issues/2219
-        #from langchain.vectorstores.pgvector import PGVector
+        from langchain.vectorstores.pgvector import PGVector
 
         logging.info("Inititaing CloudSQL pgvector")
         setup_cloudsql(vector_name)

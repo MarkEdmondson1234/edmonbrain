@@ -1,4 +1,4 @@
-langchain>=0.0.208
+langchain>=0.0.228
 openai
 tiktoken
 requests
