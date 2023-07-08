@@ -1,17 +1,17 @@
-import os, logging
+import logging
+import traceback
 
-from langchain.vectorstores import SupabaseVectorStore
 from qna.llm import pick_llm
+from qna.llm import pick_vectorstore
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
 from langchain.chains import ConversationalRetrievalChain
 from langchain.prompts.prompt import PromptTemplate
 
-from supabase import Client, create_client
 from dotenv import load_dotenv
-from qna.database import setup_supabase
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
@@ -21,21 +21,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     llm, embeddings, llm_chat = pick_llm(vector_name)
 
-    logging.debug(f"Initiating Supabase store: {vector_name}")
-    setup_supabase(vector_name)
-    # init embedding and vector store
-    supabase_url = os.getenv('SUPABASE_URL')
-    supabase_key = os.getenv('SUPABASE_KEY')
-
-
-    logging.info(f"Supabase URL: {supabase_url} vector_name: {vector_name}")
-    
-    supabase: Client = create_client(supabase_url, supabase_key)
-
-    vectorstore = SupabaseVectorStore(supabase, 
-                                      embeddings, 
-                                      table_name=vector_name,
-                                      query_name=f'match_documents_{vector_name}')
+    vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
 
     retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 
@@ -55,7 +41,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
     # File "/usr/local/lib/python3.9/site-packages/langchain/chat_models/vertexai.py", line 136, in _generate
     #response = chat.send_message(question.content, **params)
     # TypeError: send_message() got an unexpected keyword argument 'context'"
-    qa = ConversationalRetrievalChain.from_llm(llm_chat,
+    qa = ConversationalRetrievalChain.from_llm(llm,
                                                retriever=retriever, 
                                                return_source_documents=True,
                                                verbose=True,
@@ -66,6 +52,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
     try:
         result = qa({"question": question, "chat_history": chat_history})
     except Exception as err:
-        result = {"answer": f"An error occurred while asking: {question}: {str(err)}"}
+        error_message = traceback.format_exc()
+        result = {"answer": f"An error occurred while asking: {question}: {str(err)} - {error_message}"}
     
     return result
