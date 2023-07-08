@@ -34,7 +34,7 @@ def pick_llm(vector_name):
 
         #llm = OpenAI(temperature=0)
         llm_chat = ChatOpenAI(model="gpt-4", temperature=0.2, max_tokens=5000)
-        llm = OpenAI(model="gpt-3-turbo", temperature=0)
+        llm = OpenAI(model="gpt-3.5-turbo", temperature=0)
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
