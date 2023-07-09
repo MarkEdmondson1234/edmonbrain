@@ -18,8 +18,6 @@ Discord is good because its a nice UX to use to load and discuss your files:
 
 ![](../img/talk-to-discord.png)
 
-TODO:
-
 * Slackbot
 * GChat
 
