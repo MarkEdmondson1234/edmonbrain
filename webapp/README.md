@@ -40,7 +40,10 @@ These secrets are needed to be available to Cloud Build so it can add them at bu
 * SUPABASE_KEY - for Supabase deployments
 * SUPABASE_URL - the Supabase URL you want to use
 * DB_CONNECTION_STRING - the Supabase postgres connection string if you want it to set up the database for you
-
+* gitpython_PAT - a GitHub PAT if you want !saveurl github links to index whole repo
+* SLACK_SIGNING - if you want Slack bot
+* SLACK_TOKEN - if you want Slack bot
+* UNSTRCUTURED_KEY - if you don't deploy your own Unstrucutred and use public API
 
 
 ### IAM
@@ -52,6 +55,7 @@ e.g. `your-app@your-project.iam.gserviceaccount.com`
 * Pub Sub Editor
 * Storage Admin
 * AI Platform Model User (for vertex)
+* Secret Manager Secret Accessor
 
 ### Run Cloud Build
 
