@@ -8,7 +8,6 @@ substitutions:
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    secretEnv: ["SLACK_SIGNING", "SLACK_TOKEN", "DB_CONNECTION_STRING"]
     args:
     - '-c'
     - |
@@ -20,9 +19,6 @@ steps:
       RUN pip install -r slack/requirements.txt
 
       EXPOSE 8080
-      ENV SLACK_BOT_TOKEN=$$SLACK_TOKEN
-      ENV SLACK_SIGNING_SECRET=$$SLACK_SIGNING
-      ENV DB_CONNECTION_STRING=$$DB_CONNECTION_STRING
 
       CMD exec uvicorn --port \$$PORT --host 0.0.0.0 slack.app:api
 
@@ -49,6 +45,9 @@ steps:
            --cpu 1 \
            --max-instances 2 \
            --service-account ${_SERVICE_ACCOUNT}
+           --update-secrets=SLACK_TOKEN=SLACK_TOKEN:latest \
+           --update-secrets=SLACK_SIGNING=SLACK_SIGNING:latest \
+           --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: get service url for qna
@@ -67,12 +66,3 @@ steps:
       - |
         gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
           --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
-
-availableSecrets:
-  secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/SLACK_TOKEN/versions/latest
-    env: SLACK_TOKEN
-  - versionName: projects/$PROJECT_ID/secrets/SLACK_SIGNING/versions/latest
-    env: SLACK_SIGNING
-  - versionName: projects/$PROJECT_ID/secrets/DB_CONNECTION_STRING/versions/latest
-    env: DB_CONNECTION_STRING

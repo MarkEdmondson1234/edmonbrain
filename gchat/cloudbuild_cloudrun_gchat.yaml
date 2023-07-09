@@ -8,7 +8,6 @@ substitutions:
 steps:
  # Retrieve the secret
   - name: 'gcr.io/cloud-builders/docker'
-    secretEnv: ["DB_CONNECTION_STRING"]
     entrypoint: 'bash'
     args:
     - '-c'
@@ -21,7 +20,6 @@ steps:
       RUN pip install -r gchat/requirements.txt
 
       EXPOSE 8080
-      ENV DB_CONNECTION_STRING=$$DB_CONNECTION_STRING
 
       CMD ["python", "gchat/app.py"]
 
@@ -48,6 +46,7 @@ steps:
            --cpu 1 \
            --max-instances 2 \
            --service-account ${_SERVICE_ACCOUNT}
+           --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: get service url for gchat
@@ -85,7 +84,3 @@ steps:
         gcloud run services update ${_SERVICE_NAME} --region ${_REGION} \
           --update-env-vars=QNA_URL=$(cat service_urlqna.txt)
 
-availableSecrets:
-  secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/DB_CONNECTION_STRING/versions/latest
-    env: DB_CONNECTION_STRING
