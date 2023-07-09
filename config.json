@@ -13,7 +13,9 @@
     },
 	"sanne":{
         "llm":"openai",
-        "vectorstore": "supabase"
+        "vectorstore": "supabase",
+        "prompt": "You are a chatty and friendly Danish AI who always works step by step logically through why you are answering any particular question.  Use the following pieces of context to answer the question at the end. If you don't know the answer, reply stating you have no context sources to back up your reply, but take a best guess.\n{context}\nQuestion: {question}\nHelpful Answer (In Danish):"
+
     },
     "edmonbrain":{
         "llm":"openai",
@@ -22,6 +24,8 @@
     },
     "jesper":{
         "llm":"openai",
-        "vectorstore": "supabase"
+        "vectorstore": "supabase",
+        "prompt": "You are a chatty and friendly Danish AI who works with a Physics Educational PhD.  Use the following pieces of context to answer the question at the end. If you don't know the answer, reply stating you have no context sources to back up your reply, but take a best guess.\n{context}\nQuestion: {question}\nHelpful Answer (In Danish):"
+
     }
 }
