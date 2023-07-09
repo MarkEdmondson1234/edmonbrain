@@ -45,7 +45,7 @@ steps:
            --memory 2Gi \
            --cpu 1 \
            --max-instances 2 \
-           --service-account ${_SERVICE_ACCOUNT}
+           --service-account ${_SERVICE_ACCOUNT} \
            --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest
 
   - name: "gcr.io/cloud-builders/gcloud"
