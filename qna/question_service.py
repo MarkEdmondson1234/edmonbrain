@@ -3,17 +3,13 @@ import traceback
 
 from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
+from qna.llm import pick_prompt
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
 from langchain.chains import ConversationalRetrievalChain
-from langchain.prompts.prompt import PromptTemplate
-
-from dotenv import load_dotenv
 
 #logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.INFO)
-
-load_dotenv()
 
 def qna(question: str, vector_name: str, chat_history=[]):
 
@@ -25,28 +21,14 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 
-    prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.
+    prompt = pick_prompt(vector_name)
 
-    {context}
-
-    Question: {question}
-    Helpful Answer:"""
-
-    QA_PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
-
-    # how to add custom prompt?
-    # llm_chat does not work with combine_docs_chain_kwargs: 
-    # File "/usr/local/lib/python3.9/site-packages/langchain/chat_models/vertexai.py", line 136, in _generate
-    #response = chat.send_message(question.content, **params)
-    # TypeError: send_message() got an unexpected keyword argument 'context'"
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                return_source_documents=True,
                                                verbose=True,
                                                output_key='answer',
-                                               combine_docs_chain_kwargs={'prompt': QA_PROMPT},
+                                               combine_docs_chain_kwargs={'prompt': prompt},
                                                condense_question_llm=llm)
 
     try:

@@ -1,6 +1,6 @@
 import os, json
 import logging
-
+from langchain.prompts.prompt import PromptTemplate
 
 def load_config(filename):
     logging.debug("Loading config for llm")
@@ -120,3 +120,35 @@ def pick_vectorstore(vector_name, embeddings):
         raise NotImplementedError(f'No llm implemented for {vs_str}')   
 
     return vectorstore
+
+def pick_prompt(vector_name):
+    """Pick a custom prompt"""
+    logging.debug('Picking prompt')
+    # located in the parent directory e.g. config.json, qna/llm.py
+    config = load_config("config.json")
+    llm_config = config.get(vector_name, None)
+    if llm_config is None:
+        raise ValueError("No llm_config was found")
+    prompt_str = llm_config.get("prompt", None)
+    if prompt_str is None:
+        # default
+        prompt_template = """Use the following pieces of context to answer the question at the end.
+If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.
+
+        {context}
+
+        Question: {question}
+        Helpful Answer:"""
+
+    else:
+        prompt_template = prompt_str
+        if "{context}" not in prompt_str:
+            raise ValueError("prompt must contain a string '{context}'")
+        if "{question}" not in prompt_str:
+            raise ValueError("prompt must contain a string '{question}'")
+    
+    QA_PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    return QA_PROMPT
