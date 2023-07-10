@@ -29,7 +29,7 @@ dependencies = [
     "google-cloud-aiplatform",
     "google-generativeai",
     "python-dotenv",
-    "langchain>=0.0.195",
+    "langchain==0.0.228",
     "google-cloud-aiplatform>=1.26.0",
     "discord",
     "aiohttp",
@@ -41,3 +41,6 @@ license = {text = "MIT"}
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.pdm.scripts]
+debug = "debugger.py"

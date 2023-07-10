@@ -255,15 +255,15 @@ dependencies = [
 
 [[package]]
 name = "discord"
-version = "2.3.0"
+version = "2.3.1"
 summary = "A mirror package for discord.py. Please install that instead."
 dependencies = [
-    "discord-py>=2.3.0",
+    "discord-py>=2.3.1",
 ]
 
 [[package]]
 name = "discord-py"
-version = "2.3.0"
+version = "2.3.1"
 requires_python = ">=3.8.0"
 summary = "A Python wrapper for the Discord API"
 dependencies = [
@@ -428,7 +428,7 @@ dependencies = [
 
 [[package]]
 name = "google-api-python-client"
-version = "2.90.0"
+version = "2.92.0"
 requires_python = ">=3.7"
 summary = "Google API Client Library for Python"
 dependencies = [
@@ -441,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "google-auth"
-version = "2.20.0"
+version = "2.21.0"
 requires_python = ">=3.6"
 summary = "Google Authentication Library"
 dependencies = [
@@ -474,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "google-cloud-aiplatform"
-version = "1.26.0"
+version = "1.27.1"
 requires_python = ">=3.7"
 summary = "Vertex AI API client library"
 dependencies = [
@@ -490,7 +490,7 @@ dependencies = [
 
 [[package]]
 name = "google-cloud-bigquery"
-version = "3.11.1"
+version = "3.11.3"
 requires_python = ">=3.7"
 summary = "Google BigQuery API client library"
 dependencies = [
@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "google-cloud-storage"
-version = "2.9.0"
+version = "2.10.0"
 requires_python = ">=3.7"
 summary = "Google Cloud Storage API client library"
 dependencies = [
@@ -819,7 +819,7 @@ summary = "A fast implementation of the Cassowary constraint solver"
 
 [[package]]
 name = "langchain"
-version = "0.0.208"
+version = "0.0.228"
 requires_python = ">=3.8.1,<4.0"
 summary = "Building applications with LLMs through composability"
 dependencies = [
@@ -828,7 +828,7 @@ dependencies = [
     "aiohttp<4.0.0,>=3.8.3",
     "async-timeout<5.0.0,>=4.0.0; python_version < \"3.11\"",
     "dataclasses-json<0.6.0,>=0.5.7",
-    "langchainplus-sdk>=0.0.13",
+    "langchainplus-sdk<0.0.21,>=0.0.20",
     "numexpr<3.0.0,>=2.8.4",
     "numpy<2,>=1",
     "openapi-schema-pydantic<2.0,>=1.2",
@@ -839,9 +839,9 @@ dependencies = [
 
 [[package]]
 name = "langchainplus-sdk"
-version = "0.0.16"
+version = "0.0.20"
 requires_python = ">=3.8.1,<4.0"
-summary = "Client library to connect to the LangChainPlus LLM Tracing and Evaluation Platform."
+summary = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 dependencies = [
     "pydantic<2,>=1",
     "requests<3,>=2",
@@ -1761,7 +1761,7 @@ dependencies = [
 
 [[package]]
 name = "unstructured"
-version = "0.7.7"
+version = "0.8.0"
 requires_python = ">=3.7.0"
 summary = "A library that prepares raw documents for downstream ML tasks."
 dependencies = [
@@ -1788,7 +1788,7 @@ dependencies = [
 
 [[package]]
 name = "unstructured-inference"
-version = "0.5.1"
+version = "0.5.5"
 requires_python = ">=3.7.0"
 summary = "A library for performing inference using trained models."
 dependencies = [
@@ -1802,13 +1802,13 @@ dependencies = [
 
 [[package]]
 name = "unstructured"
-version = "0.7.7"
+version = "0.8.0"
 extras = ["local-inference"]
 requires_python = ">=3.7.0"
 summary = "A library that prepares raw documents for downstream ML tasks."
 dependencies = [
-    "unstructured-inference==0.5.1",
-    "unstructured==0.7.7",
+    "unstructured-inference==0.5.5",
+    "unstructured==0.8.0",
 ]
 
 [[package]]
@@ -1943,7 +1943,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4303f399"
+content_hash = "sha256:f581d6a351609f0c85db5e90ba4d74d108449342462ee58de241d1de4657fc60"
 
 [metadata.files]
 "aiohttp 3.8.4" = [
@@ -2394,13 +2394,13 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/02/c3/253a89ee03fc9b9682f1541728eb66db7db22148cd94f89ab22528cd1e1b/deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"},
     {url = "https://files.pythonhosted.org/packages/5a/d3/8ae2869247df154b64c1884d7346d412fed0c49df84db635aab2d1c40e62/deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff"},
 ]
-"discord 2.3.0" = [
-    {url = "https://files.pythonhosted.org/packages/31/f4/9d3a1c1c675164e4bf14beb4f0433ba4cc54351179c90359b5fb81ff30d8/discord-2.3.0.tar.gz", hash = "sha256:e20b9af97a91d321d09aad7bbeb45ad6c50a2784bdd739d1d7be480baf96b905"},
-    {url = "https://files.pythonhosted.org/packages/85/16/b07f057dc179019787cf27726cc3779fe82b2f6d94863312f06e3ddf7a52/discord-2.3.0-py3-none-any.whl", hash = "sha256:c48db74a1eb0dd9ffc6cd7fe25a90bbc8f0ad8bde8211d898dc89c6d88d08836"},
+"discord 2.3.1" = [
+    {url = "https://files.pythonhosted.org/packages/63/10/b5c31ebcccca0e9d69bea5655abfff70d67bf9d92975ec3a1ea19a182a5f/discord-2.3.1-py3-none-any.whl", hash = "sha256:6bce94c14019e62baf1d3426603ed388e564a1d6f2239404ea42d172181083b3"},
+    {url = "https://files.pythonhosted.org/packages/76/3f/f45716e310fe0e1144706706442a990e99d9052c5c92a92e0be2e0d02c34/discord-2.3.1.tar.gz", hash = "sha256:c180bea8f0db059b3cdd8008d6de88d9fce4283d6301cb2c9f395b5150138c32"},
 ]
-"discord-py 2.3.0" = [
-    {url = "https://files.pythonhosted.org/packages/c5/e5/24ff387ee96bb6ccfa6ef6b8e2e6a829389e2b1231210dad42744104c446/discord.py-2.3.0.tar.gz", hash = "sha256:c71066a30f037d069218e59092505c3e8945fd175e396a80748056d989756806"},
-    {url = "https://files.pythonhosted.org/packages/d3/d6/97c2b62b0c1bbb730c982ad7618f6ddb569d1ac71ed9a62bd9d52df66da2/discord.py-2.3.0-py3-none-any.whl", hash = "sha256:3e9498967822ad4499f8f72deb9173f942d9827d92b6e4e4e7732d24f78f300c"},
+"discord-py 2.3.1" = [
+    {url = "https://files.pythonhosted.org/packages/b5/78/241e04365a7dd8456f9b9e7db60c6e672a154d6683831aba03c3cda62756/discord.py-2.3.1-py3-none-any.whl", hash = "sha256:149652f24da299706270bf8c03c2fcf80cf1caf3a480744c61d5b001688b380d"},
+    {url = "https://files.pythonhosted.org/packages/e8/7a/ca123a290022dc94aba41f8165be66d7b7da2fa775e06310e562bcc3ad89/discord.py-2.3.1.tar.gz", hash = "sha256:8eb4fe66b5d503da6de3a8425e23012711dc2fbcd7a782107a92beac15ee3459"},
 ]
 "docutils 0.20.1" = [
     {url = "https://files.pythonhosted.org/packages/1f/53/a5da4f2c5739cf66290fac1431ee52aff6851c7c8ffd8264f13affd7bcdd/docutils-0.20.1.tar.gz", hash = "sha256:f08a4e276c3a1583a86dce3e34aba3fe04d02bba2dd51ed16106244e8a923e3b"},
@@ -2628,13 +2628,13 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/6e/c4/c3cd048b6cbeba8d9ae50dd7643ac065b85237338aa7501b0efae91eb4d9/google_api_core-2.11.1-py3-none-any.whl", hash = "sha256:d92a5a92dc36dd4f4b9ee4e55528a90e432b059f93aee6ad857f9de8cc7ae94a"},
     {url = "https://files.pythonhosted.org/packages/f3/b8/f727ada5b63aba53848e3791dd57be7481d5c9bf86978600ca9cca4ab03e/google-api-core-2.11.1.tar.gz", hash = "sha256:25d29e05a0058ed5f19c61c0a78b1b53adea4d9364b464d014fbda941f6d1c9a"},
 ]
-"google-api-python-client 2.90.0" = [
-    {url = "https://files.pythonhosted.org/packages/35/8b/d990f947c261304a5c1599d45717d02c27d46af5f23e1fee5dc19c8fa79d/google-api-python-client-2.90.0.tar.gz", hash = "sha256:cbcb3ba8be37c6806676a49df16ac412077e5e5dc7fa967941eff977b31fba03"},
-    {url = "https://files.pythonhosted.org/packages/39/03/209b5c36a621ae644dc7d4743746cd3b38b18e133f8779ecaf6b95cc01ce/google_api_python_client-2.90.0-py2.py3-none-any.whl", hash = "sha256:4a41ffb7797d4f28e44635fb1e7076240b741c6493e7c3233c0e4421cec7c913"},
+"google-api-python-client 2.92.0" = [
+    {url = "https://files.pythonhosted.org/packages/38/12/9fd32d6a04818e1d3d6ad5c8c2db8e7ad0087d6a251a5a9e78920b3f7079/google-api-python-client-2.92.0.tar.gz", hash = "sha256:f38a6e106a7417719715506d36f0a233ec253335e422bda311352866a86c4187"},
+    {url = "https://files.pythonhosted.org/packages/c2/ee/93cb6960136e312b5752bf8338d764b702a8202853c8ad21127ee8b0b760/google_api_python_client-2.92.0-py2.py3-none-any.whl", hash = "sha256:e0b74ed5fa9bdb07a66fb030d3f4cae550ed1c07e23600d86450d3c3c5efae51"},
 ]
-"google-auth 2.20.0" = [
-    {url = "https://files.pythonhosted.org/packages/4b/e0/d2c96098280f17eb626d4da0b7e553b8e5648d57514c8cefec851c16920c/google-auth-2.20.0.tar.gz", hash = "sha256:030af34138909ccde0fbce611afc178f1d65d32fbff281f25738b1fe1c6f3eaa"},
-    {url = "https://files.pythonhosted.org/packages/9a/1a/5866a7c6e16abc1df395e6d2b9808984d0905c747d75f5e20f1a052421d1/google_auth-2.20.0-py2.py3-none-any.whl", hash = "sha256:23b7b0950fcda519bfb6692bf0d5289d2ea49fc143717cc7188458ec620e63fa"},
+"google-auth 2.21.0" = [
+    {url = "https://files.pythonhosted.org/packages/0d/77/4737ca3b929e95df9234827f7ddcf66199df2d96057ba9a98168957de7fa/google_auth-2.21.0-py2.py3-none-any.whl", hash = "sha256:da3f18d074fa0f5a7061d99b9af8cee3aa6189c987af7c1b07d94566b6b11268"},
+    {url = "https://files.pythonhosted.org/packages/e6/76/2217d47be6a03dfd5f6bfe7432f87a5aa5ab6d85525a4dc546df9895f053/google-auth-2.21.0.tar.gz", hash = "sha256:b28e8048e57727e7cf0e5bd8e7276b212aef476654a09511354aa82753b45c66"},
 ]
 "google-auth-httplib2 0.1.0" = [
     {url = "https://files.pythonhosted.org/packages/ba/db/721e2f3f32339080153995d16e46edc3a7657251f167ddcb9327e632783b/google_auth_httplib2-0.1.0-py2.py3-none-any.whl", hash = "sha256:31e49c36c6b5643b57e82617cb3e021e3e1d2df9da63af67252c02fa9c1f4a10"},
@@ -2644,13 +2644,13 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/4a/07/8d9a8186e6768b55dfffeb57c719bc03770cf8a970a074616ae6f9e26a57/google_auth_oauthlib-1.0.0-py2.py3-none-any.whl", hash = "sha256:95880ca704928c300f48194d1770cf5b1462835b6e49db61445a520f793fd5fb"},
     {url = "https://files.pythonhosted.org/packages/e3/b4/ef2170c5f6aa5bc2461bab959a84e56d2819ce26662b50038d2d0602223e/google-auth-oauthlib-1.0.0.tar.gz", hash = "sha256:e375064964820b47221a7e1b7ee1fd77051b6323c3f9e3e19785f78ab67ecfc5"},
 ]
-"google-cloud-aiplatform 1.26.0" = [
-    {url = "https://files.pythonhosted.org/packages/45/88/16fc4e88171d30b1f357ef41c51d3bfafd00e6da2bf223473982fad0bb3a/google-cloud-aiplatform-1.26.0.tar.gz", hash = "sha256:5314289acf732e02b92af61d473817e598ed57e66bc88923816eb96426fd2957"},
-    {url = "https://files.pythonhosted.org/packages/53/c6/a740451148b41f38eb9c6a948a17e69febcbcf7b2f5671acfbcd26c54f10/google_cloud_aiplatform-1.26.0-py2.py3-none-any.whl", hash = "sha256:31de5152847cbaf094e4f635850d229adfd3fd0b1f1bb1436491f1a7d23fbc8b"},
+"google-cloud-aiplatform 1.27.1" = [
+    {url = "https://files.pythonhosted.org/packages/15/86/29705df54b1ee3ea7585d793482ee54bb0bbcbab72bc1734c87809335f9f/google_cloud_aiplatform-1.27.1-py2.py3-none-any.whl", hash = "sha256:0a80caf50174b06e56c0a3a491f376f8a1a34daa8792abb3479a551b69085f04"},
+    {url = "https://files.pythonhosted.org/packages/65/2e/d73e92b03023de7ddb7b64ae544b10f84377d0b41a4c2b848f49c829c61b/google-cloud-aiplatform-1.27.1.tar.gz", hash = "sha256:0af02c921681d12a6769f29a15d6c2decefcf783ad9e64424a18c91c6b615acb"},
 ]
-"google-cloud-bigquery 3.11.1" = [
-    {url = "https://files.pythonhosted.org/packages/42/aa/e6d0563c5e9a0917848e933b693890a72410d1db996961cf25c335fccebb/google_cloud_bigquery-3.11.1-py2.py3-none-any.whl", hash = "sha256:738ae717f26bd7567f826f29f65be266f49bc3db0b069ac6030894fd8895ed6f"},
-    {url = "https://files.pythonhosted.org/packages/4f/85/900c43c973830b3f911bdcdf1f508dc9a59a9e43521c8d32050f725b4e01/google-cloud-bigquery-3.11.1.tar.gz", hash = "sha256:cfe1158bc5818276ba765959da8a27afdcdaa11fa3fa9eed097d5639297dfe74"},
+"google-cloud-bigquery 3.11.3" = [
+    {url = "https://files.pythonhosted.org/packages/3c/8b/27222eb7bbb0cc38a91b67eeedb2a40e319488004c4d97ac4cb49a56e0ee/google-cloud-bigquery-3.11.3.tar.gz", hash = "sha256:d4585be9e76c984ec83ef290ebeff17562d2c9f2f4f84d3015d9b7b27b499a9d"},
+    {url = "https://files.pythonhosted.org/packages/8e/74/7150922507507e3a802e83585b1ebba918243e4d83e194abebbed6dd9611/google_cloud_bigquery-3.11.3-py2.py3-none-any.whl", hash = "sha256:266ba1ddd213b2454c1e4a92ae647813b783128078eb48dda4c0b443c5057e29"},
 ]
 "google-cloud-core 2.3.2" = [
     {url = "https://files.pythonhosted.org/packages/40/4b/f4cebb92fe965f02f4a9c06f16355cf83a61a2d5db110df9af71191c830a/google-cloud-core-2.3.2.tar.gz", hash = "sha256:b9529ee7047fd8d4bf4a2182de619154240df17fbe60ead399078c1ae152af9a"},
@@ -2664,9 +2664,9 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/18/e8/600cdd5321e6f76c86162aee083756b4b5f77cf0894dc9de059aca4656bd/google_cloud_resource_manager-1.10.1-py2.py3-none-any.whl", hash = "sha256:41a2204532f084c707fde0bc1a9bc95c7e0b739d7072dd0b8a25106667a56184"},
     {url = "https://files.pythonhosted.org/packages/f7/d6/5ccc9c5dedcff829986153d366a830b101edae3aad0f112af06afd87bddd/google-cloud-resource-manager-1.10.1.tar.gz", hash = "sha256:c974fb6f9810476cf7b63ea89394c1a8df47f7f2dc2303e728bb74b500bcde67"},
 ]
-"google-cloud-storage 2.9.0" = [
-    {url = "https://files.pythonhosted.org/packages/74/fb/3770e7f44cf6133f502e1b8503b6739351b53272cf8313b47f1de6cf4960/google_cloud_storage-2.9.0-py2.py3-none-any.whl", hash = "sha256:83a90447f23d5edd045e0037982c270302e3aeb45fc1288d2c2ca713d27bad94"},
-    {url = "https://files.pythonhosted.org/packages/fc/50/c9998f84fd8ce8799d7f8020466bbc5c9e3b1126b04a09fdb02378d451b0/google-cloud-storage-2.9.0.tar.gz", hash = "sha256:9b6ae7b509fc294bdacb84d0f3ea8e20e2c54a8b4bbe39c5707635fec214eff3"},
+"google-cloud-storage 2.10.0" = [
+    {url = "https://files.pythonhosted.org/packages/6b/20/51e9676cc112ec7344c0a8690361175dc1f41ed6edf618eae8af87d92a49/google-cloud-storage-2.10.0.tar.gz", hash = "sha256:934b31ead5f3994e5360f9ff5750982c5b6b11604dc072bc452c25965e076dc7"},
+    {url = "https://files.pythonhosted.org/packages/88/14/c9d4faae7ea4bff4405152cbc762b61100aa6949273b4eb3203d23308670/google_cloud_storage-2.10.0-py2.py3-none-any.whl", hash = "sha256:9433cf28801671de1c80434238fb1e7e4a1ba3087470e90f70c928ea77c2b9d7"},
 ]
 "google-crc32c 1.5.0" = [
     {url = "https://files.pythonhosted.org/packages/02/94/d2ea867760d5a27b3e9eb40ff31faf7f03f949e51d4e3b3ae24f759b5963/google_crc32c-1.5.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:72218785ce41b9cfd2fc1d6a017dc1ff7acfc4c17d01053265c41a2c0cc39b8c"},
@@ -3053,13 +3053,13 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/f6/e8/194a4b4eee0990a648711bfb769a7110d10fd8d8b370a0464cb3d1060381/kiwisolver-1.4.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:70e7c2e7b750585569564e2e5ca9845acfaa5da56ac46df68414f29fea97be9f"},
     {url = "https://files.pythonhosted.org/packages/f8/f4/724d454e95c7e9be6a05f1da3fb85251b5dbb8c3b7d06bdc61d56b16035a/kiwisolver-1.4.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:36dafec3d6d6088d34e2de6b85f9d8e2324eb734162fba59d2ba9ed7a2043d5b"},
 ]
-"langchain 0.0.208" = [
-    {url = "https://files.pythonhosted.org/packages/9e/1c/ec4295280a03d4db857650787324287b67d41990551beafbeb71c79f6bdf/langchain-0.0.208-py3-none-any.whl", hash = "sha256:c654c507dd60a6ac3d8b4c199b7c0dbc638d92a940900f6e1bf045abd400a23a"},
-    {url = "https://files.pythonhosted.org/packages/a3/f2/cf4768b6c357dd2fbc137c06bb191c7a2ebdba750b6416cab9d4173a3ff8/langchain-0.0.208.tar.gz", hash = "sha256:8eb709d31379bcf4d7e5d1c5f92e62324aac47801efe60ce12e5b99d7bf5cd9b"},
+"langchain 0.0.228" = [
+    {url = "https://files.pythonhosted.org/packages/5d/a4/2c9f1c5e569fe0c322daf4198fa7dbc0ea717838cccb767d5bca8578aeb1/langchain-0.0.228-py3-none-any.whl", hash = "sha256:04b23dbda35d89b6080bbaf21d544e49a57fef6c06a1324b05bbda8be753ac61"},
+    {url = "https://files.pythonhosted.org/packages/cb/15/7aca753cc5981061a34267b7b12624b1abfe3557eff9d772739a42adc885/langchain-0.0.228.tar.gz", hash = "sha256:2f46046b6cd7f33bb7dbfef6e8b6f1bb7716af09f0420f47b51d4a690554ce88"},
 ]
-"langchainplus-sdk 0.0.16" = [
-    {url = "https://files.pythonhosted.org/packages/30/a7/13c4e0ac0a0c35accd18b4ab3e4a22fb0537ed540918c62222a55834a409/langchainplus_sdk-0.0.16-py3-none-any.whl", hash = "sha256:2894e8ca1bbd41404925c3916099cd31ccea74e558a311c9aad67e02bcfa5ef8"},
-    {url = "https://files.pythonhosted.org/packages/95/dd/b2ad7d094db683a3bf9be997eb103effccac4eddc5ef0790aa8338cca7d3/langchainplus_sdk-0.0.16.tar.gz", hash = "sha256:2fc067dd038edcf18086d342da2c690984c4d37f9bfa684ffccaea34b43edb28"},
+"langchainplus-sdk 0.0.20" = [
+    {url = "https://files.pythonhosted.org/packages/85/b3/c8d9f825579038080691a61f42bbafe6c914b67733097a310979f5b5db28/langchainplus_sdk-0.0.20.tar.gz", hash = "sha256:3d300e2e3290f68cc9d842c059f9458deba60e776c9e790309688cad1bfbb219"},
+    {url = "https://files.pythonhosted.org/packages/ef/93/22f2d584ffa0281d51fcd8500f7c807879610ac97851f7d8eb0458165373/langchainplus_sdk-0.0.20-py3-none-any.whl", hash = "sha256:07a869d476755803aa04c4986ce78d00c2fe4ff584c0eaa57d7570c9664188db"},
 ]
 "layoutparser 0.3.4" = [
     {url = "https://files.pythonhosted.org/packages/08/cf/0bfbea1b2ace91af45e15bdec885e05992dc9150907a8398b3d305eddfd2/layoutparser-0.3.4-py3-none-any.whl", hash = "sha256:269aedfab8a0caa50aef8d0fa62740fbee1f2964880daae3a0e6a0415363126a"},
@@ -4412,13 +4412,13 @@ content_hash = "sha256:8851f3fef1cf7464def37cb6aed7a9ead070b7fd99d19ca41671ed5d4
     {url = "https://files.pythonhosted.org/packages/65/f3/107a22063bf27bdccf2024833d3445f4eea42b2e598abfbd46f6a63b6cb0/typing_inspect-0.9.0-py3-none-any.whl", hash = "sha256:9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f"},
     {url = "https://files.pythonhosted.org/packages/dc/74/1789779d91f1961fa9438e9a8710cdae6bd138c80d7303996933d117264a/typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78"},
 ]
-"unstructured 0.7.7" = [
-    {url = "https://files.pythonhosted.org/packages/14/3c/ee4d2d8fba9103c1be1e81a8ef24bd893d13bee4930b727a432bc3fd0874/unstructured-0.7.7-py3-none-any.whl", hash = "sha256:1bf9e6b6b4037d796f2ab3c3532508b6f21707dad3c0644e0d8e4f614fe62fdf"},
-    {url = "https://files.pythonhosted.org/packages/ad/ec/a6a98ab953cad2f59f92f2f5a01c2cd70dfdbab11bc58584031e44e35e9a/unstructured-0.7.7.tar.gz", hash = "sha256:1261770e472ea2b1372c40d7b9288ea926ef304ca9d7563d5563210bcf5b5289"},
+"unstructured 0.8.0" = [
+    {url = "https://files.pythonhosted.org/packages/a7/5e/db471a0137e7d8d42ab578dadd511b039d3ab8eaa209f3ce249d728e9bf7/unstructured-0.8.0.tar.gz", hash = "sha256:528b9140ef56bee3f7eabd23e7203f3f6890c1a72188d640985f86a3f842c565"},
+    {url = "https://files.pythonhosted.org/packages/bb/2f/9c71dc1d2a7dc0710285425186b6bd740a3aa6eae73ca7ee7ea688bf117c/unstructured-0.8.0-py3-none-any.whl", hash = "sha256:d6f574327f6b371f8bbe8d2c6861d8b40114ead9b920054c3601449ec72c3e42"},
 ]
-"unstructured-inference 0.5.1" = [
-    {url = "https://files.pythonhosted.org/packages/52/c3/9c98604a0d78fb95accd73b81984e97897d731c7a2894137ed1a2ab970ee/unstructured_inference-0.5.1-py3-none-any.whl", hash = "sha256:9eee037b178677dc95fb47c24cf71c989f33a9583fe0bae80921c24cbf96ef82"},
-    {url = "https://files.pythonhosted.org/packages/5e/9b/fdd0a73d4563207976dc6dac706f903846b84e6a3278f794e35d3af29bd5/unstructured_inference-0.5.1.tar.gz", hash = "sha256:58ea55cd90d9300d904550f1b599b32986b71231f55b6a4fa77692e74c16aec2"},
+"unstructured-inference 0.5.5" = [
+    {url = "https://files.pythonhosted.org/packages/55/17/f5dc6131de7b2732d646e15efedfa9023f70e359120f193649f61ce2b8df/unstructured_inference-0.5.5-py3-none-any.whl", hash = "sha256:fff5a9997c9376245d5edd0c372bfbc74ffe6058c9e596f319be1aa9b710ff7a"},
+    {url = "https://files.pythonhosted.org/packages/5b/83/98e64e7b7aec84c90e4a6a23bff53740b7e6777823a531df1d364eeec03a/unstructured_inference-0.5.5.tar.gz", hash = "sha256:3dcc5f31ae1e652ef502428df92a8d09130422e176b25cdd0be0baf44ee056d8"},
 ]
 "uritemplate 4.1.1" = [
     {url = "https://files.pythonhosted.org/packages/81/c0/7461b49cd25aeece13766f02ee576d1db528f1c37ce69aee300e075b485b/uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
