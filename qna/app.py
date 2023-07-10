@@ -51,13 +51,14 @@ def is_ai(message):
 def extract_chat_history(chat_history=None):
     
     if chat_history:
+        logging.info(f"Got chat history: {chat_history}")
         # Separate the messages into human and AI messages
         human_messages = [create_message_element(message) for message in chat_history if is_human(message)]
         ai_messages = [create_message_element(message) for message in chat_history if is_ai(message)]
         # Pair up the human and AI messages into tuples
         paired_messages = list(zip(human_messages, ai_messages))
     else:
-        print("No chat history found")
+        logging.info("No chat history found")
         paired_messages = []
 
     return paired_messages
@@ -66,7 +67,10 @@ def extract_chat_history(chat_history=None):
 @app.route('/qna/<vector_name>', methods=['POST'])
 def process_qna(vector_name):
     data = request.get_json()
+    logging.info(f"qna/{vector_name} got data: {data}")
+
     user_input = data['user_input']
+
     paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'QNA got: {user_input}')
     logging.info(f'QNA got chat_history: {paired_messages}')
