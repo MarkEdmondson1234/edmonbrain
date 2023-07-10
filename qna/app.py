@@ -105,6 +105,8 @@ def pubsub_to_store(vector_name):
 
         try:
             meta = pbembed.data_to_embed_pubsub(data, vector_name)
+            if meta is None:
+                return jsonify({'status': 'ok', 'message': 'No action required'}), 201
             file_uploaded = str(meta.get("source", "Could not find a source"))
             return jsonify({'status': 'Success', 'source': file_uploaded}), 200
         except Exception as err:
