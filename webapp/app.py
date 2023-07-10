@@ -72,7 +72,8 @@ def discord_message(vector_name):
     if command_response is not None:
         return jsonify(command_response)
 
-    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=paired_messages)
+    # send chat_history not paid_messages
+    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=chat_history)
     logging.info(f"bot_output: {bot_output}")
     
     discord_output = bot_help.generate_discord_output(bot_output)
