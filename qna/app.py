@@ -49,14 +49,23 @@ def is_ai(message):
         return 'bot_id' in message  # Slack
 
 def extract_chat_history(chat_history=None):
-    
+
     if chat_history:
         logging.info(f"Got chat history: {chat_history}")
-        # Separate the messages into human and AI messages
-        human_messages = [create_message_element(message) for message in chat_history if is_human(message)]
-        ai_messages = [create_message_element(message) for message in chat_history if is_ai(message)]
-        # Pair up the human and AI messages into tuples
-        paired_messages = list(zip(human_messages, ai_messages))
+
+        # Initialize variables to hold the last AI message and the list of paired messages
+        last_ai_message = None
+        paired_messages = []
+
+        for message in chat_history:
+            # If the message is from the AI, update the last AI message
+            if is_ai(message):
+                last_ai_message = create_message_element(message)
+            # If the message is from a human, pair it with the last AI message (if any)
+            elif is_human(message):
+                human_message = create_message_element(message)
+                paired_messages.append((human_message, last_ai_message))
+
     else:
         logging.info("No chat history found")
         paired_messages = []

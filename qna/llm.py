@@ -146,10 +146,11 @@ If you don't know the answer, reply stating you have no context sources to back 
         raise ValueError("prompt must not contain a string '{context}'")
     if "{question}" in prompt_str:
         raise ValueError("prompt must not contain a string '{question}'")
-    add_history =get_chat_history(chat_history)
-    add_history = add_history[:1000] # max 1000 in history
+    
+    add_history = get_chat_history(chat_history)
+    add_history = add_history[:2000] # max 1000 in history
 
-    business_end = """\nContext:\n{context}\nQuestion: {question}\nHelpful Answer:"""
+    business_end = """\n## Context\n{context}\n## Question\n {question}\n## Helpful Answer:\n"""
 
     prompt_template = prompt_str + "\nHistory:\n" + add_history + business_end
     
