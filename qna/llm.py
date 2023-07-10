@@ -138,9 +138,13 @@ def pick_prompt(vector_name, chat_history=[]):
     prompt_str = llm_config.get("prompt", None)
     if prompt_str is None:
         # default
-        prompt_str = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.
+        prompt_str_default = """Use the following memories to answer the question at the end.
+Favour short-term memories but be influenced by the long-term memories.
+If the memories don't help with your answer, just use them to set the tone and style of your response.
+Indicate in your speech how certain you are about your answers, whether you are sure or just taking a best guess.
 """
+    else:
+        prompt_str_default = prompt_str_default + "\n" + prompt_str
 
     if "{context}" in prompt_str:
         raise ValueError("prompt must not contain a string '{context}'")
@@ -150,9 +154,9 @@ If you don't know the answer, reply stating you have no context sources to back 
     add_history = get_chat_history(chat_history)
     add_history = add_history[:2000] # max 1000 in history
 
-    business_end = """\n## Context\n{context}\n## Question\n {question}\n## Helpful Answer:\n"""
+    business_end = """\n## Long-term memories\n{context}\n## Question\n {question}\n## Your response:\n"""
 
-    prompt_template = prompt_str + "\nHistory:\n" + add_history + business_end
+    prompt_template = prompt_str + "\nShort-term memories:\n" + add_history + business_end
     
     logging.info(f"Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
