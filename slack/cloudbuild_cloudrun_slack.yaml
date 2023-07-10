@@ -44,7 +44,7 @@ steps:
            --memory 2Gi \
            --cpu 1 \
            --max-instances 2 \
-           --service-account ${_SERVICE_ACCOUNT}
+           --service-account ${_SERVICE_ACCOUNT} \
            --update-secrets=SLACK_BOT_TOKEN=SLACK_TOKEN:latest \
            --update-secrets=SLACK_SIGNING=SLACK_SIGNING:latest \
            --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest
