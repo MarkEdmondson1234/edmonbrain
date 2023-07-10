@@ -21,10 +21,9 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 
-    prompt = pick_prompt(vector_name)
+    prompt = pick_prompt(vector_name, chat_history)
 
-    logging.basicConfig(level=logging.DEBUG)
-    logging.debug(f"Chat history: {chat_history}")
+    logging.info(f"Chat history: {chat_history}")
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                return_source_documents=True,
@@ -39,5 +38,4 @@ def qna(question: str, vector_name: str, chat_history=[]):
         error_message = traceback.format_exc()
         result = {"answer": f"An error occurred while asking: {question}: {str(err)} - {error_message}"}
     
-    logging.basicConfig(level=logging.INFO)
     return result

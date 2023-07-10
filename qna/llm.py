@@ -121,7 +121,13 @@ def pick_vectorstore(vector_name, embeddings):
 
     return vectorstore
 
-def pick_prompt(vector_name):
+def get_chat_history(inputs) -> str:
+    res = []
+    for human, ai in inputs:
+        res.append(f"Human:{human}\nAI:{ai}")
+    return "\n".join(res)
+
+def pick_prompt(vector_name, chat_history=[]):
     """Pick a custom prompt"""
     logging.debug('Picking prompt')
     # located in the parent directory e.g. config.json, qna/llm.py
@@ -132,21 +138,22 @@ def pick_prompt(vector_name):
     prompt_str = llm_config.get("prompt", None)
     if prompt_str is None:
         # default
-        prompt_template = """Use the following pieces of context to answer the question at the end.
+        prompt_str = """Use the following pieces of context to answer the question at the end.
 If you don't know the answer, reply stating you have no context sources to back up your reply, but taking a best guess.
+"""
 
-        {context}
+    if "{context}" in prompt_str:
+        raise ValueError("prompt must not contain a string '{context}'")
+    if "{question}" in prompt_str:
+        raise ValueError("prompt must not contain a string '{question}'")
+    add_history =get_chat_history(chat_history)
+    add_history = add_history[:1000] # max 1000 in history
 
-        Question: {question}
-        Helpful Answer:"""
+    business_end = """\nContext:\n{context}\nQuestion: {question}\nHelpful Answer:"""
 
-    else:
-        prompt_template = prompt_str
-        if "{context}" not in prompt_str:
-            raise ValueError("prompt must contain a string '{context}'")
-        if "{question}" not in prompt_str:
-            raise ValueError("prompt must contain a string '{question}'")
+    prompt_template = prompt_str + "\nHistory:\n" + add_history + business_end
     
+    logging.info(f"Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
