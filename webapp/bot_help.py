@@ -214,7 +214,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
 - `!deletesource [gs:// source]` - delete a source from database
 *Tips*
 - Add files to bucket folder `gs://gcloud-brain/{vector_name}` to add them via PubSub subscription
-- URLs of GoogleDrive work only if shared with **gcloud-brain-app@gcloud-brain.iam.gserviceaccount.com** in your own drive
+- URLs of GoogleDrive work only if shared with **edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com** in your own drive
 - URLs of GitHub (https://github.com/* branch:main) will git clone and add all repo files. e.g. `!saveurl https://github.com/me/repo branch:master`. 
 - For private GitHub repositories, the app has a GitHub PAT that will need access linked to MarkEdmondson1234 account
 *Slash Commands*
