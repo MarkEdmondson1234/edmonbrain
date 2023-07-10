@@ -158,7 +158,7 @@ Indicate in your speech how certain you are about your answers, whether you are 
 
     prompt_template = prompt_str + "\nShort-term memories:\n" + add_history + business_end
     
-    logging.info(f"Prompt_template: {prompt_template}") 
+    logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )

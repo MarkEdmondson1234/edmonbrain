@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector({vector_size}), match_count int)
            RETURNS TABLE(
-               id bigint,
+               id uuid,
                content text,
                metadata jsonb,
                -- we return matched vectors to enable maximal marginal relevance searches
