@@ -13,7 +13,7 @@ steps:
     args:
     - '-c'
     - |
-      gsutil cp gs://${_GCS_BUCKET}/${_CONFIG_FILE} ${_CONFIG_FILE}
+      gsutil cp ${_GCS_BUCKET}/${_CONFIG_FILE} ${_CONFIG_FILE}
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
