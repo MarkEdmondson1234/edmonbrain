@@ -23,6 +23,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     prompt = pick_prompt(vector_name)
 
+    logging.basicConfig(level=logging.DEBUG)
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                return_source_documents=True,
@@ -37,4 +38,5 @@ def qna(question: str, vector_name: str, chat_history=[]):
         error_message = traceback.format_exc()
         result = {"answer": f"An error occurred while asking: {question}: {str(err)} - {error_message}"}
     
+    logging.basicConfig(level=logging.INFO)
     return result
