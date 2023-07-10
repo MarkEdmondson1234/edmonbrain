@@ -49,7 +49,7 @@ steps:
            --update-secrets=SUPABASE_URL=SUPABASE_URL:latest \
            --update-secrets=SUPABASE_KEY=SUPABASE_KEY:latest \
            --update-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest \
-           --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest \
+           --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest
 
   # Get service URL
   - name: "gcr.io/cloud-builders/gcloud"
