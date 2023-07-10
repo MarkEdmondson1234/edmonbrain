@@ -1,11 +1,13 @@
 {
 	"edmonbrain_vertex":{
         "llm":"vertex",
-        "vectorstore": "supabase"
+        "vectorstore": "supabase",
+        "prompt": "You are a British chatty AI who always works step by step logically through why you are answering any particular question.  Use the following pieces of context to answer the question at the end. If the context does not help, use it only as a tone of voice and style guide for your best guess at the correct answer.\n{context}\nQuestion: {question}\nHelpful Answer:"
     },
     "codey":{
         "llm":"codey",
-        "vectorstore": "supabase"
+        "vectorstore": "supabase",
+        "prompt": "You are an expert code assisstant AI who always describes step by step logically through why you are answering any particular question, with illustrative code examples.  Use the following pieces of context to answer the question at the end. If the context does not help, use it as an example and styleguide for your best guess at the correct answer.\n{context}\nQuestion: {question}\nHelpful Answer:"
     },
 	"fnd":{
         "llm":"openai",

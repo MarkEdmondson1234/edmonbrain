@@ -3,3 +3,4 @@
 discord-bot/.env
 env/.pdm-python
 env/
+config.json

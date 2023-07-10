@@ -4,8 +4,16 @@ substitutions:
   _REGION: your-region
   _GCS_BUCKET: your-gcs-bucket
   _SERVICE_ACCOUNT: your-service@your-project.iam.gserviceaccount.com
+  _CONFIG_FILE: config.json
 
 steps:
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: download config file
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      gsutil cp gs://${_GCS_BUCKET}/${_CONFIG_FILE} ${_CONFIG_FILE}
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:

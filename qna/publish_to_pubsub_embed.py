@@ -136,13 +136,18 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
         eventType = attributes.get("eventType")
         payloadFormat = attributes.get("payloadFormat")
         if eventType == "OBJECT_FINALIZE" and payloadFormat == "JSON_API_V1":
-            logging.info("Got valid event from Google Cloud Storage")
+            objectId = attributes.get("objectId")
+            logging.info(f"Got valid event from Google Cloud Storage: {objectId}")
+
+            if objectId.startswith("config"):
+                logging.info(f"Ignoring config file")
+                return None
             
             # https://cloud.google.com/storage/docs/json_api/v1/objects#resource-representations
-            message_data = 'gs://' + attributes.get("bucketId") + '/' + attributes.get("objectId")
+            message_data = 'gs://' + attributes.get("bucketId") + '/' + objectId
 
-            if '/' in attributes.get("objectId"):
-                bucket_vector_name = attributes.get("objectId").split('/')[0]
+            if '/' in objectId:
+                bucket_vector_name = objectId.split('/')[0]
 
                 if len(bucket_vector_name) > 0 and vector_name != bucket_vector_name:
                     logging.info(f"Overwriting vector_name {vector_name} with {bucket_vector_name}")
