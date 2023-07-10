@@ -29,7 +29,7 @@ dependencies = [
     "google-cloud-aiplatform",
     "google-generativeai",
     "python-dotenv",
-    "langchain==0.0.228",
+    "langchain>=0.0.229",
     "google-cloud-aiplatform>=1.26.0",
     "discord",
     "aiohttp",

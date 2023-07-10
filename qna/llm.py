@@ -34,14 +34,14 @@ def pick_llm(vector_name):
 
         #llm = OpenAI(temperature=0)
         llm_chat = ChatOpenAI(model="gpt-4", temperature=0.2, max_tokens=5000)
-        llm = OpenAI(model="gpt-3.5-turbo", temperature=0)
+        llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
         embeddings = OpenAIEmbeddings()
         logging.info("Chose OpenAI")
     elif llm_str == 'vertex':
         from langchain.llms import VertexAI
         from langchain.embeddings import VertexAIEmbeddings
         from langchain.chat_models import ChatVertexAI
-        llm = VertexAI(temperature=0, max_output_tokens=1024)
+        llm = ChatVertexAI(temperature=0, max_output_tokens=1024)
         llm_chat = ChatVertexAI(temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
         logging.info("Chose VertexAI text-bison")
@@ -66,7 +66,7 @@ def pick_vectorstore(vector_name, embeddings):
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
-    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    logging.debug(f'llm_config: {llm_config} for {vector_name}')
     vs_str = llm_config.get("vectorstore", None)
     if vs_str is None:
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")

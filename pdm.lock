@@ -819,7 +819,7 @@ summary = "A fast implementation of the Cassowary constraint solver"
 
 [[package]]
 name = "langchain"
-version = "0.0.228"
+version = "0.0.229"
 requires_python = ">=3.8.1,<4.0"
 summary = "Building applications with LLMs through composability"
 dependencies = [
@@ -1943,7 +1943,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:f581d6a351609f0c85db5e90ba4d74d108449342462ee58de241d1de4657fc60"
+content_hash = "sha256:03bd5b6dc033a272b7f286536f75751328071c5e27a332fbe0d4bedc5b199f32"
 
 [metadata.files]
 "aiohttp 3.8.4" = [
@@ -3053,9 +3053,9 @@ content_hash = "sha256:f581d6a351609f0c85db5e90ba4d74d108449342462ee58de241d1de4
     {url = "https://files.pythonhosted.org/packages/f6/e8/194a4b4eee0990a648711bfb769a7110d10fd8d8b370a0464cb3d1060381/kiwisolver-1.4.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:70e7c2e7b750585569564e2e5ca9845acfaa5da56ac46df68414f29fea97be9f"},
     {url = "https://files.pythonhosted.org/packages/f8/f4/724d454e95c7e9be6a05f1da3fb85251b5dbb8c3b7d06bdc61d56b16035a/kiwisolver-1.4.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:36dafec3d6d6088d34e2de6b85f9d8e2324eb734162fba59d2ba9ed7a2043d5b"},
 ]
-"langchain 0.0.228" = [
-    {url = "https://files.pythonhosted.org/packages/5d/a4/2c9f1c5e569fe0c322daf4198fa7dbc0ea717838cccb767d5bca8578aeb1/langchain-0.0.228-py3-none-any.whl", hash = "sha256:04b23dbda35d89b6080bbaf21d544e49a57fef6c06a1324b05bbda8be753ac61"},
-    {url = "https://files.pythonhosted.org/packages/cb/15/7aca753cc5981061a34267b7b12624b1abfe3557eff9d772739a42adc885/langchain-0.0.228.tar.gz", hash = "sha256:2f46046b6cd7f33bb7dbfef6e8b6f1bb7716af09f0420f47b51d4a690554ce88"},
+"langchain 0.0.229" = [
+    {url = "https://files.pythonhosted.org/packages/30/47/dbba98f94fb48c608733516ae40856572bba0bfefc5d0b5ee8639b7d0be6/langchain-0.0.229.tar.gz", hash = "sha256:ab1beac7f3fc1f06ab1a0b545ef0d47a3d5efef3b2b4c646aafaefc2eb3151d3"},
+    {url = "https://files.pythonhosted.org/packages/7f/0e/23b18a3fad0d4eac0ab960ac8c151a047b6f9445ad358efaf24f0e4928ad/langchain-0.0.229-py3-none-any.whl", hash = "sha256:a7ca79e4ab892756ede95d212bd42243303f91b172535cefd02b0b8965e4e7b7"},
 ]
 "langchainplus-sdk 0.0.20" = [
     {url = "https://files.pythonhosted.org/packages/85/b3/c8d9f825579038080691a61f42bbafe6c914b67733097a310979f5b5db28/langchainplus_sdk-0.0.20.tar.gz", hash = "sha256:3d300e2e3290f68cc9d842c059f9458deba60e776c9e790309688cad1bfbb219"},
