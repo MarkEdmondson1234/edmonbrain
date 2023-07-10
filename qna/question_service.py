@@ -24,6 +24,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
     prompt = pick_prompt(vector_name)
 
     logging.basicConfig(level=logging.DEBUG)
+    logging.debug(f"Chat history: {chat_history}")
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                return_source_documents=True,
