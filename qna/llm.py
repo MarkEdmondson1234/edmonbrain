@@ -23,7 +23,7 @@ def pick_llm(vector_name):
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
-    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    logging.debug(f'llm_config: {llm_config} for {vector_name}')
     llm_str = llm_config.get("llm", None)
     if llm_str is None:
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
@@ -37,7 +37,7 @@ def pick_llm(vector_name):
         llm_chat = ChatOpenAI(model="gpt-4", temperature=0.2, max_tokens=5000)
         llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
         embeddings = OpenAIEmbeddings()
-        logging.info("Chose OpenAI")
+        logging.debug("Chose OpenAI")
     elif llm_str == 'vertex':
         from langchain.llms import VertexAI
         from langchain.embeddings import VertexAIEmbeddings
@@ -45,7 +45,7 @@ def pick_llm(vector_name):
         llm = ChatVertexAI(temperature=0, max_output_tokens=1024)
         llm_chat = ChatVertexAI(temperature=0, max_output_tokens=1024)
         embeddings = VertexAIEmbeddings()
-        logging.info("Chose VertexAI text-bison")
+        logging.debug("Chose VertexAI text-bison")
     elif llm_str == 'codey':
         from langchain.llms import VertexAI
         from langchain.embeddings import VertexAIEmbeddings
@@ -53,7 +53,7 @@ def pick_llm(vector_name):
         llm = VertexAI(model_name = "code-bison", temperature=0.5, max_output_tokens=2048)
         llm_chat = ChatVertexAI(model_name="codechat-bison", max_output_tokens=2048)
         embeddings = VertexAIEmbeddings()
-        logging.info("Chose VertexAI code-bison")
+        logging.debug("Chose VertexAI code-bison")
     else:
         raise NotImplementedError(f'No llm implemented for {llm_str}')   
 
@@ -92,13 +92,13 @@ def pick_vectorstore(vector_name, embeddings):
                                           table_name=vector_name,
                                           query_name=f'match_documents_{vector_name}')
 
-        logging.info("Chose Supabase")
+        logging.debug("Chose Supabase")
     elif vs_str == 'cloudsql':
         from qna.database import setup_cloudsql
         # needs this merged in https://github.com/hwchase17/langchain/issues/2219
         from langchain.vectorstores.pgvector import PGVector
 
-        logging.info("Inititaing CloudSQL pgvector")
+        logging.debug("Inititaing CloudSQL pgvector")
         setup_cloudsql(vector_name)
 
         # https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/pgvector
@@ -115,7 +115,7 @@ def pick_vectorstore(vector_name, embeddings):
             #pre_delete_collection=True # for testing purposes
             )
         
-        logging.info("Chose CloudSQL")
+        logging.debug("Chose CloudSQL")
 
     else:
         raise NotImplementedError(f'No llm implemented for {vs_str}')   
