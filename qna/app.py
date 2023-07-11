@@ -8,7 +8,11 @@ from flask import Flask, request, jsonify
 import qna.question_service as qs
 import qna.publish_to_pubsub_embed as pbembed
 import qna.pubsub_chunk_to_store as pb
+
+from qna.pubsub_manager import PubSubManager
+
 import logging
+import datetime
 
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
@@ -72,6 +76,14 @@ def extract_chat_history(chat_history=None):
 
     return paired_messages
 
+def archive_qa(user_input, bot_output, vector_name):
+    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"qna_archive_{vector_name}")
+    the_data = {"user:": user_input, 
+                "bot_output": bot_output,
+                "timestamp": datetime.datetime.now()}
+    
+    pubsub_manager.publish_message(the_data)
+
 
 @app.route('/qna/<vector_name>', methods=['POST'])
 def process_qna(vector_name):
@@ -86,6 +98,7 @@ def process_qna(vector_name):
     try:
         bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
         bot_output = parse_output(bot_output)
+        archive_qa(user_input, bot_output, vector_name)
     except Exception as err:
         bot_output = {'answer': f'QNA_ERROR: An error occurred while processing /qna/{vector_name}: {str(err)}'}
     logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')

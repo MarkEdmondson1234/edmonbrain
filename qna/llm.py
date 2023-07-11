@@ -2,6 +2,7 @@ import os, json
 import logging
 from langchain.prompts.prompt import PromptTemplate
 
+
 def load_config(filename):
     logging.debug("Loading config for llm")
     # Get the directory of the current script
@@ -140,6 +141,7 @@ def pick_prompt(vector_name, chat_history=[]):
 Favour information from the current conversation but be influenced by your memories below.
 If your memories don't help with your answer, just use them to set the tone and style of your response.
 Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
+If you don't know, just say you don't know - don't make anything up. Avoid generic boilerplate answers.
 """
     if prompt_str is not None:
         if "{context}" in prompt_str:
