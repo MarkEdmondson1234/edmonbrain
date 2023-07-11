@@ -76,10 +76,9 @@ def extract_chat_history(chat_history=None):
 
     return paired_messages
 
-def archive_qa(user_input, bot_output, vector_name):
+def archive_qa(bot_output, vector_name):
     pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"qna_archive_{vector_name}")
-    the_data = {"user:": user_input, 
-                "bot_output": bot_output,
+    the_data = {"bot_output": bot_output,
                 "vector_name": vector_name,
                 "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     
@@ -99,7 +98,7 @@ def process_qna(vector_name):
     try:
         bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
         bot_output = parse_output(bot_output)
-        archive_qa(user_input, bot_output, vector_name)
+        archive_qa(bot_output, vector_name)
     except Exception as err:
         bot_output = {'answer': f'QNA_ERROR: An error occurred while processing /qna/{vector_name}: {str(err)}'}
     logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')
