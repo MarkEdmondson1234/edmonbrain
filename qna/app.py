@@ -81,7 +81,7 @@ def archive_qa(user_input, bot_output, vector_name):
     the_data = {"user:": user_input, 
                 "bot_output": bot_output,
                 "vector_name": vector_name,
-                "timestamp": datetime.datetime.now()}
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     
     pubsub_manager.publish_message(the_data)
 
