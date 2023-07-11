@@ -80,6 +80,7 @@ def archive_qa(user_input, bot_output, vector_name):
     pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"qna_archive_{vector_name}")
     the_data = {"user:": user_input, 
                 "bot_output": bot_output,
+                "vector_name": vector_name,
                 "timestamp": datetime.datetime.now()}
     
     pubsub_manager.publish_message(the_data)
