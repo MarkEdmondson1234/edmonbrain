@@ -137,9 +137,9 @@ def pick_prompt(vector_name, chat_history=[]):
         raise ValueError("No llm_config was found")
     prompt_str = llm_config.get("prompt", None)
     prompt_str_default = """Use the following memories to answer the question at the end.
-Favour short-term memories but be influenced by the long-term memories.
-If the memories don't help with your answer, just use them to set the tone and style of your response.
-Indicate in your speech how certain you are about your answers, whether you are sure or just taking a best guess.
+Favour information from the current conversation but be influenced by the memories added below.
+If the added memories don't help with your answer, just use them to set the tone and style of your response.
+Indicate in your speech how certain you are about your answers, whether you are certain, taking your best guess, or very speculative.
 """
     if prompt_str is not None:
         if "{context}" in prompt_str:
@@ -151,9 +151,9 @@ Indicate in your speech how certain you are about your answers, whether you are 
     add_history = get_chat_history(chat_history)
     add_history = add_history[:2000] # max 1000 in history
 
-    business_end = """\n## Long-term memories\n{context}\n## Question\n {question}\n## Your response:\n"""
+    business_end = """\n## Memories\n{context}\n## Question\n {question}\n## Your response:\n"""
 
-    prompt_template = prompt_str_default + "\nShort-term memories:\n" + add_history + business_end
+    prompt_template = prompt_str_default + "\n## Current Conversation\n" + add_history + business_end
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(

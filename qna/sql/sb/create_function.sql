@@ -1,5 +1,3 @@
-DROP FUNCTION match_documents_{vector_name}(vector,integer);
-
 CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector({vector_size}), match_count int)
            RETURNS TABLE(
                id uuid,
