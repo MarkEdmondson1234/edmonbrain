@@ -137,9 +137,9 @@ def pick_prompt(vector_name, chat_history=[]):
         raise ValueError("No llm_config was found")
     prompt_str = llm_config.get("prompt", None)
     prompt_str_default = """Use the following memories to answer the question at the end.
-Favour information from the current conversation but be influenced by the memories added below.
-If the added memories don't help with your answer, just use them to set the tone and style of your response.
-Indicate in your speech how certain you are about your answers, whether you are certain, taking your best guess, or very speculative.
+Favour information from the current conversation but be influenced by your memories below.
+If your memories don't help with your answer, just use them to set the tone and style of your response.
+Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
 """
     if prompt_str is not None:
         if "{context}" in prompt_str:
@@ -149,9 +149,9 @@ Indicate in your speech how certain you are about your answers, whether you are 
         prompt_str_default = prompt_str_default + "\n" + prompt_str
     
     add_history = get_chat_history(chat_history)
-    add_history = add_history[:2000] # max 1000 in history
+    add_history = add_history[:2000] # max 2000 in history
 
-    business_end = """\n## Memories\n{context}\n## Question\n {question}\n## Your response:\n"""
+    business_end = """\n## Your Memories\n{context}\n## My Question\n {question}\n## Your response:\n"""
 
     prompt_template = prompt_str_default + "\n## Current Conversation\n" + add_history + business_end
     
