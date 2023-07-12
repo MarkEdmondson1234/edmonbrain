@@ -136,7 +136,7 @@ def get_chat_history(inputs, vector_name) -> str:
     text_sum = ""
     for sum in chat_summary:
         text_sum += sum.page_content + "\n"
-        
+
     return text_sum
 
 
@@ -149,7 +149,7 @@ def pick_prompt(vector_name, chat_history=[]):
     if llm_config is None:
         raise ValueError("No llm_config was found")
     prompt_str = llm_config.get("prompt", None)
-    prompt_str_default = """Use the following memories to answer the question at the end.
+    prompt_str_default = """Use your memory to answer the question at the end.
 Favour information from the current conversation but be influenced by your memories below.
 If your memories don't help with your answer, just use them to set the tone and style of your response.
 Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
@@ -165,7 +165,7 @@ Try to anticipate the next question, and if confident offer to answer it.  Try t
     
     chat_summary = get_chat_history(chat_history, vector_name)
 
-    business_end = """\n## Your Memories\n{context}\n## My Question\n {question}\n## Your response:\n"""
+    business_end = """\n## Your Memory\n{context}\n## My Question\n {question}\n## Your response:\n"""
 
     prompt_template = prompt_str_default + "\n## Current Conversation Summary\n" + chat_summary + business_end
     
