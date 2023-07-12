@@ -15,6 +15,9 @@ SUMMARY:"""
 MAP_PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
 
+import time
+import random
+
 def summarise_docs(docs, vector_name):
     llm, _, _ = pick_llm(vector_name)
     chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True,
@@ -26,7 +29,18 @@ def summarise_docs(docs, vector_name):
         logging.debug(f"summarise: doc {doc}")
         metadata = doc.metadata
         chunks = chunk_doc_to_docs([doc])
-        summary = chain.run(chunks)
+        
+        for attempt in range(5):  # Attempt to summarize 5 times
+            try:
+                summary = chain.run(chunks)
+                break  # If the summary was successful, break the loop
+            except Exception as e:
+                logging.error(f"Error while summarizing on attempt {attempt+1}: {e}")
+                delay = random.randint(1, (attempt+1) * 2)  # Random delay between 1 and 2x the number of attempts
+                time.sleep(delay)  # Wait for the delay period
+        else:
+            logging.error(f"Failed to summarize after 5 attempts")
+            continue  # If we've failed after 5 attempts, move on to the next document
         
         metadata["type"] = "summary"
         summary = Document(page_content=summary, metadata=metadata)
