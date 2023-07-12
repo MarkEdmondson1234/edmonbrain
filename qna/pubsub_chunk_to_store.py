@@ -6,13 +6,10 @@ import base64
 import json
 import datetime
 
-from dotenv import load_dotenv
 from langchain.schema import Document
 import logging
 from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
-
-load_dotenv()
 
 def from_pubsub_to_supabase(data: dict, vector_name:str):
     """Triggered from a message on a Cloud Pub/Sub topic "embed_chunk" topic
