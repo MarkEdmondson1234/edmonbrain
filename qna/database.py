@@ -41,14 +41,14 @@ def get_vector_size(vector_name: str):
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
-    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    logging.debug(f'llm_config: {llm_config} for {vector_name}')
     llm_str = llm_config.get("llm", None)
 
     vector_size = 768
     if llm_str == 'openai':
         vector_size = 1536 # openai
 
-    logging.info(f'vector size: {vector_size}')
+    logging.debug(f'vector size: {vector_size}')
     return vector_size
 
 def setup_database(vector_name:str, verbose:bool=False):

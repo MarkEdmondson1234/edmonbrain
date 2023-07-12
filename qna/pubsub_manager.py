@@ -66,7 +66,7 @@ class PubSubManager:
         except AlreadyExists:
             return True
         except Exception as e:
-            logging.error(f"Failed to get subscription: {e}")
+            logging.debug(f"Failed to get subscription: {e}")
             if self.verbose:
                 print(f"Failed to get subscription: {e}")
             return False
@@ -82,10 +82,10 @@ class PubSubManager:
             else:
                 service_url = os.getenv('QNA_URL', None)
                 if service_url is None:
-                    logging.info("No QNA_URL env specified and not a http endpoint")
+                    logging.error("No QNA_URL env specified and not a http endpoint")
                     return
                 else:
-                    logging.info(f"Found service QNA_URL: {service_url}")
+                    logging.debug(f"Found service QNA_URL: {service_url}")
                     if push_endpoint.startswith("/"):
                         push_endpoint = service_url + push_endpoint
                     else:
@@ -114,7 +114,7 @@ class PubSubManager:
                     if self.verbose:
                         print(f"Created push subscription: {full_subscription_name}")
                 except Exception as e:
-                    logging.error(f"Failed to create push subscription: {e}")
+                    logging.debug(f"Failed to create push subscription: {e}")
                     if self.verbose:
                         print(f"Failed to create push subscription: {e}")
             
