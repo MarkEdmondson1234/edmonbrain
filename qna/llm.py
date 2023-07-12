@@ -30,12 +30,12 @@ def pick_llm(vector_name):
     
     if llm_str == 'openai':
         from langchain.embeddings import OpenAIEmbeddings
-        from langchain.llms import OpenAI
+        #from langchain.llms import OpenAI
         from langchain.chat_models import ChatOpenAI
 
         #llm = OpenAI(temperature=0)
-        llm_chat = ChatOpenAI(model="gpt-4", temperature=0.2, max_tokens=5000)
-        llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+        llm_chat = ChatOpenAI(model="gpt-4", temperature=0.3, max_tokens=5000)
+        llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=13000)
         embeddings = OpenAIEmbeddings()
         logging.debug("Chose OpenAI")
     elif llm_str == 'vertex':
@@ -142,6 +142,7 @@ Favour information from the current conversation but be influenced by your memor
 If your memories don't help with your answer, just use them to set the tone and style of your response.
 Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
 If you don't know, just say you don't know - don't make anything up. Avoid generic boilerplate answers.
+Try to anticipate the next question, and if confident offer to answer it.  Try to also consider why the question was asked.
 """
     if prompt_str is not None:
         if "{context}" in prompt_str:
@@ -151,11 +152,16 @@ If you don't know, just say you don't know - don't make anything up. Avoid gener
         prompt_str_default = prompt_str_default + "\n" + prompt_str
     
     add_history = get_chat_history(chat_history)
-    add_history = add_history[:2000] # max 2000 in history
+
+    from langchain.schema import Document
+    from qna.summarise import summarise_docs
+
+    doc_history = Document(page_content=add_history)
+    chat_summary = summarise_docs([doc_history], vector_name=vector_name)
 
     business_end = """\n## Your Memories\n{context}\n## My Question\n {question}\n## Your response:\n"""
 
-    prompt_template = prompt_str_default + "\n## Current Conversation\n" + add_history + business_end
+    prompt_template = prompt_str_default + "\n## Current Conversation Summary\n" + chat_summary + business_end
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(

@@ -280,7 +280,8 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     
     from qna.summarise import summarise_docs
     summaries = summarise_docs(docs, vector_name=vector_name)
-    publish_chunks(summaries, vector_name=vector_name)
+    summary_chunks = chunk_doc_to_docs(summaries)
+    publish_chunks(summary_chunks, vector_name=vector_name)
 
     pubsub_manager.publish_message(
         f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding with summaries:\n{summaries}")
