@@ -8,10 +8,13 @@ if you are calling API, or deploy your own Unstrucutred instance from [this fold
 
 The config.json file should be uploaded to the root of the GCP bucket you are using.
 
+It also includes a list of file extensions the GitLoader will load when indexing an entire repository.  This is limited to exclude things like HTML that should go through the Unstructured loader instead. Currently ignores those files TODO: send them to Unstrcutured instead
+
 Example:
 
 ```json
 {
+    "code_extensions": [".py", ".js", ".java", ".c", ".cpp", ".cs", ".rb", ".php", ".txt", ".md", ".json", ".yaml", ".sql", ".r"],
 	"edmonbrain_vertex":{
         "llm":"vertex",
         "vectorstore": "supabase",

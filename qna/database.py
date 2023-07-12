@@ -25,7 +25,7 @@ def lookup_connection_env(vector_name:str):
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
-    logging.info(f'llm_config: {llm_config} for {vector_name}')
+    logging.debug(f'llm_config: {llm_config} for {vector_name}')
     vs_str = llm_config.get("vectorstore", None)
     if vs_str == "supabase":
         return "DB_CONNECTION_STRING"

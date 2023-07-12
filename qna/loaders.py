@@ -4,6 +4,7 @@ from langchain.document_loaders import UnstructuredURLLoader
 from langchain.document_loaders.git import GitLoader
 #from langchain.document_loaders import GoogleDriveLoader
 from qna.googledrive_patch import GoogleDriveLoader
+from qna.llm import load_config
 from googleapiclient.errors import HttpError
 
 import logging
@@ -77,6 +78,20 @@ class MyGoogleDriveLoader(GoogleDriveLoader):
             else:
                 return []
 
+def ignore_files(filepath):
+    """Returns True if the given path's file extension is found within 
+    config.json "code_extensions" array
+    Returns False if not
+    """
+    # Load the configuration
+    config = load_config("config.json")
+
+    code_extensions = config.get("code_extensions", [])
+
+    lower_filepath = filepath.lower()
+    # TRUE if on the list, FALSE if not
+    return any(lower_filepath.endswith(ext) for ext in code_extensions)
+
 def read_git_repo(clone_url, branch="main", metadata=None):
     logging.info(f"Reading git repo from {clone_url} - {branch}")
     GIT_PAT = os.getenv('GIT_PAT', None)
@@ -88,7 +103,10 @@ def read_git_repo(clone_url, branch="main", metadata=None):
 
     with tempfile.TemporaryDirectory() as tmp_dir:
             try:    
-                loader = GitLoader(repo_path=tmp_dir, clone_url=clone_url, branch=branch)
+                loader = GitLoader(repo_path=tmp_dir, 
+                                   clone_url=clone_url, 
+                                   branch=branch,
+                                   file_filter=ignore_files)
             except Exception as err:
                 logging.error(f"Failed to load repository: {str(err)}")
                 return None
