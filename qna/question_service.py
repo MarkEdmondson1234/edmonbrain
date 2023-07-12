@@ -26,7 +26,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
     logging.info(f"Chat history: {chat_history}")
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
-                                               chain_type="map_reduce",
+                                               chain_type="stuff",
                                                return_source_documents=True,
                                                verbose=True,
                                                output_key='answer',
