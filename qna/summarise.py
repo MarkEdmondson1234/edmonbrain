@@ -36,7 +36,7 @@ def summarise_docs(docs, vector_name):
                 break  # If the summary was successful, break the loop
             except Exception as e:
                 logging.error(f"Error while summarizing on attempt {attempt+1}: {e}")
-                delay = random.randint(1, (attempt+1) * 2)  # Random delay between 1 and 2x the number of attempts
+                delay = random.randint(1, (attempt+1) * 5)  # Random delay between 1 and 2x the number of attempts
                 time.sleep(delay)  # Wait for the delay period
         else:
             logging.error(f"Failed to summarize after 5 attempts")
