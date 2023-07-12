@@ -25,6 +25,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     prompt = pick_prompt(vector_name, chat_history)
 
+    # 3072 in context + 3000 in response + 2000 in prompt
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                chain_type="stuff",

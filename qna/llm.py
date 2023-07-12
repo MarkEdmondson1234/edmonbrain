@@ -34,7 +34,7 @@ def pick_llm(vector_name):
         from langchain.chat_models import ChatOpenAI
 
         #llm = OpenAI(temperature=0)
-        llm_chat = ChatOpenAI(model="gpt-4", temperature=0.3, max_tokens=4000)
+        llm_chat = ChatOpenAI(model="gpt-4", temperature=0.3, max_tokens=3000)
         llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=13000)
         embeddings = OpenAIEmbeddings()
         logging.debug("Chose OpenAI")
