@@ -7,14 +7,13 @@ import logging
 
 from langchain.prompts import PromptTemplate
 
-prompt_template = """Write a summary and kayword tags for the text below.
+prompt_template = """Write a summary for the text below.
 Include key concepts, people and distinct information but do not add anything that is not in the original text:
 
 TEXT:
 "{text}"
 
-SUMMARY:
-KEYWORDS:"""
+SUMMARY:"""
 MAP_PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
 
