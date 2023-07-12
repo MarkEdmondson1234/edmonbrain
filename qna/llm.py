@@ -137,7 +137,7 @@ def get_chat_history(inputs, vector_name) -> str:
     for sum in chat_summary:
         text_sum += sum.page_content + "\n"
 
-    return text_sum
+    return text_sum[:2000]
 
 
 def pick_prompt(vector_name, chat_history=[]):
@@ -163,7 +163,9 @@ Try to anticipate the next question, and if confident offer to answer it.  Try t
             raise ValueError("prompt must not contain a string '{question}'")
         prompt_str_default = prompt_str_default + "\n" + prompt_str
     
-    chat_summary = get_chat_history(chat_history, vector_name)
+    chat_summary = ""
+    if len(chat_history) != 0:
+        chat_summary = get_chat_history(chat_history, vector_name)
 
     business_end = """\n## Your Memory\n{context}\n## My Question\n {question}\n## Your response:\n"""
 
