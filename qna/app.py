@@ -58,7 +58,7 @@ def extract_chat_history(chat_history=None):
         logging.info(f"Got chat history: {chat_history}")
 
         # Initialize variables to hold the last AI message and the list of paired messages
-        last_ai_message = None
+        last_ai_message = ""
         paired_messages = []
 
         for message in chat_history:
