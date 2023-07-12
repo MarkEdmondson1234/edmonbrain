@@ -122,11 +122,20 @@ def pick_vectorstore(vector_name, embeddings):
 
     return vectorstore
 
-def get_chat_history(inputs) -> str:
+def get_chat_history(inputs, vector_name) -> str:
     res = []
     for human, ai in inputs:
         res.append(f"Human:{human}\nAI:{ai}")
-    return "\n".join(res)
+    add_history = "\n".join(res)
+
+    from langchain.schema import Document
+    from qna.summarise import summarise_docs
+
+    doc_history = Document(page_content=add_history)
+    chat_summary = summarise_docs([doc_history], vector_name=vector_name)
+    chat_summary = "\n".join(chat_summary)
+
+    return chat_summary
 
 def pick_prompt(vector_name, chat_history=[]):
     """Pick a custom prompt"""
@@ -151,13 +160,7 @@ Try to anticipate the next question, and if confident offer to answer it.  Try t
             raise ValueError("prompt must not contain a string '{question}'")
         prompt_str_default = prompt_str_default + "\n" + prompt_str
     
-    add_history = get_chat_history(chat_history)
-
-    from langchain.schema import Document
-    from qna.summarise import summarise_docs
-
-    doc_history = Document(page_content=add_history)
-    chat_summary = summarise_docs([doc_history], vector_name=vector_name)
+    chat_summary = get_chat_history(chat_history, vector_name)
 
     business_end = """\n## Your Memories\n{context}\n## My Question\n {question}\n## Your response:\n"""
 
