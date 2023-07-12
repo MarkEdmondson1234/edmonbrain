@@ -279,9 +279,11 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     logging.info(f"data_to_embed_pubsub published chunks with metadata: {metadata}")
     
     from qna.summarise import summarise_docs
-    summaries = summarise_docs(docs, vector_name=vector_name)
-    summary_chunks = chunk_doc_to_docs(summaries)
-    publish_chunks(summary_chunks, vector_name=vector_name)
+    summaries = [Document(page_content="No summary made", metadata=metadata)]
+    if docs is not None:
+        summaries = summarise_docs(docs, vector_name=vector_name)
+        summary_chunks = chunk_doc_to_docs(summaries)
+        publish_chunks(summary_chunks, vector_name=vector_name)
 
     pubsub_manager.publish_message(
         f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding with summaries:\n{summaries}")

@@ -54,12 +54,12 @@ class PubSubManager:
         # Create a subscriber client
         subscriber = pubsub_v1.SubscriberClient()
 
-        logging.info(f"Checking subscription exists: {full_subscription_name}")
+        logging.debug(f"Checking subscription exists: {full_subscription_name}")
         
         # Check if the subscription already exists
         try:
             subscriber.get_subscription(full_subscription_name)
-            logging.info(f"Subscription {full_subscription_name} already exists.")
+            logging.debug(f"Subscription {full_subscription_name} already exists.")
             return True
         except NotFound:
             return False

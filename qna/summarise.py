@@ -11,8 +11,9 @@ def summarise_docs(docs, vector_name):
 
     summaries = []
     for doc in docs:
+        logging.info(f"summarise: doc {doc}")
         metadata = doc.metadata
-        chunks = chunk_doc_to_docs(doc)
+        chunks = chunk_doc_to_docs([doc])
         summary = chain.run(chunks)
         
         metadata["type"] = "summary"
