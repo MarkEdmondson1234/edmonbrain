@@ -7,7 +7,7 @@ import logging
 
 def summarise_docs(docs, vector_name):
     llm, _, _ = pick_llm(vector_name)
-    chain = load_summarize_chain(llm, chain_type="map_reduce")
+    chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
 
     summaries = []
     for doc in docs:

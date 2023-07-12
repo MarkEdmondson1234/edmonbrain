@@ -133,9 +133,12 @@ def get_chat_history(inputs, vector_name) -> str:
 
     doc_history = Document(page_content=add_history)
     chat_summary = summarise_docs([doc_history], vector_name=vector_name)
-    chat_summary = "\n".join(chat_summary)
+    text_sum = ""
+    for sum in chat_summary:
+        text_sum += sum.page_content + "\n"
+        
+    return text_sum
 
-    return chat_summary
 
 def pick_prompt(vector_name, chat_history=[]):
     """Pick a custom prompt"""
