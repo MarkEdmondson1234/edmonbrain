@@ -21,7 +21,7 @@ def from_pubsub_to_supabase(data: dict, vector_name:str):
          data JSON
     """
 
-    logging.info(f"vectorstore: {vector_name}")
+    logging.debug(f"vectorstore: {vector_name}")
 
     #file_sha = data['message']['data']
 

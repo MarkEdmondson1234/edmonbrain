@@ -35,7 +35,7 @@ def pick_llm(vector_name):
 
         #llm = OpenAI(temperature=0)
         llm_chat = ChatOpenAI(model="gpt-4", temperature=0.3, max_tokens=3000)
-        llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=13000)
+        llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=11000)
         embeddings = OpenAIEmbeddings()
         logging.debug("Chose OpenAI")
     elif llm_str == 'vertex':
@@ -83,7 +83,7 @@ def pick_vectorstore(vector_name, embeddings):
         supabase_url = os.getenv('SUPABASE_URL')
         supabase_key = os.getenv('SUPABASE_KEY')
 
-        logging.info(f"Supabase URL: {supabase_url} vector_name: {vector_name}")
+        logging.debug(f"Supabase URL: {supabase_url} vector_name: {vector_name}")
         
         supabase: Client = create_client(supabase_url, supabase_key)
 

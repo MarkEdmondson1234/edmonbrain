@@ -7,10 +7,8 @@ import logging
 
 from langchain.prompts import PromptTemplate
 
-prompt_template = """Write a summary for the text below.
-Include key concepts, people and distinct information but do not add anything that is not in the original text:
+prompt_template = """Write a summary for below, including key concepts, people and distinct information but do not add anything that is not in the original text:
 
-TEXT:
 "{text}"
 
 SUMMARY:"""
@@ -25,7 +23,7 @@ def summarise_docs(docs, vector_name):
 
     summaries = []
     for doc in docs:
-        logging.info(f"summarise: doc {doc}")
+        logging.debug(f"summarise: doc {doc}")
         metadata = doc.metadata
         chunks = chunk_doc_to_docs([doc])
         summary = chain.run(chunks)
