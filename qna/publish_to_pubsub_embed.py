@@ -280,7 +280,9 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     
     from qna.summarise import summarise_docs
     summaries = [Document(page_content="No summary made", metadata=metadata)]
-    if docs is not None:
+
+    do_summary = False #TODO: use metadata to determine a summary should be made
+    if docs is not None and do_summary:
         summaries = summarise_docs(docs, vector_name=vector_name)
         summary_chunks = chunk_doc_to_docs(summaries)
         publish_chunks(summary_chunks, vector_name=vector_name)
