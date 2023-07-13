@@ -112,7 +112,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_en
 
             if return_rows:
                 rows = cursor.fetchall()
-
+            logging.info("SQL successfully fetched")
             break  # If all operations were successful, break the loop
 
         except (psycopg2.errors.DuplicateObject, 
@@ -121,6 +121,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_en
             logging.debug(str(e))
             if verbose:
                 print(str(e))
+            continue
 
         except psycopg2.errors.InternalError as error:
             logging.error(f"InternalError, retrying... Attempt {attempt+1} out of {max_retries}")
@@ -129,6 +130,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_en
 
         except (Exception, psycopg2.Error) as error:
             logging.error(f"Error while connecting to PostgreSQL: {str(error)}", exc_info=True)
+            continue
 
         finally:
             if connection:
