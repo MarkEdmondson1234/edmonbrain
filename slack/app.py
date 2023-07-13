@@ -22,13 +22,6 @@ async def handle_app_mention(ack, body, say, logger):
     slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
     await say(text=slack_output, thread_ts=thread_ts)
 
-@app.event("message.im")
-async def handle_direct_message(ack, body, say, logger):
-    await ack()
-    logger.info("message")
-    slack_output = await slack_help.process_slack_message(app, body, logger)
-    await say(text=slack_output)
-
 @api.post('/slack/message')
 async def slack(req: Request):
     return await app_handler.handle(req)
