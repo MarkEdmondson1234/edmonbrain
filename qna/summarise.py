@@ -27,7 +27,7 @@ def summarise_docs(docs, vector_name):
     summaries = []
     for doc in docs:
         logging.debug(f"summarise: doc {doc}")
-        if len(doc.page_content) < 500:
+        if len(doc.page_content) < 10000:
             continue
         metadata = doc.metadata
         chunks = chunk_doc_to_docs([doc])
