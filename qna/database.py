@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2.extensions import adapt
 import logging
 import os
+import time
+import math
 
 logging.basicConfig(level=logging.INFO)
 
@@ -81,7 +83,9 @@ def delete_row_from_source(source: str, vector_name:str):
 
     do_sql(sql, sql_params=sql_params, connection_env=lookup_connection_env(vector_name))
 
-def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_env='DB_CONNECTION_STRING'):
+
+
+def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_env='DB_CONNECTION_STRING', max_retries=5):
 
     if connection_env is None:
         raise ValueError("Need to specify connection_env to connect to DB")
@@ -91,44 +95,56 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_en
     if connection_string is None:
         raise ValueError("No connection string")
 
-    try:
-        connection = psycopg2.connect(connection_string)
-        cursor = connection.cursor()
+    for attempt in range(max_retries):
+        try:
+            connection = psycopg2.connect(connection_string)
+            cursor = connection.cursor()
 
-        if verbose:
-            logging.info(f"SQL: {sql}")
-        else:
-           # logging.debug(f"SQL: {sql}")
-           pass
-        # execute the SQL - raise the error if already found
-        cursor.execute(sql, sql_params)
+            if verbose:
+                logging.info(f"SQL: {sql}")
+            else:
+                pass
+            # execute the SQL - raise the error if already found
+            cursor.execute(sql, sql_params)
 
-        # commit the transaction to save changes to the database
-        connection.commit()
+            # commit the transaction to save changes to the database
+            connection.commit()
 
-        if return_rows:
-            rows = cursor.fetchall()
+            if return_rows:
+                rows = cursor.fetchall()
+
+            break  # If all operations were successful, break the loop
+
+        except (psycopg2.errors.DuplicateObject, 
+                psycopg2.errors.DuplicateTable, 
+                psycopg2.errors.DuplicateFunction) as e:
+            logging.debug(str(e))
+            if verbose:
+                print(str(e))
+
+        except psycopg2.errors.InternalError as error:
+            logging.error(f"InternalError, retrying... Attempt {attempt+1} out of {max_retries}")
+            time.sleep(math.pow(2, attempt))  # Exponential backoff
+            continue  # Go to the next iteration of the loop to retry the operation
+
+        except (Exception, psycopg2.Error) as error:
+            logging.error(f"Error while connecting to PostgreSQL: {str(error)}", exc_info=True)
+
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                logging.debug("PostgreSQL connection is closed")
     
-    except (psycopg2.errors.DuplicateObject, 
-            psycopg2.errors.DuplicateTable, 
-            psycopg2.errors.DuplicateFunction) as e:
-        logging.debug(str(e))
-        if verbose:
-            print(str(e))
+        # If we've exhausted all retries and still haven't succeeded, raise an error
+        if attempt + 1 == max_retries:
+            raise Exception("Maximum number of retries exceeded")
 
-    except (Exception, psycopg2.Error) as error:
-        logging.error(f"Error while connecting to PostgreSQL: {str(error)}", exc_info=True)
-
-    finally:
-        if (connection):
-            cursor.close()
-            connection.close()
-            logging.debug("PostgreSQL connection is closed")
-    
     if rows:
         return rows
     
     return None
+
 
 def execute_sql_from_file(filepath, params, return_rows=False, verbose=False, connection_env=None):
 
