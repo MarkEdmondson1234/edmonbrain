@@ -69,6 +69,7 @@ def extract_chat_history(chat_history=None):
             elif is_human(message):
                 human_message = create_message_element(message)
                 paired_messages.append((human_message, last_ai_message))
+                last_ai_message = ""
 
     else:
         logging.info("No chat history found")

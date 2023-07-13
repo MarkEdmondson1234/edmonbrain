@@ -31,18 +31,24 @@ def summarise_docs(docs, vector_name):
             continue
         metadata = doc.metadata
         chunks = chunk_doc_to_docs([doc])
-        
+
+        # Initial delay
+        delay = 1.0  # 1 second, for example
+        max_delay = 300.0  # Maximum delay, adjust as needed
+
         for attempt in range(5):  # Attempt to summarize 5 times
             try:
                 summary = chain.run(chunks)
                 break  # If the summary was successful, break the loop
             except Exception as e:
                 logging.error(f"Error while summarizing on attempt {attempt+1}: {e}")
-                delay = random.randint(1, (attempt+1) * 5)  # Random delay between 1 and 2x the number of attempts
+                print(f"Failure, waiting {delay} seconds before retrying...")
                 time.sleep(delay)  # Wait for the delay period
+                delay = min(delay * 2 + random.uniform(0, 1), max_delay)  # Exponential backoff with jitter
         else:
             logging.error(f"Failed to summarize after 5 attempts")
             continue  # If we've failed after 5 attempts, move on to the next document
+
         
         metadata["type"] = "summary"
         summary = Document(page_content=summary, metadata=metadata)
