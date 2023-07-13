@@ -21,7 +21,6 @@ async def send_to_qa_async(user_input, vector_name, chat_history):
     }
     logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")
     
-    # this breaks it? Its sending it multiple times though
     async with aiohttp.ClientSession() as session:
         async with session.post(qna_endpoint, json=qna_data) as resp:
             qna_response = await resp.json()

@@ -20,7 +20,7 @@ async def handle_app_mention(ack, body, say, logger):
     logger.info("app_mention")
     thread_ts = body['event']['ts']
     slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
-    await say(text=slack_output)
+    await say(text=slack_output, thread_ts=thread_ts)
 
 @app.event("message")
 async def handle_direct_message(ack, body, say, logger):
