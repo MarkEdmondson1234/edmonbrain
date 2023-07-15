@@ -213,6 +213,7 @@ def handle_special_commands(user_input, vector_name, chat_history):
 - `!sources` - get sources added in last 24hrs
 - `!deletesource [gs:// source]` - delete a source from database
 *Tips*
+- See user guide here: https://docs.google.com/document/d/1WMi5X4FVHCihIkZ69gzxkVzr86m4WQj3H75LjSPjOtQ
 - Attach files to Discord messages to upload them into database
 - If you have access, upload big files (>5MB) to the Google Cloud Storage bucket
 - URLs of GoogleDrive work only if shared with **edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com** in your own drive

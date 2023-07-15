@@ -38,7 +38,7 @@ def qna(question: str, vector_name: str, chat_history=[]):
     try:
         result = qa({"question": question, "chat_history": chat_history})
     except Exception as err:
-        error_message = traceback.format_exc()
-        result = {"answer": f"An error occurred while asking: {question}: {str(err)} - {error_message}"}
+        logging.error(traceback.format_exc())
+        result = {"answer": f"An error occurred while asking: {question}: {str(err)}"}
     
     return result
