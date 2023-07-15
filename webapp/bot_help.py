@@ -213,12 +213,12 @@ def handle_special_commands(user_input, vector_name, chat_history):
 - `!sources` - get sources added in last 24hrs
 - `!deletesource [gs:// source]` - delete a source from database
 *Tips*
-- Add files to bucket folder `gs://gcloud-brain/{vector_name}` to add them via PubSub subscription
+- Attach files to Discord messages to upload them into database
+- If you have access, upload big files (>5MB) to the Google Cloud Storage bucket
 - URLs of GoogleDrive work only if shared with **edmonbrain-app@devo-mark-sandbox.iam.gserviceaccount.com** in your own drive
 - URLs of GitHub (https://github.com/* branch:main) will git clone and add all repo files. e.g. `!saveurl https://github.com/me/repo branch:master`. 
 - For private GitHub repositories, the app has a GitHub PAT that will need access linked to MarkEdmondson1234 account
 *Slash Commands*
-- `/code` will switch from Vertex model `text-bison` to `code-bison`.
 """}
 
     # If no special commands were found, return None
