@@ -11,14 +11,22 @@ from langchain.prompts import PromptTemplate
 def fetch_data_from_bigquery(date):
     client = bigquery.Client()
 
+    # Read the main SQL query from a file and execute it
     with open('query.sql', 'r') as file:
         sql = file.read().replace('{date}', date)
-
-    # Execute the query and get the results
     query_job = client.query(sql)  # This makes an API request.
-    rows = query_job.result()  # Waits for the query to finish.
+    rows = list(query_job.result())  # Waits for the query to finish.
+
+    if len(rows) < 10:
+        # Read the additional SQL query from a file and execute it
+        with open('query_random.sql', 'r') as file:
+            sql_random = file.read().replace('{date}', date).replace('{limit}', str(10-len(rows)))
+        query_job = client.query(sql_random)
+        rows_random = list(query_job.result())
+        rows.extend(rows_random)
 
     return rows
+
 
 def prepare_llm_input(rows):
     llm_input = "Todays events:\n\n"
