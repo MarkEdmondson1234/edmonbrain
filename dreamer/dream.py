@@ -14,6 +14,8 @@ def fetch_data_from_bigquery(date):
     # Read the main SQL query from a file and execute it
     with open('dreamer/query.sql', 'r') as file:
         sql = file.read().replace('{date}', date)
+    
+    logging.info('Executing SQL query: {}'.format(sql))
     query_job = client.query(sql)  # This makes an API request.
     rows = list(query_job.result())  # Waits for the query to finish.
 
@@ -21,6 +23,8 @@ def fetch_data_from_bigquery(date):
         # Read the additional SQL query from a file and execute it
         with open('dreamer/query_random.sql', 'r') as file:
             sql_random = file.read().replace('{date}', date).replace('{limit}', str(10-len(rows)))
+        
+        logging.info('Executing random SQL query: {}'.format(sql))
         query_job = client.query(sql_random)
         rows_random = list(query_job.result())
         rows.extend(rows_random)
@@ -51,7 +55,7 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 YOUR DREAM TRANSCRIPT:"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-    chain = load_summarize_chain(llm, chain_type="map_reduce", prompt=PROMPT)
+    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
     summary = chain.run(docs)
 
     return summary
