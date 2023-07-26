@@ -1,5 +1,6 @@
 import logging
 import traceback
+import time
 
 from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
@@ -13,8 +14,7 @@ from langchain.chains import ConversationalRetrievalChain
 
 #logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.INFO)
-
-def qna(question: str, vector_name: str, chat_history=[]):
+def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial_delay=5):
 
     logging.debug("Calling qna")
 
@@ -26,7 +26,6 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     prompt = pick_prompt(vector_name, chat_history)
 
-    # 3072 in context + 3000 in response + 2000 in prompt
     qa = ConversationalRetrievalChain.from_llm(llm_chat,
                                                retriever=retriever, 
                                                chain_type="stuff",
@@ -35,15 +34,31 @@ def qna(question: str, vector_name: str, chat_history=[]):
                                                output_key='answer',
                                                combine_docs_chain_kwargs={'prompt': prompt},
                                                condense_question_llm=llm)
-
-    try:
-        result = qa({"question": question, "chat_history": chat_history})
-    except ReadTimeout as err:
-        logging.warning(f"Read timeout while asking: {question} - trying again. {str(err)}")
-        result = qa({"question": question, "chat_history": chat_history})
-        result["answer"] = result["answer"] + " (Sorry for delay, needed to warm up brain - should be quicker next time)"
-    except Exception as err:
-        logging.error(traceback.format_exc())
-        result = {"answer": f"An error occurred while asking: {question}: {str(err)}"}
     
-    return result
+    for retry in range(max_retries):
+        try:
+            return qa({"question": question, "chat_history": chat_history})
+        except ReadTimeout as err:
+            delay = initial_delay * (retry + 1)
+            logging.warning(f"Read timeout while asking: {question} - trying again after {delay} seconds. Error: {str(err)}")
+            time.sleep(delay)
+            try:
+                result = qa({"question": question, "chat_history": chat_history})
+                result["answer"] = result["answer"] + " (Sorry for delay, needed to warm up brain - should be quicker next time)"
+                return result
+            except ReadTimeout:
+                if retry == max_retries - 1:
+                    raise
+        except Exception as err:
+            delay = initial_delay * (retry + 1)
+            logging.error(f"General error: {traceback.format_exc()}")
+            time.sleep(delay)
+            try:
+                result = qa({"question": question, "chat_history": chat_history})
+                result["answer"] = result["answer"] + " (Sorry for delay, had to retry - should be quicker next time)"
+                return result
+            except Exception:
+                if retry == max_retries - 1:
+                    raise
+
+    raise Exception(f"Max retries exceeded for question: {question}")
