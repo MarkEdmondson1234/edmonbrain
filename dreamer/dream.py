@@ -12,14 +12,14 @@ def fetch_data_from_bigquery(date):
     client = bigquery.Client()
 
     # Read the main SQL query from a file and execute it
-    with open('query.sql', 'r') as file:
+    with open('dreamer/query.sql', 'r') as file:
         sql = file.read().replace('{date}', date)
     query_job = client.query(sql)  # This makes an API request.
     rows = list(query_job.result())  # Waits for the query to finish.
 
     if len(rows) < 10:
         # Read the additional SQL query from a file and execute it
-        with open('query_random.sql', 'r') as file:
+        with open('dreamer/query_random.sql', 'r') as file:
             sql_random = file.read().replace('{date}', date).replace('{limit}', str(10-len(rows)))
         query_job = client.query(sql_random)
         rows_random = list(query_job.result())
