@@ -62,6 +62,7 @@ YOUR DREAM TRANSCRIPT:"""
 
 def upload_blob(content, destination_blob_name):
     bucket_name = os.getenv('GCS_BUCKET', None)
+    bucket_name = bucket_name.replace('gs://','')
     if bucket_name is None:
         raise ValueError("No bucket found to upload to: GCS_BUCKET returned None")
     storage_client = storage.Client()
