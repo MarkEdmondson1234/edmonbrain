@@ -5,6 +5,7 @@ from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
 from qna.llm import pick_prompt
 
+from httpcore import ReadTimeout
 from openai.error import InvalidRequestError
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
@@ -37,6 +38,10 @@ def qna(question: str, vector_name: str, chat_history=[]):
 
     try:
         result = qa({"question": question, "chat_history": chat_history})
+    except ReadTimeout as err:
+        logging.warning(f"Read timeout while asking: {question} - trying again. {str(err)}")
+        result = qa({"question": question, "chat_history": chat_history})
+        result["answer"] = result["answer"] + " (Sorry for delay, needed to warm up brain - should be quicker next time)"
     except Exception as err:
         logging.error(traceback.format_exc())
         result = {"answer": f"An error occurred while asking: {question}: {str(err)}"}
