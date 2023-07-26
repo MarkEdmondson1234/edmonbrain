@@ -22,12 +22,13 @@ steps:
       cat <<EOF >Dockerfile_cloudrun
       FROM gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}
 
+      RUN pip install --no-cache-dir -r dreamer/requirements.txt
       COPY . .
 
       EXPOSE 8080
       ENV GCS_BUCKET=${_GCS_BUCKET}
 
-      CMD exec gunicorn --bind :\$$PORT --workers 4 --timeout 0 qna.app:app
+      CMD exec gunicorn --bind :\$$PORT --workers 2 --timeout 0 dreamer.app:app
       EOF
 
   - name: 'gcr.io/cloud-builders/docker'
