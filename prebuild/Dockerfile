@@ -9,6 +9,9 @@ RUN apt-get update && \
     g++ git \
     && rm -rf /var/lib/apt/lists/*
 
+ENV LANGCHAIN_TRACING_V2=true
+ENV LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+ENV LANGCHAIN_API_KEY=<your-api-key>
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt

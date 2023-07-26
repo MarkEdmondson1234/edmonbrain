@@ -64,6 +64,7 @@ steps:
            --update-secrets=SUPABASE_KEY=SUPABASE_KEY:latest \
            --update-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest \
            --update-secrets=DB_CONNECTION_STRING=DB_CONNECTION_STRING:latest \
+           --update-secrets=LANGCHAIN_API_KEY=LANGCHAIN_API_KEY:latest \
            --timeout=25m
 
   # Get service URL
