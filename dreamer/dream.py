@@ -44,7 +44,7 @@ def prepare_llm_input(rows):
     return llm_input
 
 def summarise_conversations(docs):
-    llm = ChatOpenAI(model="gpt-4", temperature=0.9, max_tokens=5000)
+    llm = ChatOpenAI(model="gpt-4", temperature=0.9, max_tokens=3000)
     prompt_template = """Use the following events from today to create a dream. 
 Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
 Practice future scenarios that may use the experiences you had today. 
@@ -55,7 +55,7 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 YOUR DREAM TRANSCRIPT:"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+    chain = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     summary = chain.run(docs)
 
     return summary
