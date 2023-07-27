@@ -53,7 +53,7 @@ def prepare_llm_input(rows):
 
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, max_tokens=3000)
+    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3000)
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
     summary1 = chain1.run(docs)
     text_splitter = CharacterTextSplitter()
@@ -64,7 +64,6 @@ def cheap_summary(docs):
     return docs2
 
 def summarise_conversations(docs, temperature=0.9, type="dream"):
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature, max_tokens=3000)
     if type=="dream":
         prompt_template = """Use the following events from today to create a dream. 
 Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
