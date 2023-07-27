@@ -216,7 +216,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             docs = []
             for page in pages:
                 logging.info(f"Sending file {page} to loaders.read_file_to_document {metadata}")
-                docs2 = loaders.read_file_to_document(page, metadata=metadata, big=True)
+                docs2 = loaders.read_file_to_document(page, metadata=metadata)
                 docs.extend(docs2)
 
             chunks = chunk_doc_to_docs(docs, file_name.suffix)
