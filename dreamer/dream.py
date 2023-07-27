@@ -3,7 +3,7 @@ import logging, os
 from google.cloud import bigquery
 from google.cloud import storage
 from langchain.docstore.document import Document
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -56,7 +56,7 @@ def cheap_summary(docs):
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2000)
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
     summary1 = chain1.run(docs)
-    text_splitter = CharacterTextSplitter()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024)
     texts = text_splitter.split_text(summary1)
 
     # Create documents
@@ -141,7 +141,7 @@ def dream(vector_name):
     llm_input = prepare_llm_input(rows)
 
     # Split text
-    text_splitter = CharacterTextSplitter()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024)
     texts = text_splitter.split_text(llm_input)
 
     # Create documents
