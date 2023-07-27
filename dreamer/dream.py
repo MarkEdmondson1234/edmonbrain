@@ -55,7 +55,17 @@ def prepare_llm_input(rows):
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2048)
-    chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
+    prompt_template = """Summarise the events below including sections for questions, answers, chat history and source documents
+
+{text}
+
+YOUR SUMMARY:
+Questions:
+Bot outputs:
+Chat history:
+Source documents:"""
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+    chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     summary1 = chain1.run(docs)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024)
     texts = text_splitter.split_text(summary1)
