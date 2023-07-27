@@ -76,15 +76,13 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 YOUR DREAM TRANSCRIPT:"""
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        # make a summary first to avoid gpt-4 rate limits
-        docs2 = cheap_summary(docs)
-
         llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
-        summary = chain2.run(docs2)
+        summary = chain2.run(docs)
         
     elif type=="journal":
-        summary = cheap_summary(docs)
+        summary2 = cheap_summary(docs)
+        summary = summary2.page_content
     elif type=="practice":
         prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
 Role play a human and yourself as an AI answering questions the human would be interested in.
@@ -98,12 +96,9 @@ AI:
 """
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        # make a summary first to avoid gpt-4 rate limits
-        docs2 = cheap_summary(docs)
-
         llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
-        summary = chain2.run(docs2)
+        summary = chain2.run(docs)
 
     else:
         raise ValueError("You must set a type of 'practice', 'journal' or 'dream'")
@@ -148,12 +143,11 @@ def dream(vector_name):
     # Create documents
     docs = [Document(page_content=t) for t in texts]
 
-    # Summarize the conversations
-    dream = summarise_conversations(docs, temperature=0.9, type="dream")
-    time.sleep(60) # rate limits
     journal = summarise_conversations(docs, temperature=0, type="journal")
-    time.sleep(60) # rate limits
-    practice = summarise_conversations(docs, temperature=0.5, type="practice")
+    docs2 = [Document(page_content=t) for t in journal]
+    # Summarize the conversations
+    dream = summarise_conversations(docs2, temperature=0.9, type="dream")
+    practice = summarise_conversations(docs2, temperature=0.5, type="practice")
 
     # Upload to input into brain
     dream_blob_name = f'{vector_name}/dreams/dream_{today_date}.txt'
@@ -161,8 +155,8 @@ def dream(vector_name):
     practice_blob_name = f'{vector_name}/practice/practice_{today_date}.txt'
 
     upload_blob(dream, dream_blob_name)
-    upload_blob(journal,journal_blob_name)
-    upload_blob(practice,practice_blob_name)
+    upload_blob(journal, journal_blob_name)
+    upload_blob(practice, practice_blob_name)
 
 if __name__ == "__main__":
     dream('edmonbrain')
