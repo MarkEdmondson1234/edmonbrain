@@ -54,7 +54,7 @@ def prepare_llm_input(rows):
 
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
-    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2048)
+    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3048)
     prompt_template = """Summarise the events below including sections for questions, answers, chat history and source documents
 
 {text}
@@ -66,13 +66,10 @@ Chat history:
 Source documents:"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
-    summary1 = chain1.run(docs)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024)
-    texts = text_splitter.split_text(summary1)
+    summary = chain1.run(docs)
 
     # Create documents
-    docs2 = [Document(page_content=t) for t in texts]
-    return docs2
+    return summary
 
 def summarise_conversations(docs, temperature=0.9, type="dream"):
     if type=="dream":
@@ -86,17 +83,15 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 YOUR DREAM TRANSCRIPT:"""
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3600)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
         summary = chain2.run(docs)
         
     elif type=="journal":
-        summaries = cheap_summary(docs)
-        summary = ""
-        for summ in summaries:
-            summary = summary + summ.page_content
+        summary = cheap_summary(docs)
     elif type=="practice":
         prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
+Don't repeat the same questions and answers, do similar but different.
 Role play a human and yourself as an AI answering questions the human would be interested in.
 Suggest interesting questions to the human that may be interesting, novel or can be useful to achieve the tasks.
 
@@ -108,7 +103,7 @@ AI:
 """
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3600)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
         summary = chain2.run(docs)
 
@@ -156,10 +151,10 @@ def dream(vector_name):
     docs = [Document(page_content=t) for t in texts]
 
     journal = summarise_conversations(docs, temperature=0, type="journal")
-    docs2 = [Document(page_content=t) for t in journal]
+    docs2 = [Document(page_content=journal)]
     # Summarize the conversations
     dream = summarise_conversations(docs2, temperature=0.9, type="dream")
-    practice = summarise_conversations(docs2, temperature=0.5, type="practice")
+    practice = summarise_conversations(docs2, temperature=0.6, type="practice")
 
     # Upload to input into brain
     dream_blob_name = f'{vector_name}/dreams/dream_{today_date}.txt'
