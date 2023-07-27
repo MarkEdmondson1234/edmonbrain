@@ -19,6 +19,7 @@ from langchain.schema import Document
 from qna.pubsub_manager import PubSubManager
 import qna.database as database
 import qna.loaders as loaders
+from qna.pdfs import split_pdf_to_pages
 
 load_dotenv()
 
@@ -62,9 +63,23 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
     month = now.strftime("%m")
     day = now.strftime("%d") 
     hour = now.strftime("%H")
+    hour_prev = (now - datetime.timedelta(hours=1)).strftime("%H")
+
     bucket_filepath = f"{vector_name}/{year}/{month}/{day}/{hour}/{os.path.basename(filename)}"
+    bucket_filepath_prev = f"{vector_name}/{year}/{month}/{day}/{hour_prev}/{os.path.basename(filename)}"
 
     blob = bucket.blob(bucket_filepath)
+    blob_prev = bucket.blob(bucket_filepath_prev)
+
+    if blob.exists():
+        logging.info(f"File {filename} already exists in gs://{bucket_name}/{bucket_filepath}")
+        return f"gs://{bucket_name}/{bucket_filepath}"
+
+    if blob_prev.exists():
+        logging.info(f"File {filename} already exists in gs://{bucket_name}/{bucket_filepath_prev}")
+        return f"gs://{bucket_name}/{bucket_filepath_prev}"
+
+    logging.info(f"File {filename} does not already exist in bucket {bucket_name}/{bucket_filepath}")
 
     the_metadata = {
         "vector_name": vector_name,
@@ -128,7 +143,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     publishTime = data['message'].get('publishTime')
 
     logging.info(f"data_to_embed_pubsub was triggered by messageId {messageId} published at {publishTime}")
-    logging.info(f"data_to_embed_pubsub data: {message_data}")
+    logging.debug(f"data_to_embed_pubsub data: {message_data}")
 
     # pubsub from a Google Cloud Storage push topic
     if attributes.get("eventType", None) is not None and attributes.get("payloadFormat", None) is not None:
@@ -157,7 +172,7 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
     
     metadata = attributes
 
-    logging.info(f"Found metadata in pubsub: {metadata}")
+    logging.debug(f"Found metadata in pubsub: {metadata}")
 
     chunks = []
 
@@ -178,6 +193,19 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             tmp_file_path = os.path.join(temp_dir, file_name.name)
             blob.download_to_filename(tmp_file_path)
 
+            if file_name.suffix == ".pdf":
+                pages = split_pdf_to_pages(tmp_file_path, temp_dir)
+                if len(pages) > 1: # we send it back to GCS to parrallise the imports
+                    logging.info(f"Got back {len(pages)} pages for file {tmp_file_path}")
+                    for pp in pages:
+                        gs_file = add_file_to_gcs(pp, vector_name=vector_name, bucket_name=bucket_name, metadata=metadata)
+                        logging.info(f"{gs_file} is now in bucket {bucket_name}")
+                    logging.info(f"Sent split pages for {file_name.name} back to GCS to parrallise the imports")
+                    return None
+            else:
+                # just original temp file
+                pages = [tmp_file_path]
+
             the_metadata = {
                 "source": message_data,
                 "type": "file_load_gcs",
@@ -185,7 +213,12 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
             }
             metadata.update(the_metadata)
 
-            docs = loaders.read_file_to_document(tmp_file_path, metadata=metadata)
+            docs = []
+            for page in pages:
+                logging.info(f"Sending file {page} to loaders.read_file_to_document {metadata}")
+                docs2 = loaders.read_file_to_document(page, metadata=metadata, big=True)
+                docs.extend(docs2)
+
             chunks = chunk_doc_to_docs(docs, file_name.suffix)
 
     elif message_data.startswith("https://drive.google.com") or message_data.startswith("https://docs.google.com"):
@@ -268,29 +301,41 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
 
         chunks = chunk_doc_to_docs(docs)
 
-    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")
-    if chunks is None:
-        logging.info("No chunks found")
-        pubsub_manager.publish_message(f"Error: no chunks from for: {metadata} to {vector_name} embedding")
-        return None
-        
-    publish_chunks(chunks, vector_name=vector_name)
+    process_docs_chunks_vector_name(chunks, vector_name, metadata)
 
-    logging.info(f"data_to_embed_pubsub published chunks with metadata: {metadata}")
-    
+    # summarisation of large docs, send them in too
     from qna.summarise import summarise_docs
     summaries = [Document(page_content="No summary made", metadata=metadata)]
-
     do_summary = False #TODO: use metadata to determine a summary should be made
     if docs is not None and do_summary:
         summaries = summarise_docs(docs, vector_name=vector_name)
         summary_chunks = chunk_doc_to_docs(summaries)
         publish_chunks(summary_chunks, vector_name=vector_name)
 
+    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")    
     pubsub_manager.publish_message(
         f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding with summaries:\n{summaries}")
 
     return metadata
+
+
+def process_docs_chunks_vector_name(chunks, vector_name, metadata):
+
+    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")
+    if chunks is None:
+        logging.info("No chunks found")
+        pubsub_manager.publish_message(f"No chunks for: {metadata} to {vector_name} embedding")
+        return None
+        
+    publish_chunks(chunks, vector_name=vector_name)
+
+    msg = f"data_to_embed_pubsub published chunks with metadata: {metadata}"
+
+    logging.info(msg)
+    
+    pubsub_manager.publish_message(f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding")
+
+    return metadata    
 
 def publish_if_urls(the_content, vector_name):
     """
