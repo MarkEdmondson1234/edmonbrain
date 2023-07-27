@@ -312,9 +312,9 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
         summary_chunks = chunk_doc_to_docs(summaries)
         publish_chunks(summary_chunks, vector_name=vector_name)
 
-    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")    
-    pubsub_manager.publish_message(
-        f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding with summaries:\n{summaries}")
+        pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"pubsub_state_messages")    
+        pubsub_manager.publish_message(
+            f"Sent doc chunks with metadata: {metadata} to {vector_name} embedding with summaries:\n{summaries}")
 
     return metadata
 

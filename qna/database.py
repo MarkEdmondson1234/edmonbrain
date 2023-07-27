@@ -112,7 +112,7 @@ def do_sql(sql, sql_params=None, return_rows=False, verbose=False, connection_en
 
             if return_rows:
                 rows = cursor.fetchall()
-            logging.info("SQL successfully fetched")
+            logging.debug("SQL successfully fetched")
             break  # If all operations were successful, break the loop
 
         except (psycopg2.errors.DuplicateObject, 
