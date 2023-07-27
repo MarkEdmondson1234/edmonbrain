@@ -53,7 +53,7 @@ def prepare_llm_input(rows):
 
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
-    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3000)
+    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2000)
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
     summary1 = chain1.run(docs)
     text_splitter = CharacterTextSplitter()
@@ -78,7 +78,7 @@ YOUR DREAM TRANSCRIPT:"""
         # make a summary first to avoid gpt-4 rate limits
         docs2 = cheap_summary(docs)
 
-        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
         summary = chain2.run(docs2)
         
@@ -100,7 +100,7 @@ AI:
         # make a summary first to avoid gpt-4 rate limits
         docs2 = cheap_summary(docs)
 
-        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=2000)
         chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
         summary = chain2.run(docs2)
 
