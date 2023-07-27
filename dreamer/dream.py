@@ -8,12 +8,12 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
-def fetch_data_from_bigquery(date):
+def fetch_data_from_bigquery(date, vector_name):
     client = bigquery.Client()
 
     # Read the main SQL query from a file and execute it
     with open('dreamer/query.sql', 'r') as file:
-        sql = file.read().replace('{date}', date)
+        sql = file.read().replace('{date}', date).replace('{vector_name}', vector_name)
     
     logging.info('Executing SQL query: {}'.format(sql))
     query_job = client.query(sql)  # This makes an API request.
@@ -22,7 +22,10 @@ def fetch_data_from_bigquery(date):
     if len(rows) < 10:
         # Read the additional SQL query from a file and execute it
         with open('dreamer/query_random.sql', 'r') as file:
-            sql_random = file.read().replace('{date}', date).replace('{limit}', str(10-len(rows)))
+            sql_random = file.read() \
+                            .replace('{date}', date) \
+                            .replace('{limit}', str(10-len(rows))) \
+                            .replace('{vector_name}', vector_name)
         
         logging.info('Executing random SQL query: {}'.format(sql))
         query_job = client.query(sql_random)
@@ -35,17 +38,23 @@ def fetch_data_from_bigquery(date):
 def prepare_llm_input(rows):
     llm_input = "Todays events:\n\n"
     for row in rows:
-        llm_input += f"**Question:** {row['question']}\n\n"
-        llm_input += f"**Bot Output:** {row['bot_output']}\n\n"
-        llm_input += f"**Chat History:** {row['chat_history']}\n\n"
-        llm_input += "**Source Documents Page Contents:**\n\n"
-        for page_content in row['source_documents_page_contents']:
-            llm_input += f"- {page_content}\n\n"
+        if row['question']:
+            llm_input += f"**Question:** {row['question']}\n\n"
+        if row['bot_output']:
+            llm_input += f"**Bot Output:** {row['bot_output']}\n\n"
+        if row['chat_history']:
+            llm_input += f"**Chat History:** {row['chat_history']}\n\n"
+        if row['source_documents_page_contents']:
+            llm_input += "**Source Documents Page Contents:**\n\n"
+            for page_content in row['source_documents_page_contents']:
+                llm_input += f"- {page_content}\n\n"
     return llm_input
 
-def summarise_conversations(docs):
-    llm = ChatOpenAI(model="gpt-4", temperature=0.9, max_tokens=3000)
-    prompt_template = """Use the following events from today to create a dream. 
+
+def summarise_conversations(docs, temperature=0.9, type="dream"):
+    llm = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+    if type=="dream":
+        prompt_template = """Use the following events from today to create a dream. 
 Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
 Practice future scenarios that may use the experiences you had today. 
 Assess the emotional underpinnings of the events. Use symbolism within the dream to display the emotions and major themes involved.
@@ -53,8 +62,28 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 {text}
 
 YOUR DREAM TRANSCRIPT:"""
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+        
+    elif type=="journal":
+        prompt_template = """Summarise the key points of the below events.
 
+{text}
+
+YOUR SUMMARY:"""
+    elif type=="practice":
+        prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
+Role play a human and yourself as an AI answering questions the human would be interested in.
+Suggest interesting questions to the human that may be interesting, novel or can be useful to achieve the tasks.
+
+{text}
+
+YOUR ROLE PLAY:
+Human:
+AI:
+"""
+    else:
+        raise ValueError("You must set a type of 'practice', 'journal' or 'dream'")
+
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     summary = chain.run(docs)
 
@@ -83,7 +112,7 @@ def dream(vector_name):
     today_date = datetime.today().strftime('%Y-%m-%d')
 
     # Fetch today's conversations data from BigQuery
-    rows = fetch_data_from_bigquery(today_date)
+    rows = fetch_data_from_bigquery(today_date, vector_name=vector_name)
 
     # Prepare LLM input
     llm_input = prepare_llm_input(rows)
@@ -96,13 +125,18 @@ def dream(vector_name):
     docs = [Document(page_content=t) for t in texts]
 
     # Summarize the conversations
-    summary = summarise_conversations(docs)
+    dream = summarise_conversations(docs, temperature=0.9, type="dream")
+    journal = summarise_conversations(docs, temperature=0, type="journal")
+    practice = summarise_conversations(docs, temperature=0.5, type="practice")
 
-    # Define the destination blob name
-    destination_blob_name = f'{vector_name}/dreams/dream_{today_date}.txt'
+    # Upload to input into brain
+    dream_blob_name = f'{vector_name}/dreams/dream_{today_date}.txt'
+    journal_blob_name = f'{vector_name}/journal/journal_{today_date}.txt'
+    practice_blob_name = f'{vector_name}/practice/practice_{today_date}.txt'
 
-    # Upload content to the bucket
-    upload_blob(summary, destination_blob_name)
+    upload_blob(dream, dream_blob_name)
+    upload_blob(journal,journal_blob_name)
+    upload_blob(practice,practice_blob_name)
 
 if __name__ == "__main__":
     dream('edmonbrain')

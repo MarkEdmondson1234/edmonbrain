@@ -1,5 +1,6 @@
 import os, json
 import logging
+import datetime
 from langchain.prompts.prompt import PromptTemplate
 
 
@@ -149,7 +150,8 @@ def pick_prompt(vector_name, chat_history=[]):
     if llm_config is None:
         raise ValueError("No llm_config was found")
     prompt_str = llm_config.get("prompt", None)
-    prompt_str_default = """You are Edmonbrain the chat bot created by Mark Edmondson.
+    the_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    prompt_str_default = f"""You are Edmonbrain the chat bot created by Mark Edmondson. It is now {the_date}.
 Use your memory to answer the question at the end.
 Favour information from the current conversation but be influenced by your memories below.
 If your memories don't help with your answer, just use them to set the tone and style of your response.

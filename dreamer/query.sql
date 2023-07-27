@@ -9,4 +9,5 @@ SELECT
 FROM  `langchain.pubsub_raw`
 WHERE DATE(publish_time) = "{date}"
 AND SAFE.PARSE_JSON(data) IS NOT NULL
+AND JSON_VALUE(SAFE.PARSE_JSON(data), "$.vector_name") = "{vector_name}"
 ORDER BY JSON_VALUE(SAFE.PARSE_JSON(data), "$.timestamp") DESC

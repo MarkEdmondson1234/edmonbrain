@@ -6,8 +6,9 @@ SELECT
     SELECT JSON_QUERY(source_document, "$.page_content") as page_content
     FROM UNNEST(JSON_EXTRACT_ARRAY(SAFE.PARSE_JSON(data), "$.bot_output.source_documents")) as source_document
   ) as source_documents_page_contents
-FROM  `langchain.pubsub_raw`
+FROM `langchain.pubsub_raw`
 WHERE DATE(publish_time) != "{date}"
 AND SAFE.PARSE_JSON(data) IS NOT NULL
+AND JSON_VALUE(SAFE.PARSE_JSON(data), "$.vector_name") = "{vector_name}"
 ORDER BY RAND()
 LIMIT {limit}
