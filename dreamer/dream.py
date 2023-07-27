@@ -51,8 +51,20 @@ def prepare_llm_input(rows):
     return llm_input
 
 
+def cheap_summary(docs):
+    # make a summary first to avoid gpt-4 rate limits
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, max_tokens=3000)
+    chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
+    summary1 = chain1.run(docs)
+    text_splitter = CharacterTextSplitter()
+    texts = text_splitter.split_text(summary1)
+
+    # Create documents
+    docs2 = [Document(page_content=t) for t in texts]
+    return docs2
+
 def summarise_conversations(docs, temperature=0.9, type="dream"):
-    llm = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature, max_tokens=3000)
     if type=="dream":
         prompt_template = """Use the following events from today to create a dream. 
 Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
@@ -62,13 +74,17 @@ Assess the emotional underpinnings of the events. Use symbolism within the dream
 {text}
 
 YOUR DREAM TRANSCRIPT:"""
+        PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+        # make a summary first to avoid gpt-4 rate limits
+        docs2 = cheap_summary(docs)
+
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+        chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
+        summary = chain2.run(docs2)
         
     elif type=="journal":
-        prompt_template = """Summarise the key points of the below events.
-
-{text}
-
-YOUR SUMMARY:"""
+        summary = cheap_summary(docs)
     elif type=="practice":
         prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
 Role play a human and yourself as an AI answering questions the human would be interested in.
@@ -80,14 +96,21 @@ YOUR ROLE PLAY:
 Human:
 AI:
 """
+        PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+        # make a summary first to avoid gpt-4 rate limits
+        docs2 = cheap_summary(docs)
+
+        llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3000)
+        chain2 = load_summarize_chain(llm_dream, chain_type="stuff", verbose=True, prompt=PROMPT)
+        summary = chain2.run(docs2)
+
     else:
         raise ValueError("You must set a type of 'practice', 'journal' or 'dream'")
-
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-    chain = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
-    summary = chain.run(docs)
-
+    
     return summary
+
+
 
 def upload_blob(content, destination_blob_name):
     bucket_name = os.getenv('GCS_BUCKET', None)
