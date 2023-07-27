@@ -108,6 +108,7 @@ def upload_blob(content, destination_blob_name):
 
 
 def dream(vector_name):
+    import time
     # Get today's date
     today_date = datetime.today().strftime('%Y-%m-%d')
 
@@ -126,7 +127,9 @@ def dream(vector_name):
 
     # Summarize the conversations
     dream = summarise_conversations(docs, temperature=0.9, type="dream")
+    time.sleep(60) # rate limits
     journal = summarise_conversations(docs, temperature=0, type="journal")
+    time.sleep(60) # rate limits
     practice = summarise_conversations(docs, temperature=0.5, type="practice")
 
     # Upload to input into brain
