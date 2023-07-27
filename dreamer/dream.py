@@ -48,12 +48,13 @@ def prepare_llm_input(rows):
             llm_input += "**Source Documents Page Contents:**\n\n"
             for page_content in row['source_documents_page_contents']:
                 llm_input += f"- {page_content}\n\n"
-    return llm_input
+    # 13k max string length
+    return llm_input[:13000]
 
 
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
-    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2000)
+    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=2048)
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True)
     summary1 = chain1.run(docs)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024)
