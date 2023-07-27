@@ -93,8 +93,8 @@ YOUR DREAM TRANSCRIPT:"""
     elif type=="journal":
         summaries = cheap_summary(docs)
         summary = ""
-        for sum in summaries:
-            summary = summary + sum.page_content
+        for summ in summaries:
+            summary = summary + summ.page_content
     elif type=="practice":
         prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
 Role play a human and yourself as an AI answering questions the human would be interested in.
