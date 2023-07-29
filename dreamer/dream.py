@@ -36,7 +36,8 @@ def fetch_data_from_bigquery(date, vector_name):
 
 
 def prepare_llm_input(rows):
-    llm_input = "Todays events:\n\n"
+    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    llm_input = f"Events occuring on {the_date}:\n\n"
     for row in rows:
         if row['question']:
             llm_input += f"**Question:** {row['question']}\n\n"
@@ -55,15 +56,19 @@ def prepare_llm_input(rows):
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3048)
-    prompt_template = """Summarise the events below including sections for questions, answers, chat history and source documents
+    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    header = f"Summarise the events for {the_date} below including sections for questions, answers, chat history and source documents\n"
+    prompt_template = """
+Include today's date in the summary heading.
 
 {text}
 
-YOUR SUMMARY:
+YOUR SUMMARY for (today's date):
 Questions:
 Bot outputs:
 Chat history (summary per conversation):
 Source documents (summary per source):"""
+    prompt_template = header + prompt_template
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     summary = chain1.run(docs)
@@ -72,15 +77,18 @@ Source documents (summary per source):"""
     return summary
 
 def summarise_conversations(docs, temperature=0.9, type="dream"):
+    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
     if type=="dream":
-        prompt_template = """Use the following events from today to create a dream. 
-Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
+        header = f"Use the following events from today ({the_date}) to create a dream\n"
+        prompt_template = """Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
 Practice future scenarios that may use the experiences you had today. 
 Assess the emotional underpinnings of the events. Use symbolism within the dream to display the emotions and major themes involved.
+Include today's date in the transcript heading.
 
 {text}
 
-YOUR DREAM TRANSCRIPT:"""
+YOUR DREAM TRANSCRIPT for (today's date):"""
+        prompt_template = header + prompt_template
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
         llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3600)
@@ -90,17 +98,19 @@ YOUR DREAM TRANSCRIPT:"""
     elif type=="journal":
         summary = cheap_summary(docs)
     elif type=="practice":
-        prompt_template = """Consider the events below, and role play possible likely future scenarios that would draw upon thier information.
-Don't repeat the same questions and answers, do similar but different.
+        header = f"Consider the events below for the date {the_date}, and role play possible likely future scenarios that would draw upon thier information.\n"
+        prompt_template = """Don't repeat the same questions and answers, do similar but different.
 Role play a human and yourself as an AI answering questions the human would be interested in.
 Suggest interesting questions to the human that may be interesting, novel or can be useful to achieve the tasks.
+Include today's date in the transcript.
 
 {text}
 
-YOUR ROLE PLAY:
+YOUR ROLE PLAY for (today's date):
 Human:
 AI:
 """
+        prompt_template = header + prompt_template
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 
         llm_dream = ChatOpenAI(model="gpt-4", temperature=temperature, max_tokens=3600)
