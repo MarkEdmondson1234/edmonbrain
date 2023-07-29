@@ -62,8 +62,8 @@ def cheap_summary(docs):
 YOUR SUMMARY:
 Questions:
 Bot outputs:
-Chat history:
-Source documents:"""
+Chat history (summary per conversation):
+Source documents (summary per source):"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain1 = load_summarize_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     summary = chain1.run(docs)

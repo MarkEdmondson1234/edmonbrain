@@ -25,7 +25,7 @@ class PubSubManager:
         self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT')
 
         if self.project_id:
-            logging.info(f"Project ID: {self.project_id}")
+            logging.debug(f"Project ID: {self.project_id}")
             # Create the Pub/Sub topic based on the project ID and memory_namespace
             self.publisher = pubsub_v1.PublisherClient()
             self.pubsub_topic = f"projects/{self.project_id}/topics/{pubsub_topic}" or \
@@ -104,7 +104,7 @@ class PubSubManager:
 
             if not exists:
                 full_subscription_name = f"projects/{self.project_id}/subscriptions/{subscription_name}"
-                logging.info(f"Creating subscription {full_subscription_name}")
+                logging.debug(f"Creating subscription {full_subscription_name}")
                 try:
                     subscriber.create_subscription(name=full_subscription_name, 
                                                    topic=self.pubsub_topic, 
