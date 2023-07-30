@@ -36,7 +36,7 @@ def fetch_data_from_bigquery(date, vector_name):
 
 
 def prepare_llm_input(rows):
-    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    the_date = datetime.now().strftime('%Y-%m-%d')
     llm_input = f"Events occuring on {the_date}:\n\n"
     for row in rows:
         if row['question']:
@@ -56,7 +56,7 @@ def prepare_llm_input(rows):
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3048)
-    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    the_date = datetime.now().strftime('%Y-%m-%d')
     header = f"Summarise the events for {the_date} below including sections for questions, answers, chat history and source documents\n"
     prompt_template = """
 Include today's date in the summary heading.
@@ -77,7 +77,7 @@ Source documents (summary per source):"""
     return summary
 
 def summarise_conversations(docs, temperature=0.9, type="dream"):
-    the_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    the_date = datetime.now().strftime('%Y-%m-%d')
     if type=="dream":
         header = f"Use the following events from today ({the_date}) to create a dream\n"
         prompt_template = """Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
