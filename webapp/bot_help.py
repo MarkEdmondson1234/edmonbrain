@@ -9,6 +9,8 @@ import tempfile
 
 import qna.database as db
 import qna.publish_to_pubsub_embed as pbembed
+from google.cloud import storage
+
 
 def generate_webapp_output(bot_output):
     source_documents = []
@@ -207,12 +209,14 @@ def handle_special_commands(user_input, vector_name, chat_history):
             msg = "\n".join([f"{row}" for row in rows])
             return {"result": f"*sources:*\n{msg}"}
 
+
     elif user_input.startswith("!help"):
         return {"result":f"""*Commands*
 - `!saveurl [https:// url]` - add the contents found at this URL to database. 
 - `!help`- see this message
 - `!sources` - get sources added in last 24hrs
 - `!deletesource [gs:// source]` - delete a source from database
+- `!dream` - get last night's dream. Use `!dream 2023-07-30` to get a dream from a specific date. Also works with `!journal` and `!practice`
 *Tips*
 - See user guide here: https://docs.google.com/document/d/1WMi5X4FVHCihIkZ69gzxkVzr86m4WQj3H75LjSPjOtQ
 - Attach files to Discord messages to upload them into database
@@ -222,9 +226,46 @@ def handle_special_commands(user_input, vector_name, chat_history):
 - For private GitHub repositories, the app has a GitHub PAT that will need access linked to MarkEdmondson1234 account
 *Slash Commands*
 """}
+    
+    # check for special text file request via !dream !journal or !practice
+    result = get_gcs_text_file(user_input, vector_name)
+    if result:
+        return {"result": result}
 
     # If no special commands were found, return None
     return None
+
+def get_gcs_text_file(user_input, vector_name):
+    command = None
+    for keyword in ["!dream", "!journal", "!practice"]:
+        if user_input.startswith(keyword):
+            command = keyword.strip('!')
+            break
+
+    if not command:
+        return None
+
+    dream_date = datetime.datetime.now() - datetime.timedelta(1)
+    if ' ' in user_input:
+        _, date_str = user_input.split(' ', 1)
+        try:
+            dream_date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            return f"Invalid date format for !{command}. Use YYYY-MM-DD."
+
+    dream_date_str = dream_date.strftime('%Y-%m-%d')
+
+    bucket_name = os.getenv("GCS_BUCKET").replace("gs://","") 
+    source_blob_name = f"{vector_name}/{command}/{command}_{dream_date_str}.txt"
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    blob = bucket.blob(source_blob_name)
+    if blob.exists():
+        dream_text = blob.download_as_text()
+        return dream_text
+    else:
+        return f"!{command} file does not exist for date {dream_date_str}"
 
 
 
