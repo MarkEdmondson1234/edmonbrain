@@ -170,7 +170,7 @@ def dream(vector_name):
     practice = summarise_conversations(docs2, temperature=0.6, type="practice")
 
     # Upload to input into brain
-    dream_blob_name = f'{vector_name}/dreams/dream_{today_date}.txt'
+    dream_blob_name = f'{vector_name}/dream/dream_{today_date}.txt'
     journal_blob_name = f'{vector_name}/journal/journal_{today_date}.txt'
     practice_blob_name = f'{vector_name}/practice/practice_{today_date}.txt'
 
