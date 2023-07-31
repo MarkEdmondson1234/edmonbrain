@@ -1,5 +1,5 @@
 from datetime import datetime
-import logging, os
+import logging, os, random
 from google.cloud import bigquery
 from google.cloud import storage
 from langchain.docstore.document import Document
@@ -19,18 +19,21 @@ def fetch_data_from_bigquery(date, vector_name):
     query_job = client.query(sql)  # This makes an API request.
     rows = list(query_job.result())  # Waits for the query to finish.
 
+    random_limit = '1'
     if len(rows) < 10:
-        # Read the additional SQL query from a file and execute it
-        with open('dreamer/query_random.sql', 'r') as file:
-            sql_random = file.read() \
-                            .replace('{date}', date) \
-                            .replace('{limit}', str(10-len(rows))) \
-                            .replace('{vector_name}', vector_name)
-        
-        logging.info('Executing random SQL query: {}'.format(sql))
-        query_job = client.query(sql_random)
-        rows_random = list(query_job.result())
-        rows.extend(rows_random)
+        random_limit = str(10-len(rows))
+
+    # Read the random SQL query from a file and execute it
+    with open('dreamer/query_random.sql', 'r') as file:
+        sql_random = file.read() \
+                        .replace('{date}', date) \
+                        .replace('{limit}', random_limit) \
+                        .replace('{vector_name}', vector_name)
+    
+    logging.info('Executing random SQL query: {}'.format(sql))
+    query_job = client.query(sql_random)
+    rows_random = list(query_job.result())
+    rows.extend(rows_random)
 
     return rows
 
@@ -38,13 +41,14 @@ def fetch_data_from_bigquery(date, vector_name):
 def prepare_llm_input(rows):
     the_date = datetime.now().strftime('%Y-%m-%d')
     llm_input = f"Events occuring on {the_date}:\n\n"
+    
+    random.shuffle(rows)
+    
     for row in rows:
         if row['question']:
             llm_input += f"**Question:** {row['question']}\n\n"
         if row['bot_output']:
             llm_input += f"**Bot Output:** {row['bot_output']}\n\n"
-        if row['chat_history']:
-            llm_input += f"**Chat History:** {row['chat_history']}\n\n"
         if row['source_documents_page_contents']:
             llm_input += "**Source Documents Page Contents:**\n\n"
             for page_content in row['source_documents_page_contents']:
@@ -66,7 +70,6 @@ Include today's date in the summary heading.
 YOUR SUMMARY for (today's date):
 Questions:
 Bot outputs:
-Chat history (summary per conversation):
 Source documents (summary per source):"""
     prompt_template = header + prompt_template
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])

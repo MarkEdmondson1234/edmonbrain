@@ -166,7 +166,7 @@ def extract_chat_history(chat_history=None):
 
 def handle_special_commands(user_input, vector_name, chat_history):
     now = datetime.datetime.now()
-    hourmin = now.strftime("%H%M")
+    hourmin = now.strftime("%H%M%S")
     the_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     chat_history = extract_chat_history(chat_history)
     if user_input.startswith("!savethread"):
