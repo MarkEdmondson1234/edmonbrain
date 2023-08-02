@@ -18,6 +18,7 @@ def fetch_data_from_bigquery(date, vector_name):
     logging.info('Executing SQL query: {}'.format(sql))
     query_job = client.query(sql)  # This makes an API request.
     rows = list(query_job.result())  # Waits for the query to finish.
+    logging.info(f'Memory query finished and returned {len(rows)} rows.')
 
     random_limit = '1'
     if len(rows) < 10:
@@ -33,7 +34,10 @@ def fetch_data_from_bigquery(date, vector_name):
     logging.info('Executing random SQL query: {}'.format(sql))
     query_job = client.query(sql_random)
     rows_random = list(query_job.result())
+    logging.info(f'Random query finished and returned {len(rows_random)} rows.')
     rows.extend(rows_random)
+
+    logging.info(f'Dream queries merged and returned {len(rows)} rows.')
 
     return rows
 
@@ -52,10 +56,19 @@ def prepare_llm_input(rows):
         if row['source_documents_page_contents']:
             llm_input += "**Source Documents Page Contents:**\n\n"
             for page_content in row['source_documents_page_contents']:
-                llm_input += f"- {page_content}\n\n"
+                source_sum = summarise_source_document(page_content)
+                llm_input += f"- {source_sum}\n\n"
+                
     # 13k max string length
     return llm_input[:13000]
 
+def summarise_source_document(source_content):
+    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=512)
+    chain = load_summarize_chain(llm, chain_type="stuff")
+    docs=[Document(page_content=source_content)]
+    summary = chain.run(docs)
+
+    return summary
 
 def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
