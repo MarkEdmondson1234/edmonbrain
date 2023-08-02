@@ -72,20 +72,29 @@ async def make_chat_history(new_thread, bot_mention, client_user):
 
     # Reverse the messages to maintain the order of conversation
     chat_history = []
-    start = False
+    last_author = None
+    group_content = ""
+    group_embeds = []
     for msg in reversed(history):
         author = "AI" if msg.author == client_user else "Human"
-        if author == "Human":
-            start = True
-        if start:
-            clean_content = msg.content.replace(bot_mention, '').strip()
-            embeds = [embed.to_dict() for embed in msg.embeds]
-            chat_history.append({"name": author, "content": clean_content, "embeds": embeds})
+        clean_content = msg.content.replace(bot_mention, '').strip()
+        embeds = [embed.to_dict() for embed in msg.embeds]
+        
+        if last_author is not None and last_author != author:
+            chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
+            group_content = ""
+            group_embeds = []
+        
+        group_content += " " + clean_content
+        group_embeds.extend(embeds)
+        last_author = author
+
+    if group_content:  # Don't forget the last group!
+        chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
 
     print(f"chat_history: {chat_history}")
 
     return chat_history
-
 
 
 async def make_new_thread(message, clean_content):
