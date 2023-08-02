@@ -136,13 +136,9 @@ def get_chat_history(inputs, vector_name, last_chars=500, summary_chars=1500) ->
     
     # Get the last `last_chars` characters of the full chat history
     last_bits = []
-    last_total = 0
     for human, ai in reversed(inputs):
         add_me = f"Human:{human}\nAI:{ai}"
         last_bits.append(add_me)
-        last_total += len(add_me)
-        if last_total > last_chars:
-            break
 
     recent_history = "\n".join(reversed(last_bits))[:-last_chars]
     logging.info(f"Recent chat history: {recent_history}")
