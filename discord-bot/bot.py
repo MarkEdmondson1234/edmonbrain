@@ -94,7 +94,7 @@ async def make_chat_history(new_thread, bot_mention, client_user):
     if group_content:  # Don't forget the last group!
         chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
 
-    print(f"chat_history: {chat_history}")
+    #print(f"chat_history: {chat_history}")
 
     return chat_history
 

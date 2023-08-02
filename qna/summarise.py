@@ -18,7 +18,7 @@ MAP_PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
 import time
 import random
 
-def summarise_docs(docs, vector_name):
+def summarise_docs(docs, vector_name, skip_if_less=10000):
     llm, _, _ = pick_llm(vector_name)
     chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True,
                                  map_prompt=MAP_PROMPT,
@@ -27,7 +27,8 @@ def summarise_docs(docs, vector_name):
     summaries = []
     for doc in docs:
         logging.info(f"summarise: doc {doc}")
-        if len(doc.page_content) < 10000:
+        if len(doc.page_content) < skip_if_less:
+            logging.info(f"Skipping summarisation as below {skip_if_less} characters")
             continue
         metadata = doc.metadata
         chunks = chunk_doc_to_docs([doc])

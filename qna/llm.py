@@ -146,8 +146,9 @@ def get_chat_history(inputs, vector_name, last_chars=1000, summary_chars=1500) -
     
     # Summarize chat history too
     remaining_history = full_history
+    logging.info(f"Remaining chat history: {remaining_history}")
     doc_history = Document(page_content=remaining_history)
-    chat_summary = summarise_docs([doc_history], vector_name=vector_name)
+    chat_summary = summarise_docs([doc_history], vector_name=vector_name, skip_if_less=100)
     text_sum = ""
     for summ in chat_summary:
         text_sum += summ.page_content + "\n"
