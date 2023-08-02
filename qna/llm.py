@@ -134,7 +134,17 @@ def get_chat_history(inputs, vector_name, last_chars=500, summary_chars=1500) ->
     full_history = "\n".join(res)
     
     # Get the last `last_chars` characters of the full chat history
-    last_part = full_history[-last_chars:]
+    last_bits = []
+    last_total = 0
+    for human, ai in reversed(inputs):
+        add_me = f"Human:{human}\nAI:{ai}"
+        last_bits.append(add_me)
+        last_total += len(add_me)
+        if last_total > last_chars:
+            break
+
+    recent_history = "\n".join(reversed(last_bits))[:-last_chars]
+    logging.info(f"Recent chat history: {recent_history}")
     
     # Summarize the part of the chat history that precedes the last `last_chars` characters
     remaining_history = full_history[:-last_chars]
@@ -148,7 +158,7 @@ def get_chat_history(inputs, vector_name, last_chars=500, summary_chars=1500) ->
     summary = text_sum[:summary_chars]
     
     # Concatenate the summary and the last `last_chars` characters of the chat history
-    return summary + "\n" + last_part
+    return summary + "\n" + recent_history
 
 
 
