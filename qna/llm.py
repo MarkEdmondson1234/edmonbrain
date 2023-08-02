@@ -196,14 +196,14 @@ Any questions about how you work should direct users to issue the `!help` comman
 
     memory_str = "\n## Your Memory\n{context}\n"
     current_conversation =f"## Current Conversation\n{chat_summary}\n"
+    current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
     my_q = "## My Question\n{question}\n## Your response:\n"
 
     prompt_template = prompt_str_default + memory_str + current_conversation + my_q
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"],
-        validate_template=False
+        template=prompt_template, input_variables=["context", "question"]
     )
 
     return QA_PROMPT
