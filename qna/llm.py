@@ -123,22 +123,33 @@ def pick_vectorstore(vector_name, embeddings):
 
     return vectorstore
 
-def get_chat_history(inputs, vector_name) -> str:
-    res = []
-    for human, ai in inputs:
-        res.append(f"Human:{human}\nAI:{ai}")
-    add_history = "\n".join(res)
-
+def get_chat_history(inputs, vector_name, last_chars=500, summary_chars=1500) -> str:
     from langchain.schema import Document
     from qna.summarise import summarise_docs
 
-    doc_history = Document(page_content=add_history)
+    # Prepare the full chat history
+    res = []
+    for human, ai in inputs:
+        res.append(f"Human:{human}\nAI:{ai}")
+    full_history = "\n".join(res)
+    
+    # Get the last `last_chars` characters of the full chat history
+    last_part = full_history[-last_chars:]
+    
+    # Summarize the part of the chat history that precedes the last `last_chars` characters
+    remaining_history = full_history[:-last_chars]
+    doc_history = Document(page_content=remaining_history)
     chat_summary = summarise_docs([doc_history], vector_name=vector_name)
     text_sum = ""
-    for sum in chat_summary:
-        text_sum += sum.page_content + "\n"
+    for summ in chat_summary:
+        text_sum += summ.page_content + "\n"
+    
+    # Make sure the summary is not longer than `summary_chars` characters
+    summary = text_sum[:summary_chars]
+    
+    # Concatenate the summary and the last `last_chars` characters of the chat history
+    return summary + "\n" + last_part
 
-    return text_sum[:2000]
 
 
 def pick_prompt(vector_name, chat_history=[]):
@@ -172,9 +183,10 @@ Any questions about how you work should direct users to issue the `!help` comman
     if len(chat_history) != 0:
         chat_summary = get_chat_history(chat_history, vector_name)
 
-    business_end = """\n## Your Memory\n{context}\n## My Question\n {question}\n## Your response:\n"""
+    business_end = "\n## Your Memory\n{context}\n## My Question\n{question}\n"
+    so_far = f"## Current Conversation Summary\n{chat_summary}## Your response:\n"
 
-    prompt_template = prompt_str_default + "\n## Current Conversation Summary\n" + chat_summary + business_end
+    prompt_template = prompt_str_default + business_end + so_far
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
