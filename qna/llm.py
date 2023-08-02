@@ -202,7 +202,8 @@ Any questions about how you work should direct users to issue the `!help` comman
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
+        template=prompt_template, input_variables=["context", "question"],
+        validate_template=False
     )
 
     return QA_PROMPT
