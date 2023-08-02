@@ -70,9 +70,6 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         history.append(msg)
 
-    # Exclude the first message
-    history = history[1:]
-
     # Reverse the messages to maintain the order of conversation
     chat_history = []
     start = False

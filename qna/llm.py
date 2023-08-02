@@ -3,6 +3,7 @@ import logging
 import datetime
 from langchain.prompts.prompt import PromptTemplate
 
+logging.basicConfig(level=logging.INFO)
 
 def load_config(filename):
     logging.debug("Loading config for llm")
@@ -194,7 +195,7 @@ Any questions about how you work should direct users to issue the `!help` comman
         chat_summary = get_chat_history(chat_history, vector_name)
 
     business_end = "\n## Your Memory\n{context}\n## My Question\n{question}\n"
-    so_far = f"## Current Conversation Summary\n{chat_summary}## Your response:\n"
+    so_far = f"## Current Conversation Summary\n{chat_summary}\n## Your response:\n"
 
     prompt_template = prompt_str_default + business_end + so_far
     
