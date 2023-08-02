@@ -44,7 +44,7 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
             time.sleep(delay)
             try:
                 result = qa({"question": question, "chat_history": chat_history})
-                result["answer"] = result["answer"] + " (Sorry for delay, needed to warm up brain - should be quicker next time)"
+                result["answer"] = result["answer"] + " (Sorry for delay, brain was a bit slow - should be quicker next time)"
                 return result
             except ReadTimeout:
                 if retry == max_retries - 1:
@@ -55,7 +55,7 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
             time.sleep(delay)
             try:
                 result = qa({"question": question, "chat_history": chat_history})
-                result["answer"] = result["answer"] + " (Sorry for delay, had to retry - should be quicker next time)"
+                result["answer"] = result["answer"] + " (Sorry for delay, had to warm up the brain - should be quicker next time)"
                 return result
             except Exception:
                 if retry == max_retries - 1:

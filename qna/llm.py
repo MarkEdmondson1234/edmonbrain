@@ -144,13 +144,15 @@ def get_chat_history(inputs, vector_name, last_chars=1000, summary_chars=1500) -
     recent_history = recent_history[-last_chars:]
     logging.info(f"Recent chat history: {recent_history}")
     
-    # Summarize the part of the chat history that precedes the last `last_chars` characters
-    remaining_history = full_history[:-last_chars]
+    # Summarize chat history too
+    remaining_history = full_history
     doc_history = Document(page_content=remaining_history)
     chat_summary = summarise_docs([doc_history], vector_name=vector_name)
     text_sum = ""
     for summ in chat_summary:
         text_sum += summ.page_content + "\n"
+    
+    logging.info(f"Conversation Summary: {text_sum}")
     
     # Make sure the summary is not longer than `summary_chars` characters
     summary = text_sum[:summary_chars]
