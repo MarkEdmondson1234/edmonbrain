@@ -70,23 +70,25 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         history.append(msg)
 
+    # Exclude the last message
+    history = history[:-1]
+
     # Reverse the messages to maintain the order of conversation
     chat_history = []
-    for i in reversed(range(len(history))):
-        msg = history[i]
+    start = False
+    for msg in reversed(history):
         author = "AI" if msg.author == client_user else "Human"
-        clean_content = msg.content.replace(bot_mention, '').strip()
-        embeds = [embed.to_dict() for embed in msg.embeds]
-        # Skip the last human message
-        if i == len(history)-1 and author == "Human":
-            continue
-        # Start from a human message
-        if i < len(history)-1 and chat_history == [] and author == "AI":
-            continue
-        chat_history.append({"name": author, "content": clean_content, "embeds": embeds})
+        if author == "Human":
+            start = True
+        if start:
+            clean_content = msg.content.replace(bot_mention, '').strip()
+            embeds = [embed.to_dict() for embed in msg.embeds]
+            chat_history.append({"name": author, "content": clean_content, "embeds": embeds})
 
     print(f"chat_history: {chat_history}")
+    
     return chat_history
+
 
 
 async def make_new_thread(message, clean_content):
