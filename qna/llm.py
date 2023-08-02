@@ -124,7 +124,7 @@ def pick_vectorstore(vector_name, embeddings):
 
     return vectorstore
 
-def get_chat_history(inputs, vector_name, last_chars=500, summary_chars=1500) -> str:
+def get_chat_history(inputs, vector_name, last_chars=1000, summary_chars=1500) -> str:
     from langchain.schema import Document
     from qna.summarise import summarise_docs
 
@@ -191,10 +191,11 @@ Any questions about how you work should direct users to issue the `!help` comman
     if len(chat_history) != 0:
         chat_summary = get_chat_history(chat_history, vector_name)
 
-    business_end = "\n## Your Memory\n{context}\n## My Question\n{question}\n"
-    so_far = f"## Current Conversation Summary\n{chat_summary}\n## Your response:\n"
+    memory_str = "\n## Your Memory\n{context}\n"
+    current_conversation =f"## Current Conversation\n{chat_summary}\n"
+    my_q = "## My Question\n{question}\n## Your response:\n"
 
-    prompt_template = prompt_str_default + business_end + so_far
+    prompt_template = prompt_str_default + memory_str + current_conversation + my_q
     
     logging.info(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(

@@ -58,7 +58,7 @@ def prepare_llm_input(rows):
             for page_content in row['source_documents_page_contents']:
                 source_sum = summarise_source_document(page_content)
                 llm_input += f"- {source_sum}\n\n"
-                
+
     # 13k max string length
     return llm_input[:13000]
 
@@ -74,7 +74,7 @@ def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3048)
     the_date = datetime.now().strftime('%Y-%m-%d')
-    header = f"Summarise the events for {the_date} below including sections for questions, answers, chat history and source documents\n"
+    header = f"Summarise the events for {the_date} below including sections for questions, answers, unanswered questions, and source documents\n"
     prompt_template = """
 Include today's date in the summary heading.
 
@@ -83,6 +83,7 @@ Include today's date in the summary heading.
 YOUR SUMMARY for (today's date):
 Questions:
 Bot outputs:
+Unanswered questions:
 Source documents (summary per source):"""
     prompt_template = header + prompt_template
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
@@ -99,6 +100,7 @@ def summarise_conversations(docs, temperature=0.9, type="dream"):
         prompt_template = """Reflect on the unique events that happened today, and speculate a lot on what they meant, both what led to them and what those events may mean for the future. 
 Practice future scenarios that may use the experiences you had today. 
 Assess the emotional underpinnings of the events. Use symbolism within the dream to display the emotions and major themes involved.
+Try to answer any unresolved or hard questions within today's events.
 Include today's date in the transcript heading.
 
 {text}
@@ -118,6 +120,7 @@ YOUR DREAM TRANSCRIPT for (today's date):"""
         prompt_template = """Don't repeat the same questions and answers, do similar but different.
 Role play a human and yourself as an AI answering questions the human would be interested in.
 Suggest interesting questions to the human that may be interesting, novel or can be useful to achieve the tasks.
+Answer any questions that didn't get a satisfactory answer originally.
 Include today's date in the transcript.
 
 {text}
