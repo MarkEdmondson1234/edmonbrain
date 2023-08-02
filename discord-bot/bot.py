@@ -72,7 +72,7 @@ async def make_chat_history(new_thread, bot_mention, client_user):
 
     # Reverse the messages to maintain the order of conversation
     chat_history = []
-    for msg in reversed(history[1:]):
+    for msg in reversed(history):
         author = "AI" if msg.author == client_user else "Human"
         clean_content = msg.content.replace(bot_mention, '').strip()
         embeds = [embed.to_dict() for embed in msg.embeds]

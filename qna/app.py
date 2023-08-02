@@ -55,7 +55,7 @@ def is_ai(message):
 def extract_chat_history(chat_history=None):
 
     if chat_history:
-        logging.info(f"Got chat history: {chat_history}")
+        logging.info(f"Extracting chat history: {chat_history}")
 
         # Initialize variables to hold the last AI message and the list of paired messages
         last_ai_message = ""
