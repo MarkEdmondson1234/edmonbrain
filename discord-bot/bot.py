@@ -79,6 +79,8 @@ async def make_chat_history(new_thread, bot_mention, client_user):
         author = "AI" if msg.author == client_user else "Human"
         clean_content = msg.content.replace(bot_mention, '').strip()
         embeds = [embed.to_dict() for embed in msg.embeds]
+
+        print(f'{author}: {clean_content}')
         
         if last_author is not None and last_author != author:
             chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
