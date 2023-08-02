@@ -70,8 +70,8 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         history.append(msg)
 
-    # Exclude the last message
-    history = history[:-1]
+    # Exclude the first message
+    history = history[1:]
 
     # Reverse the messages to maintain the order of conversation
     chat_history = []
@@ -86,7 +86,7 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             chat_history.append({"name": author, "content": clean_content, "embeds": embeds})
 
     print(f"chat_history: {chat_history}")
-    
+
     return chat_history
 
 
