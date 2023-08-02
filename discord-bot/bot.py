@@ -70,6 +70,8 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         history.append(msg)
 
+    print(f"history: {history}")
+
     # Reverse the messages to maintain the order of conversation
     chat_history = []
     for msg in reversed(history):
@@ -78,6 +80,7 @@ async def make_chat_history(new_thread, bot_mention, client_user):
         embeds = [embed.to_dict() for embed in msg.embeds]
         chat_history.append({"name": author, "content": clean_content, "embeds": embeds})
 
+    print(f"chat history: {chat_history}")
 
     return chat_history
 
