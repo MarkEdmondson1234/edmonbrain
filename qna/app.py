@@ -56,24 +56,29 @@ def extract_chat_history(chat_history=None):
 
     if chat_history:
         logging.info(f"Extracting chat history: {chat_history}")
-
-        # Initialize variables to hold the last AI message and the list of paired messages
-        last_ai_message = ""
         paired_messages = []
 
+        first_message = chat_history[0]
+        if is_ai(first_message):
+            blank_human_message = {"name": "Human", "content": "", "embeds": []}
+            paired_messages.append((create_message_element(blank_human_message), 
+                                    create_message_element(first_message)))
+            chat_history = chat_history[1:]
+
+        last_human_message = ""
         for message in chat_history:
-            # If the message is from the AI, update the last AI message
-            if is_ai(message):
-                last_ai_message = create_message_element(message)
-            # If the message is from a human, pair it with the last AI message (if any)
-            elif is_human(message):
-                human_message = create_message_element(message)
-                paired_messages.append((human_message, last_ai_message))
-                last_ai_message = ""
+            if is_human(message):
+                last_human_message = create_message_element(message)
+            elif is_ai(message):
+                ai_message = create_message_element(message)
+                paired_messages.append((last_human_message, ai_message))
+                last_human_message = ""
 
     else:
         logging.info("No chat history found")
         paired_messages = []
+
+    logging.info(f"Paired messages: {paired_messages}")
 
     return paired_messages
 
