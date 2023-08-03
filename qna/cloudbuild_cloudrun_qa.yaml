@@ -55,8 +55,8 @@ steps:
            --allow-unauthenticated \
            --memory 2Gi \
            --cpu 1 \
-           --min-instances 0 \
-           --max-instances 6 \
+           --min-instances 1 \
+           --max-instances 3 \
            --service-account ${_SERVICE_ACCOUNT} \
            --update-secrets=GIT_PAT=gitpython_PAT:latest \
            --update-secrets=UNSTRUCTURED_KEY=UNSTRCUTURED_KEY:latest \

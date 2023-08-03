@@ -18,8 +18,8 @@ from langchain.schema import Document
 
 from qna.pubsub_manager import PubSubManager
 import qna.database as database
-import qna.loaders as loaders
-from qna.pdfs import split_pdf_to_pages
+import chunker.loaders as loaders
+from chunker.pdfs import split_pdf_to_pages
 
 load_dotenv()
 
@@ -98,6 +98,7 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
     sub_name = f"pubsub_to_store_{vector_name}"
     sub_exists = pubsub_manager.subscription_exists(sub_name)
     if not sub_exists:
+        
         pubsub_manager.create_subscription(sub_name,
                                            push_endpoint=f"/pubsub_to_store/{vector_name}")
         database.setup_database(vector_name)

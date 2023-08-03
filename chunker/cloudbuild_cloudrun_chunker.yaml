@@ -33,7 +33,7 @@ steps:
       RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('bert-base-uncased'); AutoModel.from_pretrained('bert-base-uncased')"
       RUN python -c "from transformers import GPT2TokenizerFast; GPT2TokenizerFast.from_pretrained('gpt2')"
 
-      CMD exec gunicorn --bind :\$$PORT --workers 4 --timeout 0 chunker.app:app
+      CMD exec gunicorn --bind :\$$PORT --workers 5 --timeout 0 chunker.app:app
       EOF
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -53,10 +53,10 @@ steps:
            --region ${_REGION} \
            --platform managed \
            --allow-unauthenticated \
-           --memory 2Gi \
-           --cpu 1 \
+           --memory 4Gi \
+           --cpu 2 \
            --min-instances 0 \
-           --max-instances 6 \
+           --max-instances 8 \
            --service-account ${_SERVICE_ACCOUNT} \
            --update-secrets=GIT_PAT=gitpython_PAT:latest \
            --update-secrets=UNSTRUCTURED_KEY=UNSTRCUTURED_KEY:latest \

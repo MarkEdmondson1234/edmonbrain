@@ -110,42 +110,6 @@ def process_qna(vector_name):
     logging.info(f'==LLM Q:{user_input} - A:{bot_output["answer"]}')
     return jsonify(bot_output)
 
-# can only take up to 10 minutes to ack
-@app.route('/pubsub_chunk_to_store/<vector_name>', methods=['POST'])
-def pubsub_chunk_to_store(vector_name):
-    """
-    Final PubSub destination for each chunk that sends data to Supabase vectorstore"""
-    if request.method == 'POST':
-        data = request.get_json()
-
-        try:
-            meta = pb.from_pubsub_to_supabase(data, vector_name)
-            return {'status': 'Success', 'message': meta}, 200
-        except Exception as err:
-            logging.error(f'QNA_ERROR_EMBED: Error when sending {data} to {vector_name} pubsub_chunk_to_store: {str(err)} traceback: {traceback.format_exc()}')
-            return {'status': 'error', 'message':f'{str(err)} traceback: {traceback.format_exc()}'}, 200
-
-
-
-@app.route('/pubsub_to_store/<vector_name>', methods=['POST'])
-def pubsub_to_store(vector_name):
-    """
-    splits up text or gs:// file into chunks and sends to pubsub topic 
-      that pushes back to /pubsub_chunk_to_store/<vector_name>
-    """
-    if request.method == 'POST':
-        data = request.get_json()
-
-        try:
-            meta = pbembed.data_to_embed_pubsub(data, vector_name)
-            if meta is None:
-                return jsonify({'status': 'ok', 'message': 'No action required'}), 201
-            file_uploaded = str(meta.get("source", "Could not find a source"))
-            return jsonify({'status': 'Success', 'source': file_uploaded}), 200
-        except Exception as err:
-            logging.error(f'QNA_ERROR_EMBED: Error when sending {data} to {vector_name} pubsub_to_store: {str(err)} traceback: {traceback.format_exc()}')
-            return {'status': 'error', 'message':f'{str(err)}'}, 200
-
 if __name__ == "__main__":
     import os
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
