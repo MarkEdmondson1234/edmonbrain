@@ -2,7 +2,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.schema import Document
 
 from qna.llm import pick_llm
-from qna.publish_to_pubsub_embed import chunk_doc_to_docs
+from chunker.publish_to_pubsub_embed import chunk_doc_to_docs
 import logging
 
 from langchain.prompts import PromptTemplate

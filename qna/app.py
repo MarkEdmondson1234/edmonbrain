@@ -6,8 +6,6 @@ sys.path.append(parent_dir)
 # app.py
 from flask import Flask, request, jsonify
 import qna.question_service as qs
-import qna.publish_to_pubsub_embed as pbembed
-import qna.pubsub_chunk_to_store as pb
 
 from qna.pubsub_manager import PubSubManager
 
