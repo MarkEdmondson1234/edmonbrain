@@ -3,7 +3,7 @@ from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.document_loaders.git import GitLoader
 #from langchain.document_loaders import GoogleDriveLoader
-from qna.googledrive_patch import GoogleDriveLoader
+from chunker.googledrive_patch import GoogleDriveLoader
 from qna.llm import load_config
 from googleapiclient.errors import HttpError
 
@@ -13,6 +13,7 @@ import os
 import shutil
 from urllib.parse import urlparse, unquote
 import tempfile
+import time
 
 UNSTRUCTURED_KEY=os.getenv('UNSTRUCTURED_KEY')
 
@@ -171,8 +172,11 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
             # only supported for some file types
             docs = loader.load_and_split()
         else:
-            docs = loader.load()
-            logging.info(f"Loaded docs for {gs_file} from UnstructuredAPIFileLoader")
+            start = time.time()
+            docs = loader.load() # this takes a long time 30m+ for big PDF files
+            end = time.time()
+            elapsed_time = round((end - start) / 60, 2)
+            logging.info(f"Loaded docs for {gs_file} from UnstructuredAPIFileLoader took {elapsed_time} mins")
     except ValueError as e:
         logging.info(f"Error for {gs_file} from UnstructuredAPIFileLoader: {str(e)}")
         if "file type is not supported in partition" in str(e):
