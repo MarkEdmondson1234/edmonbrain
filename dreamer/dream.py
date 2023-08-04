@@ -74,16 +74,16 @@ def cheap_summary(docs):
     # make a summary first to avoid gpt-4 rate limits
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0, max_tokens=3048)
     the_date = datetime.now().strftime('%Y-%m-%d')
-    header = f"Summarise the events for {the_date} below including sections for questions, answers, unanswered questions, and source documents\n"
+    header = f"Summarise the events for {the_date} below including sections for questions, answers, and source documents\n"
     prompt_template = """
 Include today's date in the summary heading.
 
 {text}
 
 YOUR SUMMARY for (today's date):
-Questions:
+Human Questions:
 Bot outputs:
-Unanswered questions:
+Bot questions:
 Source documents (summary per source):"""
     prompt_template = header + prompt_template
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
@@ -116,7 +116,7 @@ YOUR DREAM TRANSCRIPT for (today's date):"""
     elif type=="journal":
         summary = cheap_summary(docs)
     elif type=="practice":
-        header = f"Consider the events below for the date {the_date}, and role play possible likely future scenarios that would draw upon thier information.\n"
+        header = f"Consider the events below for the date {the_date}, and role play possible likely future scenarios that would draw upon their information.\n"
         prompt_template = """Don't repeat the same questions and answers, do similar but different.
 Role play a human and yourself as an AI answering questions the human would be interested in.
 Suggest interesting questions to the human that may be interesting, novel or can be useful to achieve the tasks.
