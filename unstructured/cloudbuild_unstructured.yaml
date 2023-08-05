@@ -1,6 +1,6 @@
 substitutions:
   _IMAGE_NAME: your-image-name
-  _SERVICE_NAME: your-service-name
+  _SERVICE_NAME: edmonbrain-unstructured
   _REGION: your-region
   _SERVICE_ACCOUNT: your-service@your-project.iam.gserviceaccount.com
 
@@ -28,5 +28,4 @@ steps:
            --min-instances 0 \
            --max-instances 3 \
            --service-account ${_SERVICE_ACCOUNT} \
-           --vpc-connector quickstart-connector \
            --timeout=20m
