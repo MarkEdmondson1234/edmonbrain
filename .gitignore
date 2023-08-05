@@ -4,3 +4,8 @@ discord-bot/.env
 env/.pdm-python
 env/
 config.json
+.pdm-python
+*.pyc
+.pdm-python
+src/example_package/__init__.py
+.pdm-python

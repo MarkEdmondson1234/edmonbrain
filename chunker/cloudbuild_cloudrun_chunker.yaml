@@ -24,7 +24,7 @@ steps:
 
       COPY . .
 
-      RUN pip install --no-cache-dir -r qna/requirements.txt
+      RUN pip install --no-cache-dir -r chunker/requirements.txt
 
       EXPOSE 8080
       ENV GCS_BUCKET=${_GCS_BUCKET}
