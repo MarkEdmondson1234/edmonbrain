@@ -1,4 +1,6 @@
 import os
+import json
+import requests
 
 def create_and_execute_batch_job(gs_file, vector_name, metadata):
     from google.cloud import batch_v1
@@ -18,11 +20,12 @@ def create_and_execute_batch_job(gs_file, vector_name, metadata):
                                       "GIT_PAT": os.getenv("GIT_PATH", "BATCH_NOT_FOUND"),
                                       "PGVECTOR_CONNECTION_STRING": os.getenv("PGVECTOR_CONNECTION_STRING","BATCH_NOT_FOUND"),
                                       "UNSTRUCTURED_URL": os.getenv("UNSTRUCTURED_URL", "BATCH_NOT_FOUND"),
+                                      "EMBED_URL": os.getenv("EMBED_URL", "BATCH_NOT_FOUND"),
                                       "GCS_BUCKET": os.getenv("GCS_BUCKET", "BATCH_NOT_FOUND")}
 
     runnable.container = batch_v1.Runnable.Container()
-    runnable.container.image_uri = "gcr.io/gcloud-brain/gcloudbrain/qna:latest"
-    runnable.container.commands=["python", "qna/batch.py",
+    runnable.container.image_uri = os.getenv("THIS_IMAGE", "BATCH_NOT_FOUND")
+    runnable.container.commands=["python", "chunker/batch.py",
                                  gs_file, vector_name, meta_str]
 
     task = batch_v1.TaskSpec()
@@ -53,7 +56,7 @@ def create_and_execute_batch_job(gs_file, vector_name, metadata):
     allocation_policy = batch_v1.AllocationPolicy()
     allocation_policy.instances = [instances]
     allocation_policy.service_account = batch_v1.ServiceAccount(
-        email="gcloud-brain-app@gcloud-brain.iam.gserviceaccount.com")
+        email=get_service_account_email())
 
     job = batch_v1.Job()
     job.task_groups = [group]
@@ -67,7 +70,7 @@ def create_and_execute_batch_job(gs_file, vector_name, metadata):
     create_request = batch_v1.CreateJobRequest()
     create_request.job = job
     create_request.job_id = job_id
-    create_request.parent = "projects/gcloud-brain/locations/europe-west3"
+    create_request.parent = f"projects/{get_gcp_project()}/locations/europe-west3"
 
     # Make the request
     response = client.create_job(create_request)
@@ -102,8 +105,14 @@ def valid_batch_id(input_string:str):
     return job_id
 
 def get_service_account_email():
-    import requests
-    metadata_server_url = 'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email'
+    return get_metadata('instance/service-accounts/default/email')
+
+def get_gcp_project():
+    return get_metadata('project/project-id')
+
+def get_metadata(stem):
+    
+    metadata_server_url = f'http://metadata.google.internal/computeMetadata/v1/{stem}'
 
     headers = {'Metadata-Flavor': 'Google'}
 
@@ -115,4 +124,16 @@ def get_service_account_email():
         print(f"Request failed with status code {response.status_code}")
         return None
 
-print(get_service_account_email())
+
+
+def large_file_via_batch(gs_file, vector_name, metadata):
+        pass
+
+if __name__ == "__main__":
+    import sys
+
+    # Get arguments from command line
+    gs_file = sys.argv[1]
+    vector_name = sys.argv[2]
+    metadata = sys.argv[3]
+    large_file_via_batch(gs_file, vector_name, metadata)
