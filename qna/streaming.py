@@ -116,6 +116,9 @@ def start_streaming_chat(question,
 
     # TODO: only discord for now - slack? gchat?
     from webapp import bot_help
-    discord_output = bot_help.generate_discord_output(final_result)
+    from app import parse_output
+    discord_output = parse_output(final_result)
+    discord_output = bot_help.generate_discord_output(discord_output)
+    
     yield f"###JSON_START###{discord_output}###JSON_END###"
 
