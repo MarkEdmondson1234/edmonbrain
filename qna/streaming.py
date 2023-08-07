@@ -113,5 +113,9 @@ def start_streaming_chat(question,
 
     # the json object with full response in 'answer' and the 'sources' array
     final_result = result_queue.get()
-    yield f"###JSON_START###{final_result}###JSON_END###"
+
+    # TODO: only discord for now - slack? gchat?
+    from webapp import bot_help
+    discord_output = bot_help.generate_discord_output(final_result)
+    yield f"###JSON_START###{discord_output}###JSON_END###"
 

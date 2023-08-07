@@ -8,6 +8,7 @@ import shlex
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env file
 FLASKURL = os.getenv('FLASK_URL', None)
+STREAMURL = os.getenv('STREAM_URL', None)
 
 async def process_streamed_response(response, new_thread):
     json_buffer = ""
@@ -253,7 +254,11 @@ Need this info:
             return
 
         # Forward the message content to your Flask app
-        flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
+        # stream for openai, batch for vertex
+        if VECTORNAME.endswith("_vertex"):
+            flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
+        else:
+            flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
         print(f'Calling {flask_app_url}')
         payload = {
             'content': clean_content,

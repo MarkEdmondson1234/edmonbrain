@@ -88,12 +88,21 @@ def archive_qa(bot_output, vector_name):
     
     pubsub_manager.publish_message(the_data)
 
-@app.route('qna/streaming/<vector_name>', methods=['POST'])
+@app.route('qna/discord/streaming/<vector_name>', methods=['POST'])
 def stream_qa(vector_name):
     data = request.get_json()
-    logging.info(f"qna/streaming/{vector_name} got data: {data}")
+    logging.info(f"qna/discord/streaming/{vector_name} got data: {data}")
 
-    user_input = data['user_input']
+    user_input = data['content'].strip()  # Extract user input from the payload
+
+    chat_history = data.get('chat_history', None)
+
+    from webapp import bot_help
+    paired_messages = bot_help.extract_chat_history(chat_history)
+
+    command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
+    if command_response is not None:
+        return jsonify(command_response)
 
     paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'Stream QNA got: {user_input}')
