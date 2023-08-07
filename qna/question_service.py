@@ -5,6 +5,7 @@ import time
 from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
 from qna.llm import pick_prompt
+from qna.llm import pick_streaming
 
 from httpcore import ReadTimeout
 from openai.error import InvalidRequestError
@@ -14,11 +15,15 @@ from langchain.chains import ConversationalRetrievalChain
 
 #logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.INFO)
-def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial_delay=5):
+def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial_delay=5, stream_llm=None):
 
     logging.debug("Calling qna")
 
     llm, embeddings, llm_chat = pick_llm(vector_name)
+
+    # override llm to one that supports streaming
+    if stream_llm:
+        llm_chat=stream_llm
 
     vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
 

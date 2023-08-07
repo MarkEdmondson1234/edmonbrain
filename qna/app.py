@@ -4,7 +4,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
 # app.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import qna.question_service as qs
 
 from qna.pubsub_manager import PubSubManager
@@ -88,6 +88,25 @@ def archive_qa(bot_output, vector_name):
     
     pubsub_manager.publish_message(the_data)
 
+@app.route('qna/streaming/<vector_name>', methods=['POST'])
+def stream_qa(vector_name):
+    data = request.get_json()
+    logging.info(f"qna/streaming/{vector_name} got data: {data}")
+
+    user_input = data['user_input']
+
+    paired_messages = extract_chat_history(data['chat_history'])
+    logging.info(f'Stream QNA got: {user_input}')
+    logging.info(f'Stream QNA got chat_history: {paired_messages}')
+
+    from qna.streaming import start_streaming_chat
+    response = Response(start_streaming_chat(user_input,
+                                             vector_name,
+                                             chat_history=paired_messages), 
+                        content_type='text/plain')
+    response.headers['Transfer-Encoding'] = 'chunked'    
+
+    return response
 
 @app.route('/qna/<vector_name>', methods=['POST'])
 def process_qna(vector_name):

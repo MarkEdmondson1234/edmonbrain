@@ -61,7 +61,23 @@ def pick_llm(vector_name):
 
     return llm, embeddings, llm_chat
 
-
+def pick_streaming(vector_name):
+    logging.debug('Picking llm')
+    # located in the parent directory e.g. config.json, qna/llm.py
+    config = load_config("config.json")
+    llm_config = config.get(vector_name, None)
+    if llm_config is None:
+        raise ValueError("No llm_config was found")
+    logging.debug(f'llm_config: {llm_config} for {vector_name}')
+    llm_str = llm_config.get("llm", None)
+    if llm_str is None:
+        raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
+    
+    if llm_str == 'openai':
+        return True
+    
+    return False
+    
 def pick_vectorstore(vector_name, embeddings):
     logging.debug('Picking vectorstore')
     # located in the parent directory e.g. config.json, qna/llm.py

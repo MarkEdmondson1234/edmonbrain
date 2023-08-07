@@ -9,6 +9,33 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env file
 FLASKURL = os.getenv('FLASK_URL', None)
 
+async def process_streamed_response(response, new_thread):
+    json_buffer = ""
+    inside_json = False
+    async for chunk in response.content.iter_any(1500):
+        chunk_content = chunk.decode('utf-8')
+
+        # Handle JSON delimiter across chunk boundaries
+        if inside_json:
+            json_buffer += chunk_content
+            if '###JSON_END###' in chunk_content:
+                json_data_str = json_buffer.split('###JSON_END###')[0]
+                json_data = json.loads(json_data_str)
+                inside_json = False
+                json_buffer = ""
+                return json_data
+        elif '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
+            json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
+            json_data = json.loads(json_data_str)
+            return json_data
+        elif '###JSON_START###' in chunk_content:
+            json_buffer = chunk_content.split('###JSON_START###')[1]
+            inside_json = True
+        else:
+            # Handle regular chunk content
+            await chunk_send(new_thread, chunk_content)
+    return None
+
 def load_config(filename):
     # Get the directory of the current script
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -240,13 +267,19 @@ Need this info:
                     # Edit the thinking message to show an error
                     await thinking_message.edit(content="Error in processing message.")
                     return
+                
+                if response.headers.get('Transfer-Encoding') == 'chunked':
+                    # This is a streamed response, process it in chunks
+                    response_data = await process_streamed_response(response, new_thread)
+                    source_docs = response_data.get('source_documents', [])
+                    reply_content = ''  # Get the 'result' field from the JSON
 
-                response_data = await response.json()  # Get the response data as JSON
-                #print(f'response_data: {response_data}')
+                else:
+                    response_data = await response.json()  # Get the response data as JSON
+                    source_docs = response_data.get('source_documents', [])
+                    reply_content = response_data.get('result')  # Get the 'result' field from the JSON
 
-                source_docs = response_data.get('source_documents', [])
-                reply_content = response_data.get('result')  # Get the 'result' field from the JSON
-
+                print(f'response_data: {response_data}')
                 # dedupe source docs
                 seen = set()
                 unique_source_docs = []
