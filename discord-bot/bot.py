@@ -286,9 +286,10 @@ Need this info:
                 
                 if response.headers.get('Transfer-Encoding') == 'chunked':
                     # This is a streamed response, process it in chunks
-                    response_data = await process_streamed_response(response, new_thread, thinking_message)
-                    source_docs = response_data.get('source_documents', [])
-                    reply_content = ''  # Get the 'result' field from the JSON
+                    async with new_thread.typing():
+                        response_data = await process_streamed_response(response, new_thread, thinking_message)
+                        source_docs = response_data.get('source_documents', [])
+                        reply_content = ''  # Get the 'result' field from the JSON
 
                 else:
                     response_data = await response.json()  # Get the response data as JSON
