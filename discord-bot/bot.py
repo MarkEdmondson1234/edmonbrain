@@ -289,7 +289,7 @@ Need this info:
                     async with new_thread.typing():
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
                         source_docs = response_data.get('source_documents', [])
-                        reply_content = ''  # Get the 'result' field from the JSON
+                        reply_content = '#STREAMED#'  # Get the 'result' field from the JSON
 
                 else:
                     response_data = await response.json()  # Get the response data as JSON
@@ -323,14 +323,15 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
 
-                if len(reply_content) > 2000:
-                    await thinking_message.edit(content="*Response:*")
-                    await chunk_send(new_thread, reply_content)
-                elif len(reply_content) == 0:
-                    await thinking_message.edit(content="No response")
-                else:
-                    # Edit the thinking message to show the reply
-                    await thinking_message.edit(content=reply_content)
+                if reply_content is not "#STREAMED#":
+                    if len(reply_content) > 2000:
+                        await thinking_message.edit(content="*Response:*")
+                        await chunk_send(new_thread, reply_content)
+                    elif len(reply_content) == 0:
+                        await thinking_message.edit(content="No response")
+                    else:
+                        # Edit the thinking message to show the reply
+                        await thinking_message.edit(content=reply_content)
 
                 # Check if the message was sent in a thread or a private message
                 if isinstance(new_thread, discord.Thread):
