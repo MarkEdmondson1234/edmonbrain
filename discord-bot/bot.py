@@ -10,11 +10,13 @@ TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env fil
 FLASKURL = os.getenv('FLASK_URL', None)
 STREAMURL = os.getenv('STREAM_URL', None)
 
-async def process_streamed_response(response, new_thread):
+async def process_streamed_response(response, new_thread, thinking_message):
     json_buffer = ""
     inside_json = False
+    first = True
     async for chunk in response.content.iter_any():
         chunk_content = chunk.decode('utf-8')
+
 
         # Handle JSON delimiter across chunk boundaries
         if inside_json:
@@ -27,13 +29,22 @@ async def process_streamed_response(response, new_thread):
                 return json_data
         elif '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
             json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
-            json_data = json.loads(json_data_str)
-            return json_data
+            print(f"streamed json: {json_data_str}")
+            try:
+                json_data = json.loads(json_data_str)
+                return json_data
+            except Exception as err:
+                print(f"Could not parse JSON data: {str(err)}")
+                return None
         elif '###JSON_START###' in chunk_content:
             json_buffer = chunk_content.split('###JSON_START###')[1]
             inside_json = True
         else:
             # Handle regular chunk content
+            if first:
+                await thinking_message.edit(content=chunk_content)
+                first=False
+                continue
             await chunk_send(new_thread, chunk_content)
     return None
 
@@ -275,7 +286,7 @@ Need this info:
                 
                 if response.headers.get('Transfer-Encoding') == 'chunked':
                     # This is a streamed response, process it in chunks
-                    response_data = await process_streamed_response(response, new_thread)
+                    response_data = await process_streamed_response(response, new_thread, thinking_message)
                     source_docs = response_data.get('source_documents', [])
                     reply_content = ''  # Get the 'result' field from the JSON
 
