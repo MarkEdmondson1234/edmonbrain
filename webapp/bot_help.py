@@ -8,7 +8,7 @@ import requests
 import tempfile
 
 import qna.database as db
-import qna.publish_to_pubsub_embed as pbembed
+import chunker.publish_to_pubsub_embed as pbembed
 from google.cloud import storage
 
 
