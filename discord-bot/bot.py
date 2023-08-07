@@ -35,7 +35,7 @@ async def process_streamed_response(response, new_thread, thinking_message):
                 return json_data
             except Exception as err:
                 print(f"Could not parse JSON data: {str(err)}")
-                return None
+                return []
         elif '###JSON_START###' in chunk_content:
             json_buffer = chunk_content.split('###JSON_START###')[1]
             inside_json = True

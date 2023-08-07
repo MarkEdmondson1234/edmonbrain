@@ -1,5 +1,6 @@
 import threading
 import logging
+import json
 
 from typing import Any, Dict, List, Union
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -151,7 +152,7 @@ def generate_discord_output(bot_output):
             }
             source_documents.append(source_doc)
 
-    return {
+    return json.dumps({
         'result': bot_output.get('answer', "No answer available"),
         'source_documents': source_documents
-    }
+    })
