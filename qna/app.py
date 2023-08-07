@@ -88,7 +88,7 @@ def archive_qa(bot_output, vector_name):
     
     pubsub_manager.publish_message(the_data)
 
-@app.route('qna/discord/streaming/<vector_name>', methods=['POST'])
+@app.route('/qna/discord/streaming/<vector_name>', methods=['POST'])
 def stream_qa(vector_name):
     data = request.get_json()
     logging.info(f"qna/discord/streaming/{vector_name} got data: {data}")
