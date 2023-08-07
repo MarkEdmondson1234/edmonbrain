@@ -115,10 +115,43 @@ def start_streaming_chat(question,
     final_result = result_queue.get()
 
     # TODO: only discord for now - slack? gchat?
-    from webapp import bot_help
-    from app import parse_output
+
     discord_output = parse_output(final_result)
-    discord_output = bot_help.generate_discord_output(discord_output)
-    
+    discord_output = generate_discord_output(discord_output)
+
     yield f"###JSON_START###{discord_output}###JSON_END###"
 
+def parse_output(bot_output):
+    if 'source_documents' in bot_output:
+        bot_output['source_documents'] = [document_to_dict(doc) for doc in bot_output['source_documents']]
+    if bot_output.get("answer", None) is None or bot_output.get("answer") == "":
+        bot_output['answer'] = "(No text was returned)"
+    return bot_output
+
+def document_to_dict(document):
+    return {
+        "page_content": document.page_content,
+        "metadata": document.metadata
+    }
+
+def generate_discord_output(bot_output):
+    source_documents = []
+    if bot_output.get('source_documents', None) is not None:
+        source_documents = []
+        for doc in bot_output['source_documents']:
+            metadata = doc.get("metadata",{})
+            filtered_metadata = {}
+            if metadata.get("source", None) is not None:
+                filtered_metadata["source"] = metadata["source"]
+            if metadata.get("type", None) is not None:
+                filtered_metadata["type"] = metadata["type"]
+            source_doc = {
+                'page_content': doc["page_content"],
+                'metadata': filtered_metadata
+            }
+            source_documents.append(source_doc)
+
+    return {
+        'result': bot_output.get('answer', "No answer available"),
+        'source_documents': source_documents
+    }
