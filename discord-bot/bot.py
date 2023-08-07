@@ -13,7 +13,7 @@ STREAMURL = os.getenv('STREAM_URL', None)
 async def process_streamed_response(response, new_thread):
     json_buffer = ""
     inside_json = False
-    async for chunk in response.content.iter_any(1500):
+    async for chunk in response.content.iter_any():
         chunk_content = chunk.decode('utf-8')
 
         # Handle JSON delimiter across chunk boundaries

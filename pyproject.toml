@@ -32,7 +32,7 @@ dependencies = [
     "langchain>=0.0.229",
     "google-cloud-aiplatform>=1.26.0",
     "discord",
-    "aiohttp",
+    "aiohttp>=3.8.5",
     "slack-bolt>=1.18.0",
     "pypdf>=3.13.0",
 ]
