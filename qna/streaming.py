@@ -1,6 +1,7 @@
 import threading
 import logging
 import json
+import re
 
 from typing import Any, Dict, List, Union
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -39,9 +40,19 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         logging.debug(f"token: {token}")
         self.buffer += token
-        if any(token.endswith(t) for t in self.tokens):
+
+        # Check if the buffer matches the pattern of a numbered list
+        if re.search(r'\d+\.\s', self.buffer):
+            # Split the buffer at the numbered list items, and write each one to the content buffer
+            items = re.split(r'(\d+\.\s)', self.buffer)
+            for item in items:
+                if item:  # Ignore empty strings
+                    self.content_buffer.write(item)
+            self.buffer = ""
+        elif any(token.endswith(t) for t in self.tokens):
             self.content_buffer.write(self.buffer)
             self.buffer = ""
+
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.content_buffer.write(self.buffer)  # Write the remaining buffer
