@@ -41,18 +41,14 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         logging.debug(f"token: {token}")
         self.buffer += token
 
-        # Check if the buffer matches the pattern of a numbered list
-        if re.search(r'\d+\.\s', self.buffer):
-            # Split the buffer at the numbered list items, and write each one to the content buffer
-            items = re.split(r'(\d+\.\s)', self.buffer)
-            for item in items:
-                if item:  # Ignore empty strings
-                    self.content_buffer.write(item)
-            self.buffer = ""
-        elif any(token.endswith(t) for t in self.tokens):
+        # Check if the last token ended with a numbered list pattern, and if so, don't break on the following period
+        if re.search(r'\d+\.\s', token) and any(token.endswith(t) for t in self.tokens):
+            return
+
+        # If the token ends with one of the specified ending tokens, write the buffer to the content buffer
+        if any(token.endswith(t) for t in self.tokens):
             self.content_buffer.write(self.buffer)
             self.buffer = ""
-
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         self.content_buffer.write(self.buffer)  # Write the remaining buffer
