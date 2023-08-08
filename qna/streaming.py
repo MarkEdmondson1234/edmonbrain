@@ -41,19 +41,21 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         logging.debug(f"token: {token}")
         self.buffer += token
 
-        # If the token represents a newline or one of the specified ending tokens
-        if token.endswith("\n") or any(token.endswith(t) for t in self.tokens):
-            # Check if the buffer contains a numbered list pattern at the beginning
-            if re.search(r'^\d+\.\s', self.buffer):
-                # If so, only write up to the end of the line containing the pattern, and leave the rest in the buffer
-                line_break = self.buffer.find("\n")
-                if line_break != -1:
-                    self.content_buffer.write(self.buffer[:line_break+1])
-                    self.buffer = self.buffer[line_break+1:]
+        # If the token represents one of the specified ending tokens
+        if any(token.endswith(t) for t in self.tokens):
+            # Check for the last occurrence of a numbered list pattern in the buffer
+            matches = list(re.finditer(r'\d+\.\s', self.buffer))
+            if matches:
+                # If found, write up to the end of the last match, and leave the rest in the buffer
+                last_match = matches[-1]
+                end_of_last_match = last_match.end()
+                self.content_buffer.write(self.buffer[:end_of_last_match])
+                self.buffer = self.buffer[end_of_last_match:]
             else:
                 # If not, write the entire buffer
                 self.content_buffer.write(self.buffer)
                 self.buffer = ""
+
 
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
