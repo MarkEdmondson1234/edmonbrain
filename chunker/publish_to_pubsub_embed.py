@@ -132,7 +132,7 @@ def chunk_doc_to_docs(documents: list, extension: str = ".md"):
     logging.info(f"Chunked into {len(source_chunks)} documents")
     return source_chunks  
 
-def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
+def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
     """Triggered from a message on a Cloud Pub/Sub topic.
     Args:
          data JSON
@@ -158,6 +158,14 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
                 logging.info(f"Ignoring config file")
                 return None
             
+            # if a document is trying to be sent and has failed twice, send it to batch job instead.
+            if data.get('deliveryAttempt', None) is not None:
+                attempt = data.get('deliveryAttempt')
+                logging.info(f'deliveryAttempt detected for {objectId}: {attempt}')
+                if attempt > 2:
+                    logging.warning(f'deliveryAttempt > 2 for {objectId} - {attributes} - sending to batch job instead')
+                    batch = True
+
             # https://cloud.google.com/storage/docs/json_api/v1/objects#resource-representations
             message_data = 'gs://' + attributes.get("bucketId") + '/' + objectId
 
@@ -193,6 +201,16 @@ def data_to_embed_pubsub(data: dict, vector_name:str="documents"):
         with tempfile.TemporaryDirectory() as temp_dir:
             tmp_file_path = os.path.join(temp_dir, file_name.name)
             blob.download_to_filename(tmp_file_path)
+            if batch:
+                from chunker.batch import create_and_execute_batch_job
+                the_metadata = {
+                    "source": message_data,
+                    "type": "batch_file_load_gcs",
+                    "bucket_name": bucket_name
+                }
+                metadata.update(the_metadata)
+                create_and_execute_batch_job(tmp_file_path, vector_name=vector_name, metadata=metadata)
+                return None
 
             if file_name.suffix == ".pdf":
                 pages = split_pdf_to_pages(tmp_file_path, temp_dir)

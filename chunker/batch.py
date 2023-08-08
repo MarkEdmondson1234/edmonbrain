@@ -73,8 +73,9 @@ def create_and_execute_batch_job(gs_file, vector_name, metadata):
     create_request.parent = f"projects/{get_gcp_project()}/locations/europe-west3"
 
     # Make the request
-    response = client.create_job(create_request)
+    client.create_job(create_request)
 
+    logging.info(f"Created batch jobId: {job_id} for {gs_file} {vector_name} {metadata}")
     # Handle the response
     return job_id
 
@@ -126,14 +127,25 @@ def get_metadata(stem):
 
 
 
-def large_file_via_batch(gs_file, vector_name, metadata):
-        pass
-
 if __name__ == "__main__":
     import sys
+    import logging
+    from chunker.publish_to_pubsub_embed import chunk_doc_to_docs
+    from chunker.publish_to_pubsub_embed import process_docs_chunks_vector_name
+    from chunker.loaders import read_file_to_document
 
     # Get arguments from command line
     gs_file = sys.argv[1]
     vector_name = sys.argv[2]
     metadata = sys.argv[3]
-    large_file_via_batch(gs_file, vector_name, metadata)
+
+    
+    logging.info("Start batch chunker for {gs_file} to {vector_name}")
+    docs = read_file_to_document(gs_file, vector_name, metadata)
+    logging.info("Finished batch chunker for {gs_file} to {vector_name}")
+    
+    chunks = chunk_doc_to_docs(docs)
+
+    logging.info("Sending chunks to embed for {gs_file} to {vector_name}")
+    process_docs_chunks_vector_name(chunks, vector_name, metadata)
+    logging.info("Finished sending chunks to embed for {gs_file} to {vector_name}")
