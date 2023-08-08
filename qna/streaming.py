@@ -41,8 +41,17 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         logging.debug(f"token: {token}")
         self.buffer += token
 
-        # If the token represents one of the specified ending tokens
-        if any(token.endswith(t) for t in self.tokens):
+        # Check for the start or end of a code block
+        if '```' in self.buffer:
+            # If in a code block, wait for the end of the block before writing anything
+            if self.buffer.count('```') % 2 == 0:
+                # Found an even number of code block delimiters, so we're outside a code block
+                # Now you can handle the buffer as before
+                self._process_buffer()
+
+    def _process_buffer(self):
+        # If the buffer ends with one of the specified ending tokens
+        if any(self.buffer.endswith(t) for t in self.tokens):
             # Check for the last occurrence of a numbered list pattern in the buffer
             matches = list(re.finditer(r'\d+\.\s', self.buffer))
             if matches:
@@ -55,7 +64,6 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
                 # If not, write the entire buffer
                 self.content_buffer.write(self.buffer)
                 self.buffer = ""
-
 
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
