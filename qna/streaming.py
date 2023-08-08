@@ -50,20 +50,20 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
                 self._process_buffer()
 
     def _process_buffer(self):
-        # If the buffer ends with one of the specified ending tokens
-        if any(self.buffer.endswith(t) for t in self.tokens):
-            # Check for the last occurrence of a numbered list pattern in the buffer
-            matches = list(re.finditer(r'\d+\.\s', self.buffer))
-            if matches:
-                # If found, write up to the end of the last match, and leave the rest in the buffer
-                last_match = matches[-1]
-                end_of_last_match = last_match.end()
-                self.content_buffer.write(self.buffer[:end_of_last_match])
-                self.buffer = self.buffer[end_of_last_match:]
-            else:
-                # If not, write the entire buffer
+        # Check for the last occurrence of a newline followed by a numbered list pattern
+        matches = list(re.finditer(r'\n(\d+\.\s)', self.buffer))
+        if matches:
+            # If found, write up to the start of the last match, and leave the rest in the buffer
+            last_match = matches[-1]
+            start_of_last_match = last_match.start() + 1  # Include the newline in the split
+            self.content_buffer.write(self.buffer[:start_of_last_match])
+            self.buffer = self.buffer[start_of_last_match:]
+        else:
+            # If not found, and the buffer ends with one of the specified ending tokens, write the entire buffer
+            if any(self.buffer.endswith(t) for t in self.tokens):
                 self.content_buffer.write(self.buffer)
                 self.buffer = ""
+
 
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
