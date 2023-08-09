@@ -23,7 +23,7 @@ steps:
            --region ${_REGION} \
            --platform managed \
            --allow-unauthenticated \
-           --memory 8Gi \
+           --memory 15Gi \
            --cpu 4 \
            --min-instances 0 \
            --max-instances 10 \
