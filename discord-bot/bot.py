@@ -16,8 +16,6 @@ async def process_streamed_response(response, new_thread, thinking_message):
     first = True
     async for chunk in response.content.iter_any():
         chunk_content = chunk.decode('utf-8')
-
-
         # Handle JSON delimiter across chunk boundaries
         if inside_json:
             json_buffer += chunk_content
@@ -46,6 +44,7 @@ async def process_streamed_response(response, new_thread, thinking_message):
                 first=False
                 continue
             await chunk_send(new_thread, chunk_content)
+
     return None
 
 def load_config(filename):
@@ -289,7 +288,10 @@ Need this info:
                     async with new_thread.typing():
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
                         source_docs = response_data.get('source_documents', [])
-                        reply_content = '#STREAMED#'  # Get the 'result' field from the JSON
+                        if thinking_message.content == "Thinking...":
+                            reply_content = response_data.get('result')
+                        else:
+                            reply_content = '#STREAMED#'  # Get the 'result' field from the JSON
 
                 else:
                     response_data = await response.json()  # Get the response data as JSON
