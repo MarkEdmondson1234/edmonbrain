@@ -56,7 +56,6 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
     if bucket_name.startswith("gs://"):
         bucket_name = bucket_name.removeprefix("gs://")
     
-    logging.info(f"Bucket_name: {bucket_name}")
     bucket = storage_client.get_bucket(bucket_name)
     now = datetime.datetime.now()
     year = now.strftime("%Y")
@@ -79,7 +78,7 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
         logging.info(f"File {filename} already exists in gs://{bucket_name}/{bucket_filepath_prev}")
         return f"gs://{bucket_name}/{bucket_filepath_prev}"
 
-    logging.info(f"File {filename} does not already exist in bucket {bucket_name}/{bucket_filepath}")
+    logging.debug(f"File {filename} does not already exist in bucket {bucket_name}/{bucket_filepath}")
 
     the_metadata = {
         "vector_name": vector_name,
@@ -118,19 +117,45 @@ def remove_whitespace(page_content: str):
     return page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ").replace("  ", " ")
 
 
-def chunk_doc_to_docs(documents: list, extension: str = ".md"):
-    """Turns a Document object into a list of many Document chunks"""
+def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 50):
+    """Turns a Document object into a list of many Document chunks.
+       If a chunk is smaller than min_size, it will be merged with adjacent chunks."""
+
     if documents is None:
         return None
-    
+
     source_chunks = []
+    temporary_chunk = ""
     for document in documents:
         splitter = choose_splitter(extension)
         for chunk in splitter.split_text(remove_whitespace(document.page_content)):
+            # If a chunk is smaller than the min_size, append it to temporary_chunk with a line break and continue
+            if len(chunk) < min_size:
+                temporary_chunk += chunk + "\n"
+                logging.info("Appending chunk as its smaller than {min_size}")
+                continue
+            
+            # If there's content in temporary_chunk, append it to the current chunk
+            if temporary_chunk:
+                chunk = temporary_chunk + chunk
+                temporary_chunk = ""
+            
+            # If the combined chunk is still less than the min_size, append to temporary_chunk with a line break and continue
+            if len(chunk) < min_size:
+                temporary_chunk += chunk + "\n"
+                logging.info("Appending chunk as its smaller than {min_size}")
+                continue
+            
             source_chunks.append(Document(page_content=chunk, metadata=document.metadata))
+        
+        # If there's any remaining content in temporary_chunk, append it as a new chunk
+        if temporary_chunk:
+            source_chunks.append(Document(page_content=temporary_chunk, metadata=document.metadata))
+            temporary_chunk = ""
 
     logging.info(f"Chunked into {len(source_chunks)} documents")
-    return source_chunks  
+    return source_chunks
+
 
 def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
     """Triggered from a message on a Cloud Pub/Sub topic.

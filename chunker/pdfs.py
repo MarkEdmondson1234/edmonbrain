@@ -21,7 +21,7 @@ def split_pdf_to_pages(pdf_path, temp_dir):
     page_files = []
     
     if len(pdf.pages) == 1:
-        logging.info(f"Only one page in PDF {pdf_path} - sending back")
+        logging.debug(f"Only one page in PDF {pdf_path} - sending back")
         return [str(pdf_path)]
     
     for page in range(len(pdf.pages)):

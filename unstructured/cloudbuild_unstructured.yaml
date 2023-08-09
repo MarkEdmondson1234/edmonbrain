@@ -26,6 +26,6 @@ steps:
            --memory 8Gi \
            --cpu 4 \
            --min-instances 0 \
-           --max-instances 3 \
+           --max-instances 10 \
            --service-account ${_SERVICE_ACCOUNT} \
            --timeout=20m

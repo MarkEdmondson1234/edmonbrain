@@ -38,7 +38,7 @@ def create_and_execute_batch_job(gs_file, vector_name, metadata):
     task.compute_resource = resources
 
     task.max_retry_count = 3
-    task.max_run_duration = "6600s"
+    task.max_run_duration = "10800s" # 3hrs
 
     # Tasks are grouped inside a job using TaskGroups.
     # Currently, it's possible to have only one task group.
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     logging.info("Start batch chunker for {gs_file} to {vector_name}")
     docs = read_file_to_document(gs_file, vector_name, metadata)
     logging.info("Finished batch chunker for {gs_file} to {vector_name}")
-    
+
     chunks = chunk_doc_to_docs(docs)
 
     logging.info("Sending chunks to embed for {gs_file} to {vector_name}")
