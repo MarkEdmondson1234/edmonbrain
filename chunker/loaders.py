@@ -161,7 +161,7 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
     done = False
     pdf_path = pathlib.Path(gs_file)
     if pdf_path.suffix == ".pdf":
-        from pdfs import read_pdf_file
+        from chunker.pdfs import read_pdf_file
         local_doc = read_pdf_file(pdf_path, metadata=metadata)
         if local_doc is not None:
             docs.append(local_doc)
