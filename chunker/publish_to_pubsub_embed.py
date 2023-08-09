@@ -292,9 +292,9 @@ def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
 
             docs = []
             for page in pages:
-                
+
                 if file_name.suffix == ".pdf":
-                    local_doc = read_pdf_file(page)
+                    local_doc = read_pdf_file(page, metadata=metadata)
                     if local_doc is not None:
                         docs.append(local_doc)
                         continue

@@ -39,7 +39,7 @@ def split_pdf_to_pages(pdf_path, temp_dir):
     logging.info(f"Split PDF {pdf_path} into {len(page_files)} pages...")
     return page_files
 
-def read_pdf_file(pdf_path):
+def read_pdf_file(pdf_path, metadata):
     from langchain.schema import Document
     from pypdf import PdfReader
     logging.info(f"Reading PDF {pdf_path}...")
@@ -61,4 +61,4 @@ def read_pdf_file(pdf_path):
         return None
     
     logging.info(f"Successfully read PDF {pdf_path}...")
-    return Document(page_content=text)
+    return Document(page_content=text, metadata=metadata))
