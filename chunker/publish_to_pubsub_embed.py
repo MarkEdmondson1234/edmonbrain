@@ -117,7 +117,7 @@ def remove_whitespace(page_content: str):
     return page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ").replace("  ", " ")
 
 
-def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 50):
+def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 200):
     """Turns a Document object into a list of many Document chunks.
        If a chunk is smaller than min_size, it will be merged with adjacent chunks."""
 
