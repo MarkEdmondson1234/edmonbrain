@@ -35,19 +35,21 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         self.tokens = tokens
         self.buffer = ""
         self.stream_finished = threading.Event()
+        self.in_code_block = False
         logging.info("Starting to stream LLM")
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         logging.debug(f"token: {token}")
         self.buffer += token
 
-        # Check for the start or end of a code block
-        if '```' in self.buffer:
-            # If in a code block, wait for the end of the block before writing anything
-            if self.buffer.count('```') % 2 == 0:
-                # Found an even number of code block delimiters, so we're outside a code block
-                # Now you can handle the buffer as before
-                self._process_buffer()
+        # Toggle the code block flag if the delimiter is encountered
+        if '```' in token:
+            self.in_code_block = not self.in_code_block
+
+        # Process the buffer if not inside a code block
+        if not self.in_code_block:
+            self._process_buffer()
+
 
     def _process_buffer(self):
         # Check for the last occurrence of a newline followed by a numbered list pattern
