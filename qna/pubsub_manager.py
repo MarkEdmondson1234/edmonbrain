@@ -78,7 +78,7 @@ class PubSubManager:
             """
 
             if push_endpoint.startswith("https://"):
-                logging.info(f"Using full URL for push endpoint")
+                logging.debug(f"Using full URL for push endpoint")
             else:
                 service_url = os.getenv('QNA_URL', None)
                 if service_url is None:

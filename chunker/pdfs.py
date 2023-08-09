@@ -61,4 +61,4 @@ def read_pdf_file(pdf_path, metadata):
         return None
     
     logging.info(f"Successfully read PDF {pdf_path}...")
-    return Document(page_content=text, metadata=metadata))
+    return Document(page_content=text, metadata=metadata)
