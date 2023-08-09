@@ -38,3 +38,27 @@ def split_pdf_to_pages(pdf_path, temp_dir):
 
     logging.info(f"Split PDF {pdf_path} into {len(page_files)} pages...")
     return page_files
+
+def read_pdf_file(pdf_path):
+    from langchain.schema import Document
+    from pypdf import PdfReader
+    logging.info(f"Reading PDF {pdf_path}...")
+
+    pdf_path = pathlib.Path(pdf_path)
+    
+    pdf = PdfReader(pdf_path)
+
+    try:
+        text = ""
+        for page in pdf.pages:
+            text += page.extract_text() + "\n"
+    except Exception as err:
+        logging.warning(f"Could not extract PDF via pypdf ERROR - {str(err)}")
+        return None
+    
+    if len(text) < 10:
+        logging.info(f"Could not read PDF {pdf_path} via pypdf - too short, only got {text}")
+        return None
+    
+    logging.info(f"Successfully read PDF {pdf_path}...")
+    return Document(page_content=text)

@@ -1,7 +1,6 @@
 # imports
 import traceback
 
-from langchain.docstore.document import Document
 import base64
 import json
 import datetime
