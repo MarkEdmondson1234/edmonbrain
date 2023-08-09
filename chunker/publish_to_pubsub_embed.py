@@ -119,35 +119,52 @@ def remove_whitespace(page_content: str):
 
 def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 200):
     """Turns a Document object into a list of many Document chunks.
-       If a chunk is smaller than min_size, it will be merged with adjacent chunks."""
+       If a document or chunk is smaller than min_size, it will be merged with adjacent documents or chunks."""
 
     if documents is None:
         return None
 
+    # Combine entire documents that are smaller than min_size
+    combined_documents_content = ""
+    combined_documents = []
+    for document in documents:
+        content = remove_whitespace(document.page_content)
+        if len(content) < min_size:
+            combined_documents_content += content + "\n"
+            logging.info(f"Appending document as its smaller than {min_size}: length {len(content)}")
+        else:
+            if combined_documents_content:
+                combined_documents.append(Document(page_content=combined_documents_content, metadata=document.metadata))
+                combined_documents_content = ""
+            combined_documents.append(document)
+
+    if combined_documents_content:
+        combined_documents.append(Document(page_content=combined_documents_content, metadata=documents[-1].metadata))
+
     source_chunks = []
     temporary_chunk = ""
-    for document in documents:
+    for document in combined_documents:
         splitter = choose_splitter(extension)
-        for chunk in splitter.split_text(remove_whitespace(document.page_content)):
+        for chunk in splitter.split_text(document.page_content):
             # If a chunk is smaller than the min_size, append it to temporary_chunk with a line break and continue
             if len(chunk) < min_size:
                 temporary_chunk += chunk + "\n"
                 logging.info(f"Appending chunk as its smaller than {min_size}: length {len(chunk)}")
                 continue
-            
+
             # If there's content in temporary_chunk, append it to the current chunk
             if temporary_chunk:
                 chunk = temporary_chunk + chunk
                 temporary_chunk = ""
-            
+
             # If the combined chunk is still less than the min_size, append to temporary_chunk with a line break and continue
             if len(chunk) < min_size:
                 temporary_chunk += chunk + "\n"
-                logging.info(f"Appending chunk as its smaller than {min_size} : length {len(chunk)}")
+                logging.info(f"Appending chunk as its smaller than {min_size}: length {len(chunk)}")
                 continue
-            
+
             source_chunks.append(Document(page_content=chunk, metadata=document.metadata))
-        
+
         # If there's any remaining content in temporary_chunk, append it as a new chunk
         if temporary_chunk:
             source_chunks.append(Document(page_content=temporary_chunk, metadata=document.metadata))
@@ -155,6 +172,7 @@ def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 2
 
     logging.info(f"Chunked into {len(source_chunks)} documents")
     return source_chunks
+
 
 
 def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):

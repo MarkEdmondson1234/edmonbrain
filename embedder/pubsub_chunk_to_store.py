@@ -41,9 +41,11 @@ def from_pubsub_to_vectorstore(data: dict, vector_name:str):
     page_content = the_json.get("page_content", None)
     if page_content is None:
         return "No page content"
-    if len(page_content) < 10:
+    if len(page_content) < 100:
         logging.warning(f"too little page content to add: {message_data}")
         return "Too little characters"
+    
+    logging.info(f"embedding page_content: {page_content}")
     
     metadata = the_json.get("metadata", None)
 
