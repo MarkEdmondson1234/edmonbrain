@@ -143,7 +143,7 @@ def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 2
             # If the combined chunk is still less than the min_size, append to temporary_chunk with a line break and continue
             if len(chunk) < min_size:
                 temporary_chunk += chunk + "\n"
-                logging.info("Appending chunk as its smaller than {min_size}")
+                logging.info(f"Appending chunk as its smaller than {min_size} : length {len(chunk)}")
                 continue
             
             source_chunks.append(Document(page_content=chunk, metadata=document.metadata))
@@ -414,6 +414,7 @@ def publish_chunks(chunks: list[Document], vector_name: str):
     for chunk in chunks:
         # Convert chunk to string, as Pub/Sub messages must be strings or bytes
         chunk_str = chunk.json()
+        logging.info(f"Publishing chunk: {chunk_str}")
         pubsub_manager.publish_message(chunk_str)
     
 
