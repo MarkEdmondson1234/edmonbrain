@@ -132,7 +132,7 @@ def chunk_doc_to_docs(documents: list, extension: str = ".md", min_size: int = 2
             # If a chunk is smaller than the min_size, append it to temporary_chunk with a line break and continue
             if len(chunk) < min_size:
                 temporary_chunk += chunk + "\n"
-                logging.info("Appending chunk as its smaller than {min_size}")
+                logging.info(f"Appending chunk as its smaller than {min_size}: length {len(chunk)}")
                 continue
             
             # If there's content in temporary_chunk, append it to the current chunk
