@@ -87,10 +87,24 @@ def add_file_to_gcs(filename: str, vector_name:str, bucket_name: str=None, metad
         the_metadata.update(metadata)
 
     blob.metadata = the_metadata
+    
+    import time
 
-    blob.upload_from_filename(filename)
+    max_retries = 5
+    base_delay = 1  # 1 second
+    for attempt in range(max_retries):
+        try:
+            blob.upload_from_filename(filename)
+            logging.info(f"File {filename} uploaded to gs://{bucket_name}/{bucket_filepath}")
+            break  # Success! Exit the loop.
+        except Exception as e:
+            # In case of an exception (timeout, etc.), wait and then retry
+            logging.warning(f"Upload attempt {attempt + 1} failed with error: {str(e)}. Retrying...")
+            time.sleep(base_delay * (2 ** attempt))  # Exponential backoff
 
-    logging.info(f"File {filename} uploaded to gs://{bucket_name}/{bucket_filepath}")
+    else:  # This block executes if the loop completes without breaking
+        logging.error(f"Failed to upload file {filename} to gs://{bucket_name}/{bucket_filepath} after {max_retries} attempts.")
+
 
     # create pubsub topic and subscription if necessary to receive notifications from cloud storage 
     pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"app_to_pubsub_{vector_name}")

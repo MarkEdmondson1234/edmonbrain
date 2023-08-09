@@ -162,7 +162,7 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
         logging.info(f"Sending {gs_file} to UnstructuredAPIFileLoader")
         UNSTRUCTURED_URL = os.getenv("UNSTRUCTURED_URL", None)
         if UNSTRUCTURED_URL is not None:
-            logging.info(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
+            logging.debug(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
             the_endpoint = f"{UNSTRUCTURED_URL}/general/v0/general"
             loader = UnstructuredAPIFileLoader(gs_file, mode="elements", url=the_endpoint)
         else:
