@@ -158,46 +158,55 @@ def read_url_to_document(url: str, metadata: dict = None):
 def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = None):
     
     docs = []
-    try:
-        logging.info(f"Sending {gs_file} to UnstructuredAPIFileLoader")
-        UNSTRUCTURED_URL = os.getenv("UNSTRUCTURED_URL", None)
-        if UNSTRUCTURED_URL is not None:
-            logging.debug(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
-            the_endpoint = f"{UNSTRUCTURED_URL}/general/v0/general"
-            loader = UnstructuredAPIFileLoader(gs_file, url=the_endpoint)
-        else:
-            loader = UnstructuredAPIFileLoader(gs_file, api_key=UNSTRUCTURED_KEY)
-        
-        if split:
-            # only supported for some file types
-            docs = loader.load_and_split()
-        else:
-            start = time.time()
-            docs = loader.load() # this takes a long time 30m+ for big PDF files
-            end = time.time()
-            elapsed_time = round((end - start) / 60, 2)
-            logging.info(f"Loaded docs for {gs_file} from UnstructuredAPIFileLoader took {elapsed_time} mins")
-    except ValueError as e:
-        logging.info(f"Error for {gs_file} from UnstructuredAPIFileLoader: {str(e)}")
-        if "file type is not supported in partition" in str(e):
-            logging.info("trying locally via .txt conversion")
-            txt_file = None
-            try:
-                # Convert the file to .txt and try again
-                txt_file = convert_to_txt(gs_file)
-                loader = UnstructuredFileLoader(txt_file, mode="elements")
-                if split:
-                    docs = loader.load_and_split()
-                else:
-                    docs = loader.load()
+    done = False
+    if gs_file.suffix == ".pdf":
+        from pdfs import read_pdf_file
+        local_doc = read_pdf_file(gs_file, metadata=metadata)
+        if local_doc is not None:
+            docs.append(local_doc)
+            done = True
+    
+    if not done:
+        try:
+            logging.info(f"Sending {gs_file} to UnstructuredAPIFileLoader")
+            UNSTRUCTURED_URL = os.getenv("UNSTRUCTURED_URL", None)
+            if UNSTRUCTURED_URL is not None:
+                logging.debug(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
+                the_endpoint = f"{UNSTRUCTURED_URL}/general/v0/general"
+                loader = UnstructuredAPIFileLoader(gs_file, url=the_endpoint)
+            else:
+                loader = UnstructuredAPIFileLoader(gs_file, api_key=UNSTRUCTURED_KEY)
+            
+            if split:
+                # only supported for some file types
+                docs = loader.load_and_split()
+            else:
+                start = time.time()
+                docs = loader.load() # this takes a long time 30m+ for big PDF files
+                end = time.time()
+                elapsed_time = round((end - start) / 60, 2)
+                logging.info(f"Loaded docs for {gs_file} from UnstructuredAPIFileLoader took {elapsed_time} mins")
+        except ValueError as e:
+            logging.info(f"Error for {gs_file} from UnstructuredAPIFileLoader: {str(e)}")
+            if "file type is not supported in partition" in str(e):
+                logging.info("trying locally via .txt conversion")
+                txt_file = None
+                try:
+                    # Convert the file to .txt and try again
+                    txt_file = convert_to_txt(gs_file)
+                    loader = UnstructuredFileLoader(txt_file, mode="elements")
+                    if split:
+                        docs = loader.load_and_split()
+                    else:
+                        docs = loader.load()
 
-            except Exception as inner_e:
-                raise Exception("An error occurred during txt conversion or loading.") from inner_e
+                except Exception as inner_e:
+                    raise Exception("An error occurred during txt conversion or loading.") from inner_e
 
-            finally:
-                # Ensure cleanup happens if txt_file was created
-                if txt_file is not None and os.path.exists(txt_file):
-                    os.remove(txt_file)
+                finally:
+                    # Ensure cleanup happens if txt_file was created
+                    if txt_file is not None and os.path.exists(txt_file):
+                        os.remove(txt_file)
 
     for doc in docs:
         #doc.metadata["file_sha1"] = file_sha1

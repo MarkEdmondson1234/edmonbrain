@@ -274,7 +274,6 @@ def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
                 if len(pages) > 1: # we send it back to GCS to parrallise the imports
                     logging.info(f"Got back {len(pages)} pages for file {tmp_file_path}")
                     for pp in pages:
-                        
                         gs_file = add_file_to_gcs(pp, vector_name=vector_name, bucket_name=bucket_name, metadata=metadata)
                         logging.info(f"{gs_file} is now in bucket {bucket_name}")
                     logging.info(f"Sent split pages for {file_name.name} back to GCS to parrallise the imports")
@@ -292,12 +291,6 @@ def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
 
             docs = []
             for page in pages:
-
-                if file_name.suffix == ".pdf":
-                    local_doc = read_pdf_file(page, metadata=metadata)
-                    if local_doc is not None:
-                        docs.append(local_doc)
-                        continue
                 logging.info(f"Sending file {page} to loaders.read_file_to_document {metadata}")
                 docs2 = loaders.read_file_to_document(page, metadata=metadata)
                 docs.extend(docs2)
