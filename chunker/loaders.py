@@ -164,9 +164,9 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
         if UNSTRUCTURED_URL is not None:
             logging.debug(f"Found UNSTRUCTURED_URL: {UNSTRUCTURED_URL}")
             the_endpoint = f"{UNSTRUCTURED_URL}/general/v0/general"
-            loader = UnstructuredAPIFileLoader(gs_file, mode="elements", url=the_endpoint)
+            loader = UnstructuredAPIFileLoader(gs_file, url=the_endpoint)
         else:
-            loader = UnstructuredAPIFileLoader(gs_file, mode="elements", api_key=UNSTRUCTURED_KEY)
+            loader = UnstructuredAPIFileLoader(gs_file, api_key=UNSTRUCTURED_KEY)
         
         if split:
             # only supported for some file types

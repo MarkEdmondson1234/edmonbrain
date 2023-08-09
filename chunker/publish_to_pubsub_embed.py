@@ -243,7 +243,7 @@ def data_to_embed_pubsub(data: dict, vector_name: str, batch=False):
     chunks = []
 
     if message_data.startswith("gs://"):
-        logging.info("Detected gs://")
+        logging.debug("Detected gs://")
         bucket_name, file_name = message_data[5:].split("/", 1)
 
         # Create a client
@@ -446,6 +446,9 @@ def publish_chunks(chunks: list[Document], vector_name: str):
     for chunk in chunks:
         # Convert chunk to string, as Pub/Sub messages must be strings or bytes
         chunk_str = chunk.json()
+        if len(chunk_str) < 10:
+            logging.warning("Not publishing {chunk_str} as too small < 10 chars")
+            continue
         logging.info(f"Publishing chunk: {chunk_str}")
         pubsub_manager.publish_message(chunk_str)
     
