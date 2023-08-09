@@ -159,7 +159,7 @@ def read_file_to_document(gs_file: pathlib.Path, split=False, metadata: dict = N
     
     docs = []
     done = False
-    pdf_path = pathlib.Path(pdf_path)
+    pdf_path = pathlib.Path(gs_file)
     if pdf_path.suffix == ".pdf":
         from pdfs import read_pdf_file
         local_doc = read_pdf_file(pdf_path, metadata=metadata)
