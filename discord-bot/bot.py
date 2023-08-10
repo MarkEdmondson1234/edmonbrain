@@ -40,9 +40,8 @@ async def process_streamed_response(response, new_thread, thinking_message):
         else:
             # Handle regular chunk content
             if first:
-                await thinking_message.edit(content=chunk_content)
+                await thinking_message.edit(content="**Response:**")
                 first=False
-                continue
             await chunk_send(new_thread, chunk_content)
 
     return None
