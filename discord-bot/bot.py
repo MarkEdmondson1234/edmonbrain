@@ -324,7 +324,7 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
 
-                if reply_content is not "#STREAMED#":
+                if reply_content != "#STREAMED#":
                     if len(reply_content) > 2000:
                         await thinking_message.edit(content="*Response:*")
                         await chunk_send(new_thread, reply_content)
