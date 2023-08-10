@@ -57,6 +57,8 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
         limit=50
     )
 
+    logging.info(f'Slack history found: {len(chat_historys)}')
+
     messages = chat_historys['messages']
 
     command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
