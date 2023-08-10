@@ -277,6 +277,8 @@ Need this info:
         async with aiohttp.ClientSession() as session:
             async with session.post(flask_app_url, json=payload) as response:
                 print(f'chat response.status: {response.status}')
+                streamed=False
+
                 if response.status != 200:
                     # Edit the thinking message to show an error
                     await thinking_message.edit(content="Error in processing message.")
@@ -286,16 +288,12 @@ Need this info:
                     # This is a streamed response, process it in chunks
                     async with new_thread.typing():
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
-                        source_docs = response_data.get('source_documents', [])
-                        if thinking_message.content == "Thinking...":
-                            reply_content = response_data.get('result')
-                        else:
-                            reply_content = '#STREAMED#'  # Get the 'result' field from the JSON
-
+                        streamed=True
                 else:
                     response_data = await response.json()  # Get the response data as JSON
-                    source_docs = response_data.get('source_documents', [])
-                    reply_content = response_data.get('result')  # Get the 'result' field from the JSON
+                
+                source_docs = response_data.get('source_documents', [])
+                reply_content = response_data.get('result')  # Get the 'result' field from the JSON
 
                 print(f'response_data: {response_data}')
                 # dedupe source docs
@@ -324,7 +322,7 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
 
-                if reply_content != "#STREAMED#":
+                if not streamed:
                     if len(reply_content) > 2000:
                         await thinking_message.edit(content="*Response:*")
                         await chunk_send(new_thread, reply_content)
