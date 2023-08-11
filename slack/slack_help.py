@@ -47,14 +47,13 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
         raise ValueError(f'Could not derive vector_name from slack_config and {team_id}, {bot_user}')
     
     logging.debug(f'Slack vector_name: {vector_name}')
-
+    logging.info(f"Getting Slack histories from {body['event']['channel']}")
+    
     chat_historys = await sapp.client.conversations_replies(
         channel=body['event']['channel'],
-        ts=thread_ts,
-        limit=50
+        ts=thread_ts
     ) if thread_ts else await sapp.client.conversations_history(
-        channel=body['event']['channel'],
-        limit=50
+        channel=body['event']['channel']
     )
 
     logging.info(f'Slack history found: {len(chat_historys)}')

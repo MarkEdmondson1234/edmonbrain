@@ -12,6 +12,11 @@ import slack.slack_help as slack_help
 app = AsyncApp()
 app_handler = AsyncSlackRequestHandler(app)
 
+## used in slack_help
+#app.client.conversations_replies()
+#app.client.conversations_history()
+
+
 api = FastAPI()
 
 @app.event("message")
