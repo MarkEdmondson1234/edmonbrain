@@ -49,6 +49,8 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     logging.debug(f'Slack vector_name: {vector_name}')
     logging.info(f"Getting Slack histories from {body['event']['channel']}")
 
+    logging.info(f"thread_ts: {thread_ts}")
+
     if not thread_ts:
         logging.info(f"Getting Slack history sapp.client.conversations_history")
         chat_historys = await sapp.client.conversations_history(channel=body['event']['channel'], limit=50)
@@ -64,7 +66,7 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     logging.debug(f'Slack historys obj: {chat_historys}')
 
     messages = chat_historys['messages']
-    logging.info(f'Slack history found: {len(messages)} messages')
+    logging.info(f'Slack history found: {len(messages)} messages using thread_ts: {thread_ts}')
 
     command_response = bot_help.handle_special_commands(user_input, vector_name, messages)
     if command_response is not None:

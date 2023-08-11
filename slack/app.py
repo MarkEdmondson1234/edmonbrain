@@ -23,17 +23,17 @@ api = FastAPI()
 async def handle_private_message(ack, body, say, logger):
     channel_type = body['event']['channel_type']
     if channel_type == 'im': # Respond only if the message is a direct message
-        logger.info(body)
+        logger.info(f"handle_private_message {body}")
         await ack()
-        thread_ts = body['event']['ts']
+        thread_ts = body['event']['thread_ts']
         slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
         await say(text=slack_output, thread_ts=thread_ts)
 
 @app.event("app_mention")
 async def handle_app_mention(ack, body, say, logger):
     await ack() 
-    logger.info("app_mention")
-    thread_ts = body['event']['ts']
+    logger.info(f"app_mention {body}")
+    thread_ts = body['event']['thread_ts']
     slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
     await say(text=slack_output, thread_ts=thread_ts)
 
