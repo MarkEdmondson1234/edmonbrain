@@ -17,7 +17,7 @@ steps:
       COPY . ./
 
       RUN pip install -r slack/requirements.txt
-
+      ENV GCS_BUCKET=${_GCS_BUCKET}
       EXPOSE 8080
 
       CMD exec uvicorn --port \$$PORT --host 0.0.0.0 slack.app:api

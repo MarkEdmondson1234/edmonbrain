@@ -18,7 +18,7 @@ steps:
       COPY . ./
 
       RUN pip install -r gchat/requirements.txt
-
+      ENV GCS_BUCKET=${_GCS_BUCKET}
       EXPOSE 8080
 
       CMD ["python", "gchat/app.py"]
