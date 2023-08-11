@@ -176,8 +176,8 @@ def handle_special_commands(user_input, vector_name, chat_history):
             chat_file_path = os.path.join(temp_dir, f"{hourmin}_chat_history.txt")
             with open(chat_file_path, 'w') as file:
                 file.write(f"## Thread history at {the_datetime}\nUser: {user_input}")
-                for chat in chat_history:
-                    file.write(f"{chat['name']}: {chat['content']}\n")
+                for human_message, ai_message in chat_history:
+                    file.write(f"Human: {human_message}\nAI: {ai_message}\n")
             gs_file = app_to_store(chat_file_path, vector_name, via_bucket_pubsub=True)
             return {"result": f"Saved chat history to {gs_file}"}
 
