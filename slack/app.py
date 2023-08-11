@@ -25,7 +25,7 @@ async def handle_private_message(ack, body, say, logger):
     if channel_type == 'im': # Respond only if the message is a direct message
         logger.info(f"handle_private_message {body}")
         await ack()
-        thread_ts = body['event']['thread_ts']
+        thread_ts = body['event'].get('thread_ts', body['event'].get('ts'))
         slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
         await say(text=slack_output, thread_ts=thread_ts)
 
@@ -33,7 +33,7 @@ async def handle_private_message(ack, body, say, logger):
 async def handle_app_mention(ack, body, say, logger):
     await ack() 
     logger.info(f"app_mention {body}")
-    thread_ts = body['event']['thread_ts']
+    thread_ts = body['event'].get('thread_ts', body['event'].get('ts'))
     slack_output = await slack_help.process_slack_message(app, body, logger, thread_ts)
     await say(text=slack_output, thread_ts=thread_ts)
 
