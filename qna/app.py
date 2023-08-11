@@ -40,7 +40,8 @@ def is_human(message):
     elif 'sender' in message:  # Google Chat
         return message['sender']['type'] == 'HUMAN'
     else:
-        return 'user' in message  # Slack
+        # Slack: Check for the 'user' field and absence of 'bot_id' field
+        return 'user' in message and 'bot_id' not in message
 
 def is_ai(message):
     if 'name' in message:
