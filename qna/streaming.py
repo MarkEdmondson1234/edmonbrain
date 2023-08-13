@@ -84,7 +84,8 @@ logging.basicConfig(level=logging.INFO)
 def start_streaming_chat(question, 
                          vector_name,
                          chat_history=[],
-                         wait_time=5):
+                         wait_time=5,
+                         timeout=120): # Timeout in seconds (2 minutes)
     from threading import Thread, Event
     from queue import Queue
     from qna.streaming import ContentBuffer, BufferStreamingStdOutCallbackHandler
@@ -126,6 +127,11 @@ def start_streaming_chat(question,
             content_buffer.clear()
         else:
             logging.info("No content to send")
+
+        elapsed_time = time.time() - start
+        if elapsed_time > timeout: # If the elapsed time exceeds the timeout
+            logging.warning("Content production has timed out after 2 minutes")
+            break
     else:
         logging.info(f"Stream has ended after {round(time.time() - start, 2)} seconds")
         logging.info(f"Sending final full message plus sources...")
