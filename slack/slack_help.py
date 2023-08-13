@@ -82,7 +82,7 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
         logging.info(f'Found source documents: {bot_output.get("source_documents")}')
         doc_sources = ""
         for docss in bot_output["source_documents"]:
-            doc_source = docss.get("source", None)
+            doc_source = docss.get("metadata", None).get("source", None)
             if doc_source is not None:
                 doc_sources += f"\n**source**: {doc_source}"
         slack_output = slack_output + doc_sources
