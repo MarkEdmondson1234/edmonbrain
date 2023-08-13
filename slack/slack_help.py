@@ -95,7 +95,7 @@ def generate_slack_output(bot_output):
             if doc_source is not None:
                 source_block = {
                     "type": "section",
-                    "text": {"type": "mrkdwn", "text": f"**source**: {doc_source}"}
+                    "text": {"type": "mrkdwn", "text": f"*source*: `{doc_source}`"}
                 }
                 blocks.append(source_block)
     else:
