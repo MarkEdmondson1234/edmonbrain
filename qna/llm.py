@@ -217,7 +217,7 @@ Any questions about how you work should direct users to issue the `!help` comman
 
     prompt_template = prompt_str_default + memory_str + current_conversation + my_q
     
-    logging.info(f"--Prompt_template: {prompt_template}") 
+    logging.debug(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
