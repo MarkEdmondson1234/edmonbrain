@@ -79,12 +79,15 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
     slack_output = bot_output.get("answer", "No answer available")
     if bot_output.get("source_documents", None) is not None:
+        logging.info(f'Found source documents: {bot_output.get("source_documents")}')
         doc_sources = ""
-        for doc in bot_output["source_documents"]:
-            doc_source = doc.get("source", None)
+        for docss in bot_output["source_documents"]:
+            doc_source = docss.get("source", None)
             if doc_source is not None:
-                doc_sources += f"\n**source**: {doc}"
-        slack_output += doc_sources
+                doc_sources += f"\n**source**: {doc_source}"
+        slack_output = slack_output + doc_sources
+    else:
+        logging.info("Found no source documents")
 
     return slack_output
 
