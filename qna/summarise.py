@@ -30,8 +30,8 @@ def summarise_docs(docs, vector_name, skip_if_less=10000):
         llm.max_tokens = 13000
         max_content_length = 13000
     elif isinstance(llm, ChatVertexAI):
-        llm.max_output_tokens=6000
-        max_content_length=6000
+        llm.max_output_tokens=1024
+        max_content_length=1024
     else:
         raise ValueError("Unsupported llm type: %s" % llm.__class__.__)
 
