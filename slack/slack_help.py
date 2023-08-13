@@ -77,19 +77,32 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
     bot_output = await send_to_qa_async(user_input, vector_name, chat_history=messages)
     logging.info(f"Slack bot_output: {bot_output}")
 
-    slack_output = bot_output.get("answer", "No answer available")
+    return generate_slack_output(bot_output)
+
+def generate_slack_output(bot_output):
+    answer_text = bot_output.get("answer", "No answer available")
+    blocks = [
+        {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": answer_text}
+        }
+    ]
+
     if bot_output.get("source_documents", None) is not None:
         logging.info(f'Found source documents: {bot_output.get("source_documents")}')
-        doc_sources = ""
         for docss in bot_output["source_documents"]:
             doc_source = docss.get("metadata", None).get("source", None)
             if doc_source is not None:
-                doc_sources += f"\n**source**: {doc_source}"
-        slack_output = slack_output + doc_sources
+                source_block = {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": f"**source**: {doc_source}"}
+                }
+                blocks.append(source_block)
     else:
         logging.info("Found no source documents")
 
-    return slack_output
+    return blocks
+
 
 def load_config(filename):
     # Get the directory of the current script
