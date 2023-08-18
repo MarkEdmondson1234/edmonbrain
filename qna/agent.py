@@ -52,6 +52,6 @@ def activate_agent(question, llm_chat):
                 if retry == max_retries - 1:
                     raise
 
-    logging.info("Agent answer: {result}")
+    logging.info(f"Agent answer: {result}")
 
     return {"answer": result}

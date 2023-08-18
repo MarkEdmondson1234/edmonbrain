@@ -128,11 +128,13 @@ def process_qna(vector_name):
 
     user_input = data['user_input']
 
+    message_author = data.get('message_author', None)
+
     paired_messages = extract_chat_history(data['chat_history'])
     logging.info(f'QNA got: {user_input}')
     logging.info(f'QNA got chat_history: {paired_messages}')
     try:
-        bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages)
+        bot_output = qs.qna(user_input, vector_name, chat_history=paired_messages, message_author=message_author)
         bot_output = parse_output(bot_output)
         archive_qa(bot_output, vector_name)
     except Exception as err: 

@@ -42,6 +42,8 @@ def qna(question: str,
             chat_buddy = pick_chat_buddy(vector_name)
             if chat_buddy == message_author:
                 result['answer'] = f"{chat_buddy} {result['answer']}"
+            else:
+                logging.info(f"No chat buddy found for {message_author} from {vector_name}")
 
             return result
         
