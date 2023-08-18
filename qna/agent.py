@@ -11,9 +11,9 @@ from httpx import ReadTimeout
 import logging
 import traceback
 
-def activate_agent(question, chat_history, llm_chat):
+def activate_agent(question, llm_chat):
 
-    logging.info(f"Activating agent {question}, chat history {chat_history}")
+    logging.info(f"Activating agent {question}")
     tools = [
         Tool(
             name="python-repl",
@@ -29,14 +29,14 @@ def activate_agent(question, chat_history, llm_chat):
     for retry in range(max_retries):
         try:
             agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
-            result = agent_chain.run(input=question, chat_history=chat_history)
+            result = agent_chain.run(input=question)
         except ReadTimeout as err:
             delay = initial_delay * (retry + 1)
             logging.warning(f"Read timeout while asking: {question} - trying again after {delay} seconds. Error: {str(err)}")
             time.sleep(delay)
             try:
                 agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
-                result = agent_chain.run(input=question, chat_history=chat_history)
+                result = agent_chain.run(input=question)
             except ReadTimeout:
                 if retry == max_retries - 1:
                     raise
@@ -46,7 +46,7 @@ def activate_agent(question, chat_history, llm_chat):
             time.sleep(delay)
             try:
                 agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
-                result = agent_chain.run(input=question, chat_history=chat_history)
+                result = agent_chain.run(input=question)
 
             except Exception:
                 if retry == max_retries - 1:
