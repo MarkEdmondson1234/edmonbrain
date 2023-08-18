@@ -202,7 +202,11 @@ Any questions about how you work should direct users to issue the `!help` comman
 
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
-        follow_up += f" to your friend explicitly including thier name: {agent_buddy}. {agent_buddy} is {agent_description} and will reply into your chat history.\n"
+        follow_up += f""" to your friend explicitly including thier name: {agent_buddy}. 
+{agent_buddy} is {agent_description} and any replies are in your chat history.  Ask them in this format:
+My Question: {agent_buddy} - (a detailed description of the question you need to have answered by using a python program)
+My Friend's Response:
+"""
     else:
         follow_up += ".\n"
 
