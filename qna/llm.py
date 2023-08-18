@@ -18,17 +18,20 @@ def load_config(filename):
         config = json.load(f)
     return config
 
-def pick_llm(vector_name):
-    logging.debug('Picking llm')
-    # located in the parent directory e.g. config.json, qna/llm.py
+def load_config_key(key, vector_name):
     config = load_config("config.json")
     llm_config = config.get(vector_name, None)
     if llm_config is None:
         raise ValueError("No llm_config was found")
     logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    llm_str = llm_config.get("llm", None)
-    if llm_str is None:
-        raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
+    key_str = llm_config.get(key, None)
+    
+    return key_str
+
+def pick_llm(vector_name):
+    logging.debug('Picking llm')
+    
+    llm_str = load_config_key("llm", vector_name)
     
     if llm_str == 'openai':
         from langchain.embeddings import OpenAIEmbeddings
@@ -62,16 +65,8 @@ def pick_llm(vector_name):
     return llm, embeddings, llm_chat
 
 def pick_streaming(vector_name):
-    logging.debug('Picking llm')
-    # located in the parent directory e.g. config.json, qna/llm.py
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    llm_str = llm_config.get("llm", None)
-    if llm_str is None:
-        raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
+    
+    llm_str = load_config_key("llm", vector_name)
     
     if llm_str == 'openai':
         return True
@@ -80,13 +75,9 @@ def pick_streaming(vector_name):
     
 def pick_vectorstore(vector_name, embeddings):
     logging.debug('Picking vectorstore')
-    # located in the parent directory e.g. config.json, qna/llm.py
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    vs_str = llm_config.get("vectorstore", None)
+
+    vs_str = load_config_key("vectorstore", vector_name)
+
     if vs_str is None:
         raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
     
@@ -182,18 +173,15 @@ def get_chat_history(inputs, vector_name, last_chars=1000, summary_chars=1500) -
 def pick_prompt(vector_name, chat_history=[]):
     """Pick a custom prompt"""
     logging.debug('Picking prompt')
-    # located in the parent directory e.g. config.json, qna/llm.py
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    prompt_str = llm_config.get("prompt", None)
+
+    prompt_str = load_config_key("prompt", vector_name)
+
     the_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     prompt_str_default = f"""You are Edmonbrain the chat bot created by Mark Edmondson. It is now {the_date}.
 Use your memory to answer the question at the end.
 If your memories don't help with your answer, just use them to set the tone and style of your response.
 Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
-If you need more information to make your reply more certain, ask a follow up question to the user.
+
 If you don't know, just say you don't know - don't make anything up. Avoid generic boilerplate answers.
 Consider why the question was asked, and offer follow up questions linked to those reasons.
 Match the level of detail in your answer to the question. A more detailed explanation is needed if the question is very specific.
@@ -209,13 +197,21 @@ Any questions about how you work should direct users to issue the `!help` comman
     chat_summary = ""
     if len(chat_history) != 0:
         chat_summary = get_chat_history(chat_history, vector_name)
+    
+    follow_up = "\nIf you need more information to make your reply more certain, ask a follow up question"
+
+    agent_buddy, agent_description = pick_chat_buddy(vector_name)
+    if agent_buddy:
+        follow_up += f" to your friend explicitly including thier name: {agent_buddy}. {agent_buddy} is {agent_description} and will reply into your chat history.\n"
+    else:
+        follow_up += ".\n"
 
     memory_str = "\n## Your Memory\n{context}\n"
     current_conversation =f"## Current Conversation\n{chat_summary}\n"
     current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
     my_q = "## My Question\n{question}\n## Your response:\n"
 
-    prompt_template = prompt_str_default + memory_str + current_conversation + my_q
+    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q
     
     logging.debug(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
@@ -223,3 +219,18 @@ Any questions about how you work should direct users to issue the `!help` comman
     )
 
     return QA_PROMPT
+
+def pick_chat_buddy(vector_name):
+    chat_buddy = load_config_key("chat_buddy", vector_name)
+    if chat_buddy is not None:
+        buddy_description = load_config_key("chat_buddy_description",None)
+        return chat_buddy, buddy_description
+    return None
+
+
+def pick_agent(vector_name):
+    agent_str = load_config_key("agent", vector_name)
+    if agent_str == "yes":
+        return True
+    
+    return False

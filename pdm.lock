@@ -819,16 +819,16 @@ summary = "A fast implementation of the Cassowary constraint solver"
 
 [[package]]
 name = "langchain"
-version = "0.0.229"
+version = "0.0.266"
 requires_python = ">=3.8.1,<4.0"
 summary = "Building applications with LLMs through composability"
 dependencies = [
-    "PyYAML>=5.4.1",
+    "PyYAML>=5.3",
     "SQLAlchemy<3,>=1.4",
     "aiohttp<4.0.0,>=3.8.3",
     "async-timeout<5.0.0,>=4.0.0; python_version < \"3.11\"",
     "dataclasses-json<0.6.0,>=0.5.7",
-    "langchainplus-sdk<0.0.21,>=0.0.20",
+    "langsmith<0.1.0,>=0.0.21",
     "numexpr<3.0.0,>=2.8.4",
     "numpy<2,>=1",
     "openapi-schema-pydantic<2.0,>=1.2",
@@ -838,14 +838,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "langchainplus-sdk"
-version = "0.0.20"
+name = "langsmith"
+version = "0.0.24"
 requires_python = ">=3.8.1,<4.0"
 summary = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 dependencies = [
-    "pydantic<2,>=1",
+    "pydantic<3,>=1",
     "requests<3,>=2",
-    "tenacity<9.0.0,>=8.1.0",
 ]
 
 [[package]]
@@ -3062,13 +3061,13 @@ content_hash = "sha256:a467f933469b3e80b866caa0e84d6346f57a3a70b225e23052d409751
     {url = "https://files.pythonhosted.org/packages/f6/e8/194a4b4eee0990a648711bfb769a7110d10fd8d8b370a0464cb3d1060381/kiwisolver-1.4.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:70e7c2e7b750585569564e2e5ca9845acfaa5da56ac46df68414f29fea97be9f"},
     {url = "https://files.pythonhosted.org/packages/f8/f4/724d454e95c7e9be6a05f1da3fb85251b5dbb8c3b7d06bdc61d56b16035a/kiwisolver-1.4.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:36dafec3d6d6088d34e2de6b85f9d8e2324eb734162fba59d2ba9ed7a2043d5b"},
 ]
-"langchain 0.0.229" = [
-    {url = "https://files.pythonhosted.org/packages/30/47/dbba98f94fb48c608733516ae40856572bba0bfefc5d0b5ee8639b7d0be6/langchain-0.0.229.tar.gz", hash = "sha256:ab1beac7f3fc1f06ab1a0b545ef0d47a3d5efef3b2b4c646aafaefc2eb3151d3"},
-    {url = "https://files.pythonhosted.org/packages/7f/0e/23b18a3fad0d4eac0ab960ac8c151a047b6f9445ad358efaf24f0e4928ad/langchain-0.0.229-py3-none-any.whl", hash = "sha256:a7ca79e4ab892756ede95d212bd42243303f91b172535cefd02b0b8965e4e7b7"},
+"langchain 0.0.266" = [
+    {url = "https://files.pythonhosted.org/packages/20/bf/976db78bec94a810375d3eb7fab5501ef774993da5f54947d5ba71efc997/langchain-0.0.266-py3-none-any.whl", hash = "sha256:8c4968dc83b77b89ed4612aeb95eff5e24d28d48f2658d8abb26a863a667c525"},
+    {url = "https://files.pythonhosted.org/packages/b2/6d/35a05160fbbef005c5c1c5f04fde278bdbe651328620810f15a595521bec/langchain-0.0.266.tar.gz", hash = "sha256:16754e79008fdf1badd1642555bb839d6d4a03b533c686f759f5eb6ba1f37454"},
 ]
-"langchainplus-sdk 0.0.20" = [
-    {url = "https://files.pythonhosted.org/packages/85/b3/c8d9f825579038080691a61f42bbafe6c914b67733097a310979f5b5db28/langchainplus_sdk-0.0.20.tar.gz", hash = "sha256:3d300e2e3290f68cc9d842c059f9458deba60e776c9e790309688cad1bfbb219"},
-    {url = "https://files.pythonhosted.org/packages/ef/93/22f2d584ffa0281d51fcd8500f7c807879610ac97851f7d8eb0458165373/langchainplus_sdk-0.0.20-py3-none-any.whl", hash = "sha256:07a869d476755803aa04c4986ce78d00c2fe4ff584c0eaa57d7570c9664188db"},
+"langsmith 0.0.24" = [
+    {url = "https://files.pythonhosted.org/packages/3a/51/63ff9bfcb70146b2ff72858765fc32427d127e4e50bb5bd946f78121560d/langsmith-0.0.24-py3-none-any.whl", hash = "sha256:f9f951d070aa1919123d700642aca9c781edfc8797a65ab1161aa12f89bed707"},
+    {url = "https://files.pythonhosted.org/packages/d9/2d/74f85143e9e18a60e2a7e760a08e7904ea6ac4941db93f3a95d539b5dc2e/langsmith-0.0.24.tar.gz", hash = "sha256:9c066dd915752324490a735692997b0db0958f5dfc1e0a0dfbf752c6e62c7529"},
 ]
 "layoutparser 0.3.4" = [
     {url = "https://files.pythonhosted.org/packages/08/cf/0bfbea1b2ace91af45e15bdec885e05992dc9150907a8398b3d305eddfd2/layoutparser-0.3.4-py3-none-any.whl", hash = "sha256:269aedfab8a0caa50aef8d0fa62740fbee1f2964880daae3a0e6a0415363126a"},

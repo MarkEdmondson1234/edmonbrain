@@ -5,7 +5,7 @@ import time
 from qna.llm import pick_llm
 from qna.llm import pick_vectorstore
 from qna.llm import pick_prompt
-from qna.llm import pick_streaming
+from qna.llm import pick_agent
 
 from httpcore import ReadTimeout
 from openai.error import InvalidRequestError
@@ -24,6 +24,15 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
     # override llm to one that supports streaming
     if stream_llm:
         llm_chat=stream_llm
+
+    is_agent = pick_agent(vector_name)
+    if is_agent:
+        from qna.agent import activate_agent
+        result = activate_agent(question, chat_history)
+        if result is not None:
+            return result
+        
+        return {'answer':"Agent couldn't help", 'source_documents': []}
 
     vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
 
