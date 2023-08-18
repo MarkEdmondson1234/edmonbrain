@@ -39,7 +39,7 @@ def qna(question: str,
         result = activate_agent(question, llm_chat)
         if result is not None:
             logging.info(f"agent result: {result}")
-            chat_buddy = pick_chat_buddy(vector_name)
+            chat_buddy, buddy_description = pick_chat_buddy(vector_name)
             if chat_buddy == message_author:
                 result['answer'] = f"{chat_buddy} {result['answer']}"
             else:

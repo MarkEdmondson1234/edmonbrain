@@ -279,6 +279,8 @@ Need this info:
             'message_author': str(message.author)
         }
 
+        print(f'Sending: {payload}')
+
         async with aiohttp.ClientSession() as session:
             async with session.post(flask_app_url, json=payload) as response:
                 print(f'chat response.status: {response.status}')

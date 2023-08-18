@@ -22,7 +22,6 @@ def activate_agent(question, llm_chat):
         )
     ]
 
-    #memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     max_retries=1
     initial_delay = 5
     import time

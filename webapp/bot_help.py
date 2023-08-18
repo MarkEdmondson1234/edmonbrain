@@ -282,7 +282,7 @@ def load_config(filename):
         config = json.load(f)
     return config
 
-def send_to_qa(user_input, vector_name, chat_history):
+def send_to_qa(user_input, vector_name, chat_history, message_author=None):
 
     qna_url = os.getenv('QNA_URL', None)
     if qna_url is None:
@@ -292,6 +292,7 @@ def send_to_qa(user_input, vector_name, chat_history):
     qna_data = {
         'user_input': user_input,
         'chat_history': chat_history,
+        'message_author': message_author
     }
     try:
         logging.info(f"Sending to {qna_endpoint} this data: {qna_data}")

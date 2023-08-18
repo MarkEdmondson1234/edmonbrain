@@ -71,9 +71,11 @@ def discord_message(vector_name):
     command_response = bot_help.handle_special_commands(user_input, vector_name, paired_messages)
     if command_response is not None:
         return jsonify(command_response)
+    
+    message_author = data.get('message_author', None)
 
     # send chat_history not paired_messages
-    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=chat_history)
+    bot_output = bot_help.send_to_qa(user_input, vector_name, chat_history=chat_history, message_author=message_author)
     logging.info(f"bot_output: {bot_output}")
     
     discord_output = bot_help.generate_discord_output(bot_output)
