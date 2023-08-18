@@ -52,8 +52,6 @@ def activate_agent(question, llm_chat):
                 if retry == max_retries - 1:
                     raise
 
-        raise Exception(f"Max retries exceeded for question: {question}")
-
     logging.info("Agent answer: {result}")
 
     return {"answer": result}
