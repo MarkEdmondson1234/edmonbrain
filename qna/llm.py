@@ -203,9 +203,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
         follow_up += f""" to your friend explicitly including thier name: {agent_buddy}. 
-{agent_buddy} is {agent_description} and any replies are in your chat history.  Ask them in this format:
-My Question: {agent_buddy} - (a detailed description of the question you need to have answered by using a python program)
-My Friend's Response:
+{agent_buddy} is {agent_description} and any replies are in your chat history.  
 """
     else:
         follow_up += ".\n"
@@ -214,8 +212,12 @@ My Friend's Response:
     current_conversation =f"## Current Conversation\n{chat_summary}\n"
     current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
     my_q = "## My Question\n{question}\n## Your response:\n"
+    if agent_buddy:
+        buddy_question = """
+(If necessary) Your Question to {agent_buddy}: (a detailed description of the question you need to have answered by using a python program)
+My Friend's Response:\n"""
 
-    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q
+    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question
     
     logging.debug(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
