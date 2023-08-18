@@ -214,7 +214,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     my_q = "## My Question\n{question}\n## Your response:\n"
     if agent_buddy:
         buddy_question = """
-(If necessary) Your Question to {agent_buddy}: (a detailed description of the question you need to have answered by using a python program)
+(If necessary) Your Question to your friend:
 My Friend's Response:\n"""
 
     prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question
