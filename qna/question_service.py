@@ -16,7 +16,13 @@ from langchain.chains import ConversationalRetrievalChain
 
 #logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.INFO)
-def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial_delay=5, stream_llm=None):
+def qna(question: str, 
+        vector_name: str, 
+        chat_history=[], 
+        max_retries=1, 
+        initial_delay=5, 
+        stream_llm=None,
+        message_author=None):
 
     logging.debug("Calling qna")
 
@@ -29,9 +35,14 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
     is_agent = pick_agent(vector_name)
     if is_agent:
         from qna.agent import activate_agent
+        from qna.llm import pick_chat_buddy
         result = activate_agent(question, llm_chat)
         if result is not None:
             logging.info(f"agent result: {result}")
+            chat_buddy = pick_chat_buddy(vector_name)
+            if chat_buddy == message_author:
+                result['answer'] = f"{chat_buddy} {result['answer']}"
+
             return result
         
         return {'answer':"Agent couldn't help", 'source_documents': []}

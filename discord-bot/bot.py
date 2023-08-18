@@ -261,17 +261,22 @@ Need this info:
             await thinking_message.edit(content=f"May I ask you to reply with a bit more context?")
 
             return
+        
+        agent = False
+        if VECTORNAME.endswith("_agent"):
+            agent = True
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
-        if VECTORNAME.endswith("_vertex") or VECTORNAME.endswith("_agent"):
+        if VECTORNAME.endswith("_vertex") or agent:
             flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         else:
             flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
         print(f'Calling {flask_app_url}')
         payload = {
             'content': clean_content,
-            'chat_history': chat_history
+            'chat_history': chat_history,
+            'message_author': str(message.author)
         }
 
         async with aiohttp.ClientSession() as session:
@@ -333,9 +338,9 @@ Need this info:
                         await thinking_message.edit(content=reply_content)
 
                 # Check if the message was sent in a thread or a private message
-                if isinstance(new_thread, discord.Thread):
+                if isinstance(new_thread, discord.Thread) and not agent:
                     await new_thread.send(f"*Reply to {bot_mention} within this thread to continue. Use `!help` for special commands*")
-                elif isinstance(new_thread, discord.DMChannel):
+                elif isinstance(new_thread, discord.DMChannel) and not agent:
                     # Its a DM
                     await new_thread.send(f"*Use `!help` to see special commands*")
                 else:

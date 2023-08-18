@@ -84,6 +84,7 @@ logging.basicConfig(level=logging.INFO)
 def start_streaming_chat(question, 
                          vector_name,
                          chat_history=[],
+                         message_author=None,
                          wait_time=5,
                          timeout=120): # Timeout in seconds (2 minutes)
     from threading import Thread, Event
@@ -109,7 +110,7 @@ def start_streaming_chat(question,
     # Start the chat in a separate thread
     def start_chat(stop_event, result_queue):
         from qna.question_service import qna
-        final_result = qna(question, vector_name, chat_history, stream_llm=llm_stream)
+        final_result = qna(question, vector_name, chat_history, stream_llm=llm_stream, message_author=message_author)
         result_queue.put(final_result)
 
     chat_thread = Thread(target=start_chat, args=(stop_event,result_queue))

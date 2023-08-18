@@ -98,6 +98,8 @@ def stream_qa(vector_name):
 
     chat_history = data.get('chat_history', None)
 
+    message_author = data.get('message_author', None)
+
     from webapp import bot_help
     paired_messages = bot_help.extract_chat_history(chat_history)
 
@@ -112,7 +114,8 @@ def stream_qa(vector_name):
     from qna.streaming import start_streaming_chat
     response = Response(start_streaming_chat(user_input,
                                              vector_name,
-                                             chat_history=paired_messages), 
+                                             chat_history=paired_messages,
+                                             message_author=message_author), 
                         content_type='text/plain')
     response.headers['Transfer-Encoding'] = 'chunked'    
 
