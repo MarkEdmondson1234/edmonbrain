@@ -276,7 +276,7 @@ Need this info:
         payload = {
             'content': clean_content,
             'chat_history': chat_history,
-            'message_author': message.author
+            'message_author': f"<@{message.author.id}>"
         }
 
         print(f'Sending: {payload}')
