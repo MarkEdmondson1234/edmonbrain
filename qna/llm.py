@@ -234,3 +234,8 @@ def pick_agent(vector_name):
         return True
     
     return False
+
+def pick_shared_vectorstore(vector_name, embeddings):
+    shared_vectorstore = load_config_key("shared_vectorstore", vector_name)
+    vectorstore = pick_vectorstore(shared_vectorstore, embeddings)
+    return vectorstore

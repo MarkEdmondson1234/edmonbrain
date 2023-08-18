@@ -8,6 +8,7 @@ from qna.llm import pick_prompt
 from qna.llm import pick_agent
 
 from httpcore import ReadTimeout
+from httpx import ReadTimeout
 from openai.error import InvalidRequestError
 
 #https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html
@@ -28,8 +29,9 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
     is_agent = pick_agent(vector_name)
     if is_agent:
         from qna.agent import activate_agent
-        result = activate_agent(question, chat_history, vector_name)
+        result = activate_agent(question, chat_history, vector_name, llm_chat)
         if result is not None:
+            print("result2:" + str(result))
             return result
         
         return {'answer':"Agent couldn't help", 'source_documents': []}
