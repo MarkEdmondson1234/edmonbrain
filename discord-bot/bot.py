@@ -272,7 +272,7 @@ Need this info:
             flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         else:
             flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
-        print(f'Calling {flask_app_url}')
+        #print(f'Calling {flask_app_url}')
         payload = {
             'content': clean_content,
             'chat_history': chat_history,

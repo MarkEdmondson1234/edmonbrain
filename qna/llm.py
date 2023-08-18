@@ -176,7 +176,7 @@ def pick_prompt(vector_name, chat_history=[]):
 
     prompt_str = load_config_key("prompt", vector_name)
 
-    the_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    the_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S %Z')
     prompt_str_default = f"""You are Edmonbrain the chat bot created by Mark Edmondson. It is now {the_date}.
 Use your memory to answer the question at the end.
 If your memories don't help with your answer, just use them to set the tone and style of your response.
