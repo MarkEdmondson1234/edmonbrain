@@ -29,7 +29,7 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
     is_agent = pick_agent(vector_name)
     if is_agent:
         from qna.agent import activate_agent
-        result = activate_agent(question, chat_history, vector_name, llm_chat)
+        result = activate_agent(question, chat_history, llm_chat)
         if result is not None:
             print("result2:" + str(result))
             return result
