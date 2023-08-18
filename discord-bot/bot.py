@@ -264,7 +264,7 @@ Need this info:
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
-        if VECTORNAME.endswith("_vertex"):
+        if VECTORNAME.endswith("_vertex") or VECTORNAME.endswith("_agent"):
             flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         else:
             flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'

@@ -31,7 +31,7 @@ def qna(question: str, vector_name: str, chat_history=[], max_retries=1, initial
         from qna.agent import activate_agent
         result = activate_agent(question, chat_history, llm_chat)
         if result is not None:
-            print("result2:" + str(result))
+            logging.info(f"agent result: {result}")
             return result
         
         return {'answer':"Agent couldn't help", 'source_documents': []}

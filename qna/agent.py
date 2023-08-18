@@ -3,12 +3,8 @@ from langchain.agents import AgentType
 
 from langchain.agents import initialize_agent
 from langchain.memory import ConversationBufferMemory
-from langchain.chat_models import ChatOpenAI
-from qna.llm import pick_shared_vectorstore
-from qna.llm import pick_llm
 
 from langchain.tools.python.tool import PythonREPLTool
-from langchain.chains import RetrievalQA
 
 from httpx import ReadTimeout
 
@@ -17,6 +13,7 @@ import traceback
 
 def activate_agent(question, chat_history, llm_chat):
 
+    logging.info(f"Activating agent {question}, chat history {chat_history}")
     tools = [
         Tool(
             name="python-repl",
@@ -33,10 +30,6 @@ def activate_agent(question, chat_history, llm_chat):
         try:
             agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
             result = agent_chain.run(input=question, chat_history=chat_history)
-
-            logging.info("Agent result:" + result)
-
-            return {"answer": result}
         except ReadTimeout as err:
             delay = initial_delay * (retry + 1)
             logging.warning(f"Read timeout while asking: {question} - trying again after {delay} seconds. Error: {str(err)}")
@@ -44,10 +37,6 @@ def activate_agent(question, chat_history, llm_chat):
             try:
                 agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
                 result = agent_chain.run(input=question, chat_history=chat_history)
-
-                logging.info("Agent result:" + result)
-
-                return {"answer": result}
             except ReadTimeout:
                 if retry == max_retries - 1:
                     raise
@@ -59,11 +48,12 @@ def activate_agent(question, chat_history, llm_chat):
                 agent_chain = initialize_agent(tools, llm=llm_chat, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
                 result = agent_chain.run(input=question, chat_history=chat_history)
 
-                logging.info("Agent result:" + result)
-
-                return {"answer": result}
             except Exception:
                 if retry == max_retries - 1:
                     raise
 
-    raise Exception(f"Max retries exceeded for question: {question}")
+        raise Exception(f"Max retries exceeded for question: {question}")
+
+    logging.info("Agent answer: {result}")
+
+    return {"answer": result}
