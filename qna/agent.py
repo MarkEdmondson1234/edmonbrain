@@ -11,9 +11,14 @@ from httpx import ReadTimeout
 import logging
 import traceback
 
-def activate_agent(question, llm_chat):
+def activate_agent(question, llm_chat, chat_history):
 
     logging.info(f"Activating agent {question}")
+
+    if chat_history:
+        last_human_message, last_ai_message = chat_history[-1]
+        question = f"Last human message: {last_human_message}\nLast AI message: {last_ai_message}\nQuestion: {question}"
+
     tools = [
         Tool(
             name="python-repl",
