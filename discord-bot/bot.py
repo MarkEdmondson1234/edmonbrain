@@ -268,14 +268,14 @@ Need this info:
                 return
 
         # Send a thinking message
-        if not agent and not talking_to_bot:
+        if not agent:
             thinking_message = await new_thread.send("Thinking...")
 
-        if len(clean_content) < 10 and not clean_content.startswith("!"):
-            print(f"Got a little message not worth sending: {clean_content}")
-            await thinking_message.edit(content=f"May I ask you to reply with a bit more context, {str(message.author)}?")
+            if len(clean_content) < 10 and not clean_content.startswith("!"):
+                print(f"Got a little message not worth sending: {clean_content}")
+                await thinking_message.edit(content=f"May I ask you to reply with a bit more context, {str(message.author)}?")
 
-            return
+                return
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
@@ -340,7 +340,7 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
                 
-                if talking_to_bot and agent:
+                if agent:
                     await chunk_send(new_thread, reply_content)
                 else:
                     # talking to a human
