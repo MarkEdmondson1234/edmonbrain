@@ -168,17 +168,10 @@ async def on_message(message):
        and client.user not in message.mentions:
         return
 
-
-
     print(f"## Processing message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     bot_mention = client.user.mention
 
     clean_content = message.content.replace(bot_mention, '')
-
-    if not agent:
-        new_thread = await make_new_thread(message, clean_content)
-
-    chat_history = await make_chat_history(new_thread, bot_mention, client.user)
 
     try:
         VECTORNAME = select_vectorname(message, bot_mention)
@@ -201,6 +194,11 @@ Need this info:
     agent = False
     if VECTORNAME.endswith("_agent"):
         agent = True
+
+    if not agent:
+        new_thread = await make_new_thread(message, clean_content)
+    
+    chat_history = await make_chat_history(new_thread, bot_mention, client.user)
 
     # a file is attached
     if message.attachments:
