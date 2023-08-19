@@ -159,7 +159,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    print(f"## Message by {message.author} to {client.user} ##")
+    print(f"## Message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     if message.author == client.user:
         return
 
@@ -168,6 +168,7 @@ async def on_message(message):
        and client.user not in message.mentions:
         return
 
+    print(f"## Processing message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     bot_mention = client.user.mention
 
     clean_content = message.content.replace(bot_mention, '')
