@@ -203,7 +203,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
         follow_up += f"""either to the human, or to your friend explicitly including thier name: {agent_buddy}. 
-{agent_buddy} only knows this: {agent_description} and will reply back to you to help. Don't ask them about anything else beyond that they can help with. 
+{agent_buddy} only knows this: {agent_description} and will reply back to you to help.  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
 """
     else:

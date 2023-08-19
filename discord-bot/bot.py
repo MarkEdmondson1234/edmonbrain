@@ -195,8 +195,7 @@ Need this info:
     if VECTORNAME.endswith("_agent"):
         agent = True
 
-    if not agent:
-        new_thread = await make_new_thread(message, clean_content)
+    new_thread = await make_new_thread(message, clean_content)
     
     chat_history = await make_chat_history(new_thread, bot_mention, client.user)
 
