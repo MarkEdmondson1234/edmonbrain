@@ -168,13 +168,7 @@ async def on_message(message):
        and client.user not in message.mentions:
         return
 
-    talking_to_bot = False    
-    if message.mentions[0].bot == True:
-        talking_to_bot = True
-    
-    agent = False
-    if VECTORNAME.endswith("_agent"):
-        agent = True
+
 
     print(f"## Processing message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     bot_mention = client.user.mention
@@ -198,7 +192,17 @@ Need this info:
 - guild_id: Your-Guild-Name
 """)
         return  # exit the event handler
+    
+    # set bot and agent flags
+    talking_to_bot = False    
+    if message.mentions[0].bot == True:
+        talking_to_bot = True
+    
+    agent = False
+    if VECTORNAME.endswith("_agent"):
+        agent = True
 
+    # a file is attached
     if message.attachments:
 
         max_file_size = 1 * 1024 * 1024  # 10 MB
