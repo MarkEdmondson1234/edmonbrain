@@ -22,7 +22,7 @@ def activate_agent(question, llm_chat, chat_history):
     tools = [
         Tool(
             name="python-repl",
-            description="useful for when you need to calculate something using programing. Use print() to see the answer.",
+            description="useful for when you need to calculate something using programing. Always end your programes with print() so we can see the answer.",
             func=PythonREPLTool().run
         )
     ]
