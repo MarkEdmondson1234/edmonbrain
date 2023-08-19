@@ -171,13 +171,17 @@ async def on_message(message):
     talking_to_bot = False    
     if message.mentions[0].bot == True:
         talking_to_bot = True
+    
+    agent = False
+    if VECTORNAME.endswith("_agent"):
+        agent = True
 
     print(f"## Processing message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     bot_mention = client.user.mention
 
     clean_content = message.content.replace(bot_mention, '')
 
-    if not talking_to_bot:
+    if not agent:
         new_thread = await make_new_thread(message, clean_content)
 
     chat_history = await make_chat_history(new_thread, bot_mention, client.user)
@@ -262,7 +266,7 @@ Need this info:
                 return
 
         # Send a thinking message
-        if not talking_to_bot:
+        if not agent and not talking_to_bot:
             thinking_message = await new_thread.send("Thinking...")
 
         if len(clean_content) < 10 and not clean_content.startswith("!"):
@@ -270,10 +274,6 @@ Need this info:
             await thinking_message.edit(content=f"May I ask you to reply with a bit more context, {str(message.author)}?")
 
             return
-        
-        agent = False
-        if VECTORNAME.endswith("_agent"):
-            agent = True
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
@@ -338,7 +338,7 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
                 
-                if talking_to_bot:
+                if talking_to_bot and agent:
                     await chunk_send(new_thread, reply_content)
                 else:
                     # talking to a human
