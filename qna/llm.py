@@ -203,7 +203,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
         follow_up += f""" to your friend explicitly including thier name: {agent_buddy}. 
-{agent_buddy} is {agent_description} and any replies are in your chat history.  
+{agent_buddy} only knows this: {agent_description} and any replies are in your chat history. Don't ask them about anything else. 
 """
     else:
         follow_up += ".\n"
@@ -214,7 +214,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     my_q = "## My Question\n{question}\n## Your response:\n"
     if agent_buddy:
         buddy_question = """
-(If necessary) Your Question to your friend:
+(Only if necessary) Your Question to your friend:
 My Friend's Response:\n"""
 
     prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question

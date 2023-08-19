@@ -158,6 +158,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
+    print(f"## Message by {message.author} to {client.user} ##")
     if message.author == client.user:
         return
 
@@ -225,7 +227,7 @@ Need this info:
         return
 
     if message.content:
-        print(f'Got the message: {message.content}')
+        print(f'Got the message: {message.content} from {message.author}')
 
         debug=False
         if message.content.startswith("!debug"):
@@ -272,7 +274,7 @@ Need this info:
             flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         else:
             flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
-        #print(f'Calling {flask_app_url}')
+        #pythprint(f'Calling {flask_app_url}')
         payload = {
             'content': clean_content,
             'chat_history': chat_history,
