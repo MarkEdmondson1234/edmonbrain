@@ -159,7 +159,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    print(f"## Message by {message.author} read by {client.user} mentioning {message.mentions} ##")
+    print(f"## Message by {message.author} read by {client.user} mentioning {str(message.mentions)} ##")
     if message.author == client.user:
         return
 
@@ -168,12 +168,17 @@ async def on_message(message):
        and client.user not in message.mentions:
         return
 
+    talking_to_bot = False    
+    if message.mentions[0].bot == True:
+        talking_to_bot = True
+
     print(f"## Processing message by {message.author} read by {client.user} mentioning {message.mentions} ##")
     bot_mention = client.user.mention
 
     clean_content = message.content.replace(bot_mention, '')
 
-    new_thread = await make_new_thread(message, clean_content)
+    if not talking_to_bot:
+        new_thread = await make_new_thread(message, clean_content)
 
     chat_history = await make_chat_history(new_thread, bot_mention, client.user)
 
@@ -257,11 +262,12 @@ Need this info:
                 return
 
         # Send a thinking message
-        thinking_message = await new_thread.send("Thinking...")
+        if not talking_to_bot:
+            thinking_message = await new_thread.send("Thinking...")
 
         if len(clean_content) < 10 and not clean_content.startswith("!"):
             print(f"Got a little message not worth sending: {clean_content}")
-            await thinking_message.edit(content=f"May I ask you to reply with a bit more context?")
+            await thinking_message.edit(content=f"May I ask you to reply with a bit more context, {str(message.author)}?")
 
             return
         
@@ -331,16 +337,20 @@ Need this info:
                     if source_url is not None:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
-
-                if not streamed:
-                    if len(reply_content) > 2000:
-                        await thinking_message.edit(content="*Response:*")
-                        await chunk_send(new_thread, reply_content)
-                    elif len(reply_content) == 0:
-                        await thinking_message.edit(content="No response")
-                    else:
-                        # Edit the thinking message to show the reply
-                        await thinking_message.edit(content=reply_content)
+                
+                if talking_to_bot:
+                    await chunk_send(new_thread, reply_content)
+                else:
+                    # talking to a human
+                    if not streamed:
+                        if len(reply_content) > 2000:
+                            await thinking_message.edit(content="*Response:*")
+                            await chunk_send(new_thread, reply_content)
+                        elif len(reply_content) == 0:
+                            await thinking_message.edit(content="No response")
+                        else:
+                            # Edit the thinking message to show the reply
+                            await thinking_message.edit(content=reply_content)
 
                 # Check if the message was sent in a thread or a private message
                 if isinstance(new_thread, discord.Thread) and not agent:
