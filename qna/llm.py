@@ -196,11 +196,11 @@ Any questions about how you work should direct users to issue the `!help` comman
     if len(chat_history) != 0:
         chat_summary = get_chat_history(chat_history, vector_name)
     
-    follow_up = "\nIf you need more information, ask a follow up question"
+    follow_up = "\nIf you can't answer the human's question without more information, ask a follow up question"
 
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
-        follow_up += f"""either to the human, or to your friend if they can help including explicitly thier name: {agent_buddy}. 
+        follow_up += f"""either to the human, or to your friend {agent_buddy}.
 {agent_buddy} only knows about this: {agent_description} and will reply back to you to help.  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
 Only mention {agent_buddy} once in your response when asking your question, else they get confused.
