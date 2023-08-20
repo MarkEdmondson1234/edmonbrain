@@ -27,7 +27,7 @@ async def process_streamed_response(response, new_thread, thinking_message):
                 return json_data
         elif '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
             json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
-            print(f"streamed json: {json_data_str}")
+            #print(f"streamed json: {json_data_str}")
             try:
                 json_data = json.loads(json_data_str)
                 return json_data
@@ -159,7 +159,6 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    print(f"## Message by {message.author} read by {client.user} mentioning {str(message.mentions)} ##")
     if message.author == client.user:
         return
 
@@ -289,7 +288,7 @@ Need this info:
             'message_author': f"<@{message.author.id}>"
         }
 
-        print(f'Sending: {payload}')
+        #print(f'Sending: {payload}')
 
         async with aiohttp.ClientSession() as session:
             async with session.post(flask_app_url, json=payload) as response:
@@ -306,6 +305,7 @@ Need this info:
                     async with new_thread.typing():
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
                         streamed=True
+                        print("Finished streaming response")
                 else:
                     response_data = await response.json()  # Get the response data as JSON
                 
@@ -340,10 +340,12 @@ Need this info:
                         await chunk_send(new_thread, url_message)
                 
                 if agent:
+                    print("Agent sending directly")
                     await chunk_send(new_thread, reply_content)
                 else:
                     # talking to a human
                     if not streamed:
+                        print("Not streamed content")
                         if len(reply_content) > 2000:
                             await thinking_message.edit(content="*Response:*")
                             await chunk_send(new_thread, reply_content)

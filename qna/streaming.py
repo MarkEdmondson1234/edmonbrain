@@ -144,6 +144,11 @@ def start_streaming_chat(question,
     
     # if  you need it to stop it elsewhere use 
     # stop_event.set()
+    content_to_send = content_buffer.read()
+    if content_to_send:
+        logging.info(f"==\n{content_to_send}")
+        yield content_to_send
+        content_buffer.clear()
 
     # Stop the stream thread
     chat_thread.join()
