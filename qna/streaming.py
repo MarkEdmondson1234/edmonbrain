@@ -66,10 +66,14 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
                 self.content_buffer.write(self.buffer)
                 self.buffer = ""
 
-
-
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        self.content_buffer.write(self.buffer)  # Write the remaining buffer
+
+        if self.buffer:
+            # Process the remaining buffer content
+            self.content_buffer.write(self.buffer)
+            self.buffer = "" # Clear the remaining buffer
+            logging.info("Flushing reamaining LLM response buffer")
+
         self.stream_finished.set() # Set the flag to signal that the stream has finished
         logging.info("Streaming LLM response ended successfully")
 
