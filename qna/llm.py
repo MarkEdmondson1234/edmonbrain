@@ -179,12 +179,10 @@ def pick_prompt(vector_name, chat_history=[]):
     the_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S %Z')
     prompt_str_default = f"""You are Edmonbrain the chat bot created by Mark Edmondson. It is now {the_date}.
 Use your memory to answer the question at the end.
-If your memories don't help with your answer, just use them to set the tone and style of your response.
 Indicate in your reply how sure you are about your answer, for example whether you are certain, taking your best guess, or its very speculative.
 
 If you don't know, just say you don't know - don't make anything up. Avoid generic boilerplate answers.
 Consider why the question was asked, and offer follow up questions linked to those reasons.
-Match the level of detail in your answer to the question. A more detailed explanation is needed if the question is very specific.
 Any questions about how you work should direct users to issue the `!help` command.
 """
     if prompt_str is not None:
@@ -198,13 +196,14 @@ Any questions about how you work should direct users to issue the `!help` comman
     if len(chat_history) != 0:
         chat_summary = get_chat_history(chat_history, vector_name)
     
-    follow_up = "\nIf you need more information to make your reply more certain, ask a follow up question"
+    follow_up = "\nIf you need more information, ask a follow up question"
 
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
-        follow_up += f"""either to the human, or to your friend explicitly including thier name: {agent_buddy}. 
-{agent_buddy} only knows this: {agent_description} and will reply back to you to help.  
+        follow_up += f"""either to the human, or to your friend if they can help including explicitly thier name: {agent_buddy}. 
+{agent_buddy} only knows about this: {agent_description} and will reply back to you to help.  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
+Only mention {agent_buddy} once in your response when asking your question, else they get confused.
 """
     else:
         follow_up += ".\n"
@@ -214,9 +213,7 @@ This means there are three people in this conversation - you, the human and your
     current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
     my_q = "## My Question\n{question}\n## Your response:\n"
     if agent_buddy:
-        buddy_question = """
-(Only if necessary) Your Question to your friend:
-My Friend's Response:\n"""
+        buddy_question = f"""## If needed, your question to {agent_buddy}:"""
 
     prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question
     
