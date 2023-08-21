@@ -357,7 +357,7 @@ Need this info:
                     await chunk_send(new_thread, reply_content)
                 else:
                     print("Not an agent")
-                    if streamed and thinking_message.content.starts_with("Thinking..."):
+                    if streamed and thinking_message.content.startswith("Thinking..."):
                         print("Something went wrong with streaming, resorting to batch")
                         streamed = False
 
