@@ -345,14 +345,17 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
                 
-                if thinking_message.starts_with("Thinking..."):
-                    print("Something went wrong with streaming, resorting to batch")
-                    streamed = False
+
                 
                 if agent:
                     print("Agent sending directly")
                     await chunk_send(new_thread, reply_content)
                 else:
+                    print("Not an agent")
+                    if streamed and thinking_message.starts_with("Thinking..."):
+                        print("Something went wrong with streaming, resorting to batch")
+                        streamed = False
+
                     # talking to a human
                     if not streamed:
                         print("Not streamed content")
