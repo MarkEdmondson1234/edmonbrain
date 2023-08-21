@@ -274,6 +274,8 @@ Need this info:
                 await thinking_message.edit(content=f"May I ask you to reply with a bit more context, {str(message.author)}?")
 
                 return
+        else:
+            print("Agent detected, no thinking message")
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
@@ -297,7 +299,10 @@ Need this info:
 
                 if response.status != 200:
                     # Edit the thinking message to show an error
-                    await thinking_message.edit(content="Error in processing message.")
+                    if not agent:
+                        await thinking_message.edit(content="Error in processing message.")
+                    else:
+                        new_thread.send("Error in processing message.")
                     return
                 
                 if response.headers.get('Transfer-Encoding') == 'chunked':
