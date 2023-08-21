@@ -36,6 +36,7 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         self.buffer = ""
         self.stream_finished = threading.Event()
         self.in_code_block = False
+        self.in_question_block = False
         logging.info("Starting to stream LLM")
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
