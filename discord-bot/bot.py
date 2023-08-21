@@ -107,12 +107,14 @@ async def make_chat_history(new_thread, bot_mention, client_user):
             continue
         history.append(msg)
 
+    print(f"client_user: {client_user}") # Debug print
     # Reverse the messages to maintain the order of conversation
     chat_history = []
     last_author = None
     group_content = ""
     group_embeds = []
     for msg in reversed(history):
+        print(f"msg.author: {msg.author}, msg.author.bot: {msg.author.bot}") # Debug print
         if msg.author == client_user:
             author = "AI"
         elif msg.author.bot:
