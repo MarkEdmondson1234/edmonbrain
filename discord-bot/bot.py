@@ -305,14 +305,15 @@ Need this info:
                         new_thread.send("Error in processing message.")
                     return
                 
-                async with new_thread.typing():
-                    if response.headers.get('Transfer-Encoding') == 'chunked':
-                        # This is a streamed response, process it in chunks
+                
+                if response.headers.get('Transfer-Encoding') == 'chunked':
+                    # This is a streamed response, process it in chunks
+                    async with new_thread.typing():
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
                         streamed=True
                         print("Finished streaming response")
-                    else:
-                        response_data = await response.json()  # Get the response data as JSON
+                else:
+                    response_data = await response.json()  # Get the response data as JSON
                 
                 source_docs = response_data.get('source_documents', [])
                 reply_content = response_data.get('result')  # Get the 'result' field from the JSON
@@ -343,6 +344,10 @@ Need this info:
                     if source_url is not None:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
+                
+                if thinking_message.starts_with("Thinking..."):
+                    print("Something went wrong with streaming, resorting to batch")
+                    streamed = False
                 
                 if agent:
                     print("Agent sending directly")
