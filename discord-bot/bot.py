@@ -300,6 +300,8 @@ Need this info:
         }
 
         #print(f'Sending: {payload}')
+        # override streaming URL
+        flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
 
         async with aiohttp.ClientSession() as session:
             async with session.post(flask_app_url, json=payload) as response:
