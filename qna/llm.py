@@ -203,7 +203,12 @@ Any questions about how you work should direct users to issue the `!help` comman
         follow_up += f""" either to the human, or to your friend {agent_buddy}.
 {agent_buddy} only knows about this: {agent_description} and will reply back to you to help.  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
-Only mention {agent_buddy} once in your response when asking your question, else they get confused.
+Asking questions and mentioning {agent_buddy} are only allowed with this format:
+## One Question for {agent_buddy} (the only mention in your response)
+(your question here)
+## Data for Question
+(all data, information and background info needed to answer the question for: {agent_description})
+## End Question
 """
     else:
         follow_up += ".\n"
@@ -213,7 +218,7 @@ Only mention {agent_buddy} once in your response when asking your question, else
     current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
     my_q = "## My Question\n{question}\n## Your response:\n"
     if agent_buddy:
-        buddy_question = f"""## If needed, your question to {agent_buddy}:"""
+        buddy_question = f"""(Including, if needed, your question to {agent_buddy})"""
 
     prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question
     
