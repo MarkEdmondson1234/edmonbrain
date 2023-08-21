@@ -201,7 +201,8 @@ Any questions about how you work should direct users to issue the `!help` comman
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
         follow_up += f""" either to the human, or to your friend {agent_buddy}.
-{agent_buddy} only knows about this: {agent_description} and will reply back to you to help.  
+{agent_buddy} only knows about this: {agent_description} and will reply back to you to help in your chat history.
+Don't repeat the question if you can see the answer in the chat history (from any source)  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
 Asking questions and mentioning {agent_buddy} are only allowed with this format:
 €€Question€€ 

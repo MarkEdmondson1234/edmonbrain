@@ -113,7 +113,12 @@ async def make_chat_history(new_thread, bot_mention, client_user):
     group_content = ""
     group_embeds = []
     for msg in reversed(history):
-        author = "AI" if msg.author == client_user else "Human"
+        if msg.author == client_user:
+            author = "AI"
+        elif msg.author.bot:
+            author = str(msg.author)  # This will use the bot's username
+        else:
+            author = "Human"
         clean_content = msg.content.replace(bot_mention, '').strip()
         embeds = [embed.to_dict() for embed in msg.embeds]
 
@@ -134,6 +139,8 @@ async def make_chat_history(new_thread, bot_mention, client_user):
     #print(f"chat_history: {chat_history}")
 
     return chat_history
+
+
 
 
 async def make_new_thread(message, clean_content):
