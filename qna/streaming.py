@@ -42,6 +42,22 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         logging.debug(f"token: {token}")
         self.buffer += token
 
+        # Check for question start delimiter
+        if '€€Question€€' in token:
+            self.in_question_block = True
+            return  # Skip processing this token further
+
+        # Check for question end delimiter
+        if self.in_question_block and '€€End Question€€' in token:
+            self.in_question_block = False
+            self._process_buffer()
+            return  # Skip processing this token further
+
+        # If inside a question block, add to the buffer without processing
+        if self.in_question_block:
+            self.buffer += token
+            return
+
         # Toggle the code block flag if the delimiter is encountered
         if '```' in token:
             self.in_code_block = not self.in_code_block

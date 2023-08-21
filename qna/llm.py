@@ -204,11 +204,11 @@ Any questions about how you work should direct users to issue the `!help` comman
 {agent_buddy} only knows about this: {agent_description} and will reply back to you to help.  
 This means there are three people in this conversation - you, the human and your assistant bot {agent_buddy}.
 Asking questions and mentioning {agent_buddy} are only allowed with this format:
-## One Question for {agent_buddy} (the only mention in your response)
-(your question here)
-## Data for Question
+€€Question€€ 
 (all data, information and background info needed to answer the question for: {agent_description})
-## End Question
+(your question here)
+Can you help {agent_buddy} with the above question? (the only mention in your response)
+€€End Question€€
 """
     else:
         follow_up += ".\n"

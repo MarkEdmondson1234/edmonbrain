@@ -305,14 +305,14 @@ Need this info:
                         new_thread.send("Error in processing message.")
                     return
                 
-                if response.headers.get('Transfer-Encoding') == 'chunked':
-                    # This is a streamed response, process it in chunks
-                    async with new_thread.typing():
+                async with new_thread.typing():
+                    if response.headers.get('Transfer-Encoding') == 'chunked':
+                        # This is a streamed response, process it in chunks
                         response_data = await process_streamed_response(response, new_thread, thinking_message)
                         streamed=True
                         print("Finished streaming response")
-                else:
-                    response_data = await response.json()  # Get the response data as JSON
+                    else:
+                        response_data = await response.json()  # Get the response data as JSON
                 
                 source_docs = response_data.get('source_documents', [])
                 reply_content = response_data.get('result')  # Get the 'result' field from the JSON
