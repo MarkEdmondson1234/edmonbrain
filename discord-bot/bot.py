@@ -351,9 +351,7 @@ Need this info:
                     if source_url is not None:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
-                
-
-                
+                            
                 if agent:
                     print("Agent sending directly")
                     await chunk_send(new_thread, reply_content)

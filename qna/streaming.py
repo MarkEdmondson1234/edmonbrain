@@ -64,7 +64,7 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
             self.in_code_block = not self.in_code_block
 
         # Process the buffer if not inside a code block
-        if not self.in_code_block:
+        if not self.in_code_block and not self.in_question_block:
             self._process_buffer()
 
 

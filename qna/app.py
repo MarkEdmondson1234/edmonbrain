@@ -43,13 +43,8 @@ def is_human(message):
         # Slack: Check for the 'user' field and absence of 'bot_id' field
         return 'user' in message and 'bot_id' not in message
 
-def is_ai(message):
-    if 'name' in message:
-        return message["name"] == "AI"
-    elif 'sender' in message:  # Google Chat
-        return message['sender']['type'] == 'BOT'
-    else:
-        return 'bot_id' in message  # Slack
+def is_bot(message):
+    return not is_human(message)
 
 def extract_chat_history(chat_history=None):
 
@@ -58,7 +53,7 @@ def extract_chat_history(chat_history=None):
         paired_messages = []
 
         first_message = chat_history[0]
-        if is_ai(first_message):
+        if is_bot(first_message):
             blank_human_message = {"name": "Human", "content": "", "embeds": []}
             paired_messages.append((create_message_element(blank_human_message), 
                                     create_message_element(first_message)))
@@ -68,7 +63,7 @@ def extract_chat_history(chat_history=None):
         for message in chat_history:
             if is_human(message):
                 last_human_message = create_message_element(message)
-            elif is_ai(message):
+            elif is_bot(message):
                 ai_message = create_message_element(message)
                 paired_messages.append((last_human_message, ai_message))
                 last_human_message = ""
