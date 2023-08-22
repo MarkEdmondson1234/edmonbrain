@@ -197,14 +197,14 @@ async def on_message(message):
 Hi {message.author}
 This Discord is not yet configured to use the bot. \
 Need this info: 
-- bot_id: {bot_mention}
-- guild_id: Your-Guild-Name
+- {message.mentions}
 """)
         return  # exit the event handler
     
     # set bot and agent flags
     talking_to_bot = False    
-    if message.mentions[0].bot == True:
+    if message.mentions[0].bot == True and message.author.bot == True:
+        print("Bot talking to another bot")
         talking_to_bot = True
     
     agent = load_config_key(["_bot_config", VECTORNAME, "agent"])
@@ -363,7 +363,7 @@ Need this info:
                         await chunk_send(new_thread, url_message)
                             
                 if agent or talking_to_bot:
-                    print("Agent sending directly")
+                    print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
                     await chunk_send(new_thread, reply_content)
                     await thinking_message.edit(content="*Response:*")
                 else:
