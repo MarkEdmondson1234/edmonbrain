@@ -4,14 +4,29 @@
 		"1114588633505206353": "edmonbrain_agent"
 	},
 	"Illys Shield":{
-		"1107554583192031232":"fnd",
-		"1114588633505206353": "fnd_vertex"
+		"1107554583192031232":"fnd"
 	},
 	"MemoAux":{
-		"1107554583192031232":"sanne",
-		"1114588633505206353": "sanne_vertex"
+		"1107554583192031232":"sanne"
 	},
 	"Den sprudlende glædes server":{
 		"1107554583192031232": "jesper"
+	},
+	"_bot_config":{
+		"edmonbrain": {
+			
+		},
+		"fnd":{
+
+		},
+		"edmonbrain_agent":{
+			"agent": true
+		},
+		"sanne": {
+			"stream": true
+		},
+		"jesper":{
+			"stream": true
+		}
 	}
 }
