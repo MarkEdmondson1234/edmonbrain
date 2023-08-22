@@ -193,7 +193,9 @@ Any questions about how you work should direct users to issue the `!help` comman
         prompt_str_default = prompt_str_default + "\n" + prompt_str
     
     chat_summary = ""
+    original_question = ""
     if len(chat_history) != 0:
+        original_question = chat_history[0][0]
         chat_summary = get_chat_history(chat_history, vector_name)
     
     follow_up = "\nIf you can't answer the human's question without more information, ask a follow up question"
@@ -215,14 +217,19 @@ If your chat history asks the same question repeatedly, stop with an error messa
     else:
         follow_up += ".\n"
 
-    memory_str = "\n## Your Memory\n{context}\n"
-    current_conversation =f"## Current Conversation\n{chat_summary}\n"
-    current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
-    my_q = "## My Question\n{question}\n## Your response:\n"
+    memory_str = "\n## Your Memory (ignore if not relevant to question)\n{context}\n"
+    
+    current_conversation = ""
+    if chat_summary != "":
+        current_conversation =f"## Current Conversation\n{chat_summary}\n"
+        current_conversation = current_conversation.replace("{","{{").replace("}","}}") #escape {} characters
+   
+    my_q = "## Current Question\n{question}\n"
     if agent_buddy:
         buddy_question = f"""(Including, if needed, your question to {agent_buddy})"""
+        my_q = f"## Original Question that started conversation\n{original_question}\n"
 
-    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question
+    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question + "## Your response:\n"
     
     logging.debug(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(
