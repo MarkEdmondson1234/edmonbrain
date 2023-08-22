@@ -245,7 +245,7 @@ def pick_chat_buddy(vector_name):
         logging.info(f"Got chat buddy {chat_buddy} for {vector_name}")
         buddy_description = load_config_key("chat_buddy_description", vector_name)
         return chat_buddy, buddy_description
-    return None
+    return None, None
 
 
 def pick_agent(vector_name):
