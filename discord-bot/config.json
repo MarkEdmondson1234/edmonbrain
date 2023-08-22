@@ -23,10 +23,8 @@
 			"agent": true
 		},
 		"sanne": {
-			"stream": true
 		},
 		"jesper":{
-			"stream": true
 		}
 	}
 }

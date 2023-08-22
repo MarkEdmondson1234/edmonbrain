@@ -368,11 +368,11 @@ Need this info:
                     await thinking_message.edit(content="*Response:*")
                 else:
                     print("Not an agent")
-                    if streamed and thinking_message.content.startswith("Thinking..."):
-                        print(str(thinking_message.content))
-                        print(thinking_message)
-                        print("Something went wrong with streaming, resorting to batch")
-                        #streamed = False
+                    #if streamed and thinking_message.content.startswith("Thinking..."):
+                    #    print(str(thinking_message.content))
+                    #    print(thinking_message)
+                    #    print("Something went wrong with streaming, resorting to batch")
+                    #    #streamed = False
 
                     # talking to a human
                     if not streamed:
