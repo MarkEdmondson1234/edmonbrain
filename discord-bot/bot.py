@@ -57,6 +57,14 @@ def load_config(filename):
         config = json.load(f)
     return config
 
+def load_config_key(keys):
+    value = load_config('config.json')
+    for key in keys:
+        value = value.get(key, None)
+        if value is None:
+            return False
+    return value
+
 # Load the config file at the start of your program
 config = load_config('config.json')
 
@@ -199,9 +207,7 @@ Need this info:
     if message.mentions[0].bot == True:
         talking_to_bot = True
     
-    agent = False
-    if VECTORNAME.endswith("_agent"):
-        agent = True
+    agent = load_config_key(["_bot_config", VECTORNAME, "agent"])
 
     new_thread = await make_new_thread(message, clean_content)
     
@@ -288,10 +294,12 @@ Need this info:
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
-        if VECTORNAME.endswith("_vertex") or agent:
-            flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
-        else:
+        streamer = load_config_key(["_bot_config", VECTORNAME, "stream"])
+        
+        flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
+        if streamer:
             flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
+            
         #pythprint(f'Calling {flask_app_url}')
         payload = {
             'content': clean_content,
@@ -300,8 +308,6 @@ Need this info:
         }
 
         #print(f'Sending: {payload}')
-        # override streaming URL
-        flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
 
         async with aiohttp.ClientSession() as session:
             async with session.post(flask_app_url, json=payload) as response:
@@ -359,6 +365,7 @@ Need this info:
                 if agent or talking_to_bot:
                     print("Agent sending directly")
                     await chunk_send(new_thread, reply_content)
+                    await thinking_message.edit("*Response:*")
                 else:
                     print("Not an agent")
                     if streamed and thinking_message.content.startswith("Thinking..."):
