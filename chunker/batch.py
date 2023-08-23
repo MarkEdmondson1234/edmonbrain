@@ -1,6 +1,6 @@
 import os
 import json
-import requests
+from utils.gcp import get_service_account_email, get_gcp_project
 
 def create_and_execute_batch_job(gs_file, vector_name, metadata):
     from google.cloud import batch_v1
@@ -104,27 +104,6 @@ def valid_batch_id(input_string:str):
         job_id = job_id[:60]
 
     return job_id
-
-def get_service_account_email():
-    return get_metadata('instance/service-accounts/default/email')
-
-def get_gcp_project():
-    return get_metadata('project/project-id')
-
-def get_metadata(stem):
-    
-    metadata_server_url = f'http://metadata.google.internal/computeMetadata/v1/{stem}'
-
-    headers = {'Metadata-Flavor': 'Google'}
-
-    response = requests.get(metadata_server_url, headers=headers)
-
-    if response.status_code == 200:
-        return response.text
-    else:
-        print(f"Request failed with status code {response.status_code}")
-        return None
-
 
 
 if __name__ == "__main__":
