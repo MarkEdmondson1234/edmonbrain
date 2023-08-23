@@ -81,6 +81,7 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
 def generate_slack_output(bot_output):
     answer_text = bot_output.get("answer", "No answer available")
+    answer_text = answer_text[:2950] + "..(slack character limit reached (3000))"
     blocks = [
         {
             "type": "section",
