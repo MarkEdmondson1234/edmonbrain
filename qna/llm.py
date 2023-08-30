@@ -208,8 +208,7 @@ Don't repeat the question if you can see the answer in the chat history (from an
 This means there are three people in this conversation - you, the human and your assistant bot.
 Asking questions to your friend bot are only allowed with this format:
 €€Question€€ 
-(all data, information and background info needed to answer the question for: {agent_description})
-(your question here)
+(your question here, including all required information needed to answer the question fully)
 Can you help {agent_buddy} with the above question? (the only mention in your response)
 €€End Question€€
 If your chat history asks the same question repeatedly, stop with an error message.
