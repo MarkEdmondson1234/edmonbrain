@@ -370,7 +370,6 @@ Need this info:
                 if agent or talking_to_bot:
                     print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
                     await chunk_send(new_thread, reply_content)
-                    await thinking_message.edit(content="*Response:*")
                 else:
                     print("Not an agent")
                     #if streamed and thinking_message.content.startswith("Thinking..."):
