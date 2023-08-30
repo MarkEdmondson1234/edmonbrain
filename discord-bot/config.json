@@ -14,7 +14,7 @@
 	},
 	"_bot_config":{
 		"edmonbrain": {
-
+			"stream": true
 		},
 		"fnd":{
 
