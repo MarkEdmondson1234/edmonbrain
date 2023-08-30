@@ -14,8 +14,11 @@ async def process_streamed_response(response, new_thread, thinking_message):
     json_buffer = ""
     inside_json = False
     first = True
+    print("Start streaming response:")
     async for chunk in response.content.iter_any():
         chunk_content = chunk.decode('utf-8')
+
+        print("Stream: " + str(chunk_content))
         # Handle JSON delimiter across chunk boundaries
         if inside_json:
             json_buffer += chunk_content
@@ -35,10 +38,12 @@ async def process_streamed_response(response, new_thread, thinking_message):
                 print(f"Could not parse JSON data: {str(err)}")
                 return []
         elif '###JSON_START###' in chunk_content:
+            print("Streaming JSON starting...")
             json_buffer = chunk_content.split('###JSON_START###')[1]
             inside_json = True
         else:
             # Handle regular chunk content
+            print("Streaming...")
             if first:
                 await thinking_message.edit(content="**Response:**")
                 first=False
