@@ -93,22 +93,20 @@ def pick_vectorstore(vector_name, embeddings):
         supabase_key = os.getenv('SUPABASE_KEY')
 
         logging.debug(f"Supabase URL: {supabase_url} vector_name: {vector_name}")
-        
+
         supabase: Client = create_client(supabase_url, supabase_key)
 
         vectorstore = SupabaseVectorStore(supabase, 
-                                          embeddings,
-                                          table_name=vector_name,
-                                          query_name=f'match_documents_{vector_name}')
+                                        embeddings,
+                                        table_name=vector_name,
+                                        query_name=f'match_documents_{vector_name}')
 
         logging.debug("Chose Supabase")
     elif vs_str == 'cloudsql':
-        from qna.database import setup_cloudsql
-        # needs this merged in https://github.com/hwchase17/langchain/issues/2219
         from langchain.vectorstores.pgvector import PGVector
 
         logging.debug("Inititaing CloudSQL pgvector")
-        setup_cloudsql(vector_name)
+        #setup_cloudsql(vector_name) 
 
         # https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/pgvector
         CONNECTION_STRING = os.environ.get("PGVECTOR_CONNECTION_STRING")
@@ -123,13 +121,47 @@ def pick_vectorstore(vector_name, embeddings):
             collection_name=vector_name,
             #pre_delete_collection=True # for testing purposes
             )
-        
+
         logging.debug("Chose CloudSQL")
+    elif vs_str == 'alloydb':  # exact same as CloudSQL for now
+        from langchain.vectorstores.pgvector import PGVector
+
+        logging.info("Inititaing AlloyDB pgvector")
+        #setup_cloudsql(vector_name) 
+
+        # https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/pgvector
+        CONNECTION_STRING = os.environ.get("ALLOYDB_CONNECTION_STRING",None)
+        if CONNECTION_STRING is None:
+            logging.info("Did not find ALLOYDB_CONNECTION_STRING fallback to PGVECTOR_CONNECTION_STRING")
+            CONNECTION_STRING = os.environ.get("PGVECTOR_CONNECTION_STRING")
+        # postgresql://brainuser:password@10.24.0.3:5432/brain
+
+        from qna.database import get_vector_size
+        vector_size = get_vector_size(vector_name)
+
+        os.environ["PGVECTOR_VECTOR_SIZE"] = str(vector_size)
+        vectorstore = PGVector(connection_string=CONNECTION_STRING,
+            embedding_function=embeddings,
+            collection_name=vector_name,
+            #pre_delete_collection=True # for testing purposes
+            )
+
+        logging.info("Chose AlloyDB")
 
     else:
         raise NotImplementedError(f'No llm implemented for {vs_str}')   
 
     return vectorstore
+
+def pick_retriever(vector_name, embeddings):
+    vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
+
+    retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
+
+    #from langchain.retrievers import MergerRetriever
+
+    return retriever
+
 
 def get_chat_history(inputs, vector_name, last_chars=1000, summary_chars=1500) -> str:
     from langchain.schema import Document
@@ -211,7 +243,7 @@ Asking questions to your friend bot are only allowed with this format:
 (your question here, including all required information needed to answer the question fully)
 Can you help {agent_buddy} with the above question? (the only mention in your response)
 €€End Question€€
-Avoid mentioning your agent buddy if you can see in the chat history no useful information is available.
+Only reply to your friend bot if they have a useful answer to the question you asked, otherwise it can't help and you need to ask the human instead.
 """
     else:
         follow_up += ".\n"
