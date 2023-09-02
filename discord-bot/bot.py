@@ -15,12 +15,47 @@ async def process_streamed_response(response, new_thread, thinking_message):
     inside_json = False
     first = True
     print("Start streaming response:")
+
     async for chunk in response.content.iter_any():
         chunk_content = chunk.decode('utf-8')
 
         print("Stream: " + str(chunk_content))
-        # Handle JSON delimiter across chunk boundaries
-        if inside_json:
+
+        # Update the "Thinking..." message on the first chunk
+        if first:
+            await thinking_message.edit(content="**Response:**")
+            first=False
+
+        # Check for both START and END delimiters in the chunk
+        if '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
+            content_before_json = chunk_content.split('###JSON_START###')[0]
+            json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
+            
+            # Return or process the content before the JSON delimiter
+            if content_before_json:
+                await chunk_send(new_thread, content_before_json)
+
+            try:
+                json_data = json.loads(json_data_str)
+                return json_data
+            except Exception as err:
+                print(f"Could not parse JSON data: {str(err)}")
+                return []
+
+        # Handle the START delimiter (without the END delimiter in the chunk)
+        elif '###JSON_START###' in chunk_content:
+            content_before_json = chunk_content.split('###JSON_START###')[0]
+            
+            # Return or process the content before the JSON delimiter
+            if content_before_json:
+                await chunk_send(new_thread, content_before_json)
+
+            print("Streaming JSON starting...")
+            json_buffer = chunk_content.split('###JSON_START###')[1]
+            inside_json = True
+
+        # Handle JSON content continuation
+        elif inside_json:
             json_buffer += chunk_content
             if '###JSON_END###' in chunk_content:
                 json_data_str = json_buffer.split('###JSON_END###')[0]
@@ -28,28 +63,13 @@ async def process_streamed_response(response, new_thread, thinking_message):
                 inside_json = False
                 json_buffer = ""
                 return json_data
-        elif '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
-            json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
-            #print(f"streamed json: {json_data_str}")
-            try:
-                json_data = json.loads(json_data_str)
-                return json_data
-            except Exception as err:
-                print(f"Could not parse JSON data: {str(err)}")
-                return []
-        elif '###JSON_START###' in chunk_content:
-            print("Streaming JSON starting...")
-            json_buffer = chunk_content.split('###JSON_START###')[1]
-            inside_json = True
         else:
             # Handle regular chunk content
             print("Streaming...")
-            if first:
-                await thinking_message.edit(content="**Response:**")
-                first=False
             await chunk_send(new_thread, chunk_content)
 
     return None
+
 
 def load_config(filename):
     # Get the directory of the current script
