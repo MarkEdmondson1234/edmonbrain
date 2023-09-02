@@ -211,7 +211,7 @@ Asking questions to your friend bot are only allowed with this format:
 (your question here, including all required information needed to answer the question fully)
 Can you help {agent_buddy} with the above question? (the only mention in your response)
 €€End Question€€
-If your chat history asks the same question repeatedly, stop with an error message.
+Avoid mentioning your agent buddy if you can see in the chat history no useful information is available.
 """
     else:
         follow_up += ".\n"

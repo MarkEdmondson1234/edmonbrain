@@ -2,7 +2,6 @@ from langchain.agents import Tool
 from langchain.agents import AgentType
 
 from langchain.agents import initialize_agent
-from langchain.memory import ConversationBufferMemory
 
 from langchain.tools.python.tool import PythonREPLTool
 
