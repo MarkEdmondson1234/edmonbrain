@@ -81,7 +81,11 @@ async def process_slack_message(sapp, body, logger, thread_ts=None):
 
 def generate_slack_output(bot_output):
     answer_text = bot_output.get("answer", "No answer available")
-    answer_text = answer_text[:2950] + "..(slack character limit reached (3000))"
+    truncation_msg = "..(slack character limit reached (3000))"
+        
+    # If the answer_text length exceeds the slack limit after appending the truncation message
+    if len(answer_text) > (3000 - len(truncation_msg)):
+        answer_text = answer_text[:2956] + truncation_msg
     blocks = [
         {
             "type": "section",
