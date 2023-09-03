@@ -37,35 +37,40 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
         self.stream_finished = threading.Event()
         self.in_code_block = False
         self.in_question_block = False
+        self.question_buffer = ""
         logging.info("Starting to stream LLM")
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         logging.debug(f"token: {token}")
-        self.buffer += token
 
         # Check for question start delimiter
         if '€€Question€€' in token:
             self.in_question_block = True
+            self.question_buffer = token  # Start capturing the question block content
             return  # Skip processing this token further
 
         # Check for question end delimiter
-        if self.in_question_block and '€€End Question€€' in token:
-            self.in_question_block = False
-            self._process_buffer()
-            return  # Skip processing this token further
-
-        # If inside a question block, add to the buffer without processing
         if self.in_question_block:
+            self.question_buffer += token  # Continue capturing the question block content
+
+            if '€€End Question€€' in token:
+                self.buffer += self.question_buffer  # Append the entire question block to main buffer
+                self.in_question_block = False
+                self._process_buffer()  # Now process the entire block
+                return  # Skip processing this token further
+
+        # If not inside a question block, handle normally
+        if not self.in_question_block:
             self.buffer += token
-            return
 
-        # Toggle the code block flag if the delimiter is encountered
-        if '```' in token:
-            self.in_code_block = not self.in_code_block
+            # Toggle the code block flag if the delimiter is encountered
+            if '```' in token:
+                self.in_code_block = not self.in_code_block
 
-        # Process the buffer if not inside a code block
-        if not self.in_code_block and not self.in_question_block:
-            self._process_buffer()
+            # Process the buffer if not inside a code block
+            if not self.in_code_block and not self.in_question_block:
+                self._process_buffer()
+
 
 
     def _process_buffer(self):
