@@ -234,6 +234,25 @@ Need this info:
     
     agent = load_config_key(["_bot_config", VECTORNAME, "agent"])
 
+    
+    if agent and talking_to_bot:
+        import re
+        # Extract question from the message using regex
+        pattern = r"€€Question€€\s*(.*?)\s*€€End Question€€"
+        match = re.search(pattern, message.content, re.DOTALL)
+
+        # Only respond if the message matches the correct format
+        if match:
+            clean_content = match.group(1).strip()
+
+            # Now you can proceed with the code to handle the question or send a response back
+            # For demonstration, let's just print the question
+            print(f"Received question: {clean_content}")
+            # ... handle the question or send response back ...
+        else:
+            print("Received message not in correct format. Ignoring.")
+            return
+
     new_thread = await make_new_thread(message, clean_content)
     
     chat_history = await make_chat_history(new_thread, bot_mention, client.user)
