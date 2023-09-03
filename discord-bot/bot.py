@@ -13,6 +13,7 @@ STREAMURL = os.getenv('STREAM_URL', None)
 async def process_streamed_response(response, new_thread, thinking_message):
     json_buffer = ""
     inside_json = False
+    inside_question = False
     first = True
     print("Start streaming response:")
 
