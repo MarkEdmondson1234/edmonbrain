@@ -43,43 +43,17 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         logging.debug(f"token: {token}")
 
-        # Check for question start delimiter
-        if '€€Question€€' in token:
-            self.in_question_block = True
-            self.question_buffer = token  # Start capturing the question block content
-            return  # Skip processing this token further
+        self.buffer += token
 
-        # Check for question end delimiter
-        if self.in_question_block:
-            self.question_buffer += token  # Continue capturing the question block content
+        # Toggle the code block flag if the delimiter is encountered
+        if '```' in token:
+            self.in_code_block = not self.in_code_block
 
-            if '€€End Question€€' in token:
-                self.content_buffer.write(self.question_buffer)  # Directly write the entire question block
-                self.question_buffer = ""  # Clear the question buffer
-                self.in_question_block = False
-                return  # Skip processing this token further
-
-
-        # If not inside a question block, handle normally
-        if not self.in_question_block:
-            self.buffer += token
-
-            # Toggle the code block flag if the delimiter is encountered
-            if '```' in token:
-                self.in_code_block = not self.in_code_block
-
-            # Process the buffer if not inside a code block
-            if not self.in_code_block and not self.in_question_block:
-                self._process_buffer()
-
-
+        # Process the buffer if not inside a code block
+        if not self.in_code_block:
+            self._process_buffer()
 
     def _process_buffer(self):
-        # If the buffer contains the entire question block, write the entire buffer.
-        if '€€Question€€' in self.buffer and '€€End Question€€' in self.buffer:
-            self.content_buffer.write(self.buffer)
-            self.buffer = ""
-            return
 
         # Check for the last occurrence of a newline followed by a numbered list pattern
         matches = list(re.finditer(r'\n(\d+\.\s)', self.buffer))

@@ -26,6 +26,18 @@ async def process_streamed_response(response, new_thread, thinking_message):
             await thinking_message.edit(content="**Response:**")
             first=False
 
+        # Handling question blocks
+        if '€€Question€€' in chunk_content:
+            inside_question = True
+
+        if inside_question:
+            question_buffer += chunk_content
+            if '€€End Question€€' in question_buffer:
+                await chunk_send(new_thread, question_buffer)
+                inside_question = False
+                question_buffer = ""
+            continue  # Skip further processing for this chunk
+
         # Check for both START and END delimiters in the chunk
         if '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
             content_before_json = chunk_content.split('###JSON_START###')[0]
