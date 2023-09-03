@@ -54,10 +54,11 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
             self.question_buffer += token  # Continue capturing the question block content
 
             if '€€End Question€€' in token:
-                self.buffer += self.question_buffer  # Append the entire question block to main buffer
+                self.content_buffer.write(self.question_buffer)  # Directly write the entire question block
+                self.question_buffer = ""  # Clear the question buffer
                 self.in_question_block = False
-                self._process_buffer()  # Now process the entire block
                 return  # Skip processing this token further
+
 
         # If not inside a question block, handle normally
         if not self.in_question_block:
