@@ -236,7 +236,7 @@ Any questions about how you work should direct users to issue the `!help` comman
     if agent_buddy:
         follow_up += f""" either to the human, or to your friend bot.
 You bot friend will reply back to you to help in your chat history.
-Do not ask your friend bot about anything other than {agent_description}
+Do not ask {agent_buddy} about anything other than {agent_description}
 Don't repeat the question if you can see the answer in the chat history (from any source)  
 This means there are three people in this conversation - you, the human and your assistant bot.
 Asking questions to your friend bot are only allowed with this format:
@@ -244,7 +244,7 @@ Asking questions to your friend bot are only allowed with this format:
 (your question here, including all required information needed to answer the question fully)
 Can you help {agent_buddy} with the above question? (the only mention in your response)
 €€End Question€€
-Only reply to your friend bot's replies if they have a useful answer to the question you asked, otherwise it can't help and you need to ask the human instead.
+Ask the human the follow up questions without naming them or {agent_buddy}.
 """
     else:
         follow_up += ".\n"

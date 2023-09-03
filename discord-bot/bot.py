@@ -406,7 +406,7 @@ Need this info:
                         url_message = f"**url**: {source_url}"
                         await chunk_send(new_thread, url_message)
                             
-                if agent or talking_to_bot:
+                if agent and talking_to_bot:
                     print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
                     await chunk_send(new_thread, reply_content)
                 else:
