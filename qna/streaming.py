@@ -74,6 +74,12 @@ class BufferStreamingStdOutCallbackHandler(StreamingStdOutCallbackHandler):
 
 
     def _process_buffer(self):
+        # If the buffer contains the entire question block, write the entire buffer.
+        if '€€Question€€' in self.buffer and '€€End Question€€' in self.buffer:
+            self.content_buffer.write(self.buffer)
+            self.buffer = ""
+            return
+
         # Check for the last occurrence of a newline followed by a numbered list pattern
         matches = list(re.finditer(r'\n(\d+\.\s)', self.buffer))
         if matches:
