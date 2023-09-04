@@ -2,8 +2,8 @@ from langchain.document_loaders.unstructured import UnstructuredFileLoader
 from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.document_loaders.git import GitLoader
-#from langchain.document_loaders import GoogleDriveLoader
-from chunker.googledrive_patch import GoogleDriveLoader
+from langchain.document_loaders import GoogleDriveLoader
+#from chunker.googledrive_patch import GoogleDriveLoader
 from qna.llm import load_config
 from googleapiclient.errors import HttpError
 
