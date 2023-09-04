@@ -35,6 +35,7 @@ dependencies = [
     "aiohttp>=3.8.5",
     "slack-bolt>=1.18.0",
     "pypdf>=3.13.0",
+    "google-cloud-discoveryengine>=0.10.0",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}
