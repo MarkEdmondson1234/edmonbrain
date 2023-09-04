@@ -162,6 +162,7 @@ def pick_retriever(vector_name, embeddings):
     if rt_list and len(rt_list) > 0:
         from langchain.retrievers import MergerRetriever
         from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
+        _, filter_embeddings, _ = pick_llm(vector_name)
 
         all_retrievers = [vs_retriever]
         for key, value in rt_list.items():
@@ -177,7 +178,21 @@ def pick_retriever(vector_name, embeddings):
                 raise NotImplementedError(f"Retriver not supported: {value}")
             
             all_retrievers.append(gcp_retriever)
-        retriever = MergerRetriever(retrievers=all_retrievers)
+        lotr = MergerRetriever(retrievers=all_retrievers)
+
+        # https://python.langchain.com/docs/integrations/retrievers/merger_retriever
+        from langchain.document_transformers import (
+            EmbeddingsRedundantFilter,
+            EmbeddingsClusteringFilter,
+        )
+        from langchain.retrievers.document_compressors import DocumentCompressorPipeline
+        from langchain.retrievers import ContextualCompressionRetriever
+
+        filter = EmbeddingsRedundantFilter(embeddings=filter_embeddings)
+        pipeline = DocumentCompressorPipeline(transformers=[filter])
+        retriever = ContextualCompressionRetriever(
+            base_compressor=pipeline, base_retriever=lotr, 
+            k=3)
 
     else:
         retriever = vs_retriever

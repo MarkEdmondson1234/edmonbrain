@@ -48,3 +48,6 @@ Example:
     }
 }
 ```
+
+Discovery Search neeeds 
+* Discovery Engine viewer role added
