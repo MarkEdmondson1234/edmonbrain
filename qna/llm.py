@@ -166,7 +166,7 @@ def pick_retriever(vector_name, embeddings):
         all_retrievers = [vs_retriever]
         for key, value in rt_list.items():
             from utils.gcp import get_gcp_project
-            if value.get("provider") == "GoogleCloudEnterpriseSearch":
+            if value.get("provider") == "GoogleCloudEnterpriseSearchRetriever":
                 gcp_retriever = GoogleCloudEnterpriseSearchRetriever(
                     project_id=get_gcp_project(),
                     search_engine_id=key,
