@@ -171,7 +171,7 @@ async def make_chat_history(new_thread, bot_mention, client_user):
         clean_content = msg.content.replace(bot_mention, '').strip()
         embeds = [embed.to_dict() for embed in msg.embeds]
 
-        print(f'{author}: {clean_content}')
+        print(f'-msg-: {clean_content[:10]}')
         
         if last_author is not None and last_author != author:
             chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
@@ -261,10 +261,10 @@ Need this info:
 
             # Now you can proceed with the code to handle the question or send a response back
             # For demonstration, let's just print the question
-            print(f"Received question: {clean_content}")
+            print(f"#Agent: Received question: {clean_content}")
             # ... handle the question or send response back ...
         else:
-            print("Received message not in correct format. Ignoring.")
+            print("#Agent: Received message not in correct format. Ignoring.")
             return
 
     new_thread = await make_new_thread(message, clean_content)
