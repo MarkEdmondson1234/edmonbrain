@@ -51,7 +51,23 @@ Example:
     "edmonbrain":{
         "llm":"openai",
         "vectorstore": "supabase",
-        "prompt": "You are a chatty AI who always works step by step logically through why you are answering any particular question."
+        "retrievers":{
+            "qna-history_169xx-id":{
+                "type":"structured",
+                "location":"global",
+                "provider":"GoogleCloudEnterpriseSearchRetriever"
+            }
+        },  
+        "prompt": "You are a happy, optimistic British AI who always works step by step logically through why you are answering any particular question.\n",
+        "chat_buddy": "<@1114xxx-discord-id>",
+        "chat_buddy_description": "can run python programs to help answer questions for you"
+    },
+    "edmonbrain_agent":{
+        "llm":"openai",
+        "agent": "yes",
+        "shared_vectorstore": "edmonbrain",
+        "chat_buddy":"<@1107xxx-discord-id>",
+        "chat_buddy_description": "called Electric Sheep and asks you questions."
     },
     "jesper":{
         "llm":"openai",

@@ -3,7 +3,7 @@ import traceback
 import time
 
 from qna.llm import pick_llm
-from qna.llm import pick_vectorstore
+from qna.llm import pick_retriever
 from qna.llm import pick_prompt
 from qna.llm import pick_agent
 
@@ -49,9 +49,7 @@ def qna(question: str,
         
         return {'answer':"Agent couldn't help", 'source_documents': []}
 
-    vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
-
-    retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
+    retriever = pick_retriever(vector_name, embeddings=embeddings)
 
     prompt = pick_prompt(vector_name, chat_history)
 

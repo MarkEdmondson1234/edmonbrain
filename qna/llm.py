@@ -156,9 +156,31 @@ def pick_vectorstore(vector_name, embeddings):
 def pick_retriever(vector_name, embeddings):
     vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
 
-    retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
+    vs_retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 
-    #from langchain.retrievers import MergerRetriever
+    rt_list = load_config_key("retrievers", vector_name)
+    if rt_list and len(rt_list) > 0:
+        from langchain.retrievers import MergerRetriever
+        from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
+
+        all_retrievers = [vs_retriever]
+        for key, value in rt_list.items():
+            from utils.gcp import get_gcp_project
+            if value.get("provider") == "GoogleCloudEnterpriseSearch":
+                gcp_retriever = GoogleCloudEnterpriseSearchRetriever(
+                    project_id=get_gcp_project(),
+                    search_engine_id=key,
+                    location_id=value.get("location", "global"),
+                    engine_data_type=1 if value.get("type","unstructured") == "structured" else 0
+                )
+            else:
+                raise NotImplementedError(f"Retriver not supported: {value}")
+            
+            all_retrievers.append(gcp_retriever)
+        retriever = MergerRetriever(retrievers=all_retrievers)
+
+    else:
+        retriever = vs_retriever
 
     return retriever
 

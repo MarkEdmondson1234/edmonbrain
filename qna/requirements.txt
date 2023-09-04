@@ -25,3 +25,4 @@ gunicorn
 pgvector
 flask_testing
 pypdf
+google-cloud-discoveryengine
