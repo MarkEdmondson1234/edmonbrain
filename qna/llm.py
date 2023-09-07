@@ -172,7 +172,8 @@ def pick_retriever(vector_name, embeddings):
                     project_id=get_gcp_project(),
                     search_engine_id=key,
                     location_id=value.get("location", "global"),
-                    engine_data_type=1 if value.get("type","unstructured") == "structured" else 0
+                    engine_data_type=1 if value.get("type","unstructured") == "structured" else 0,
+                    query_expansion_condition=2
                 )
             else:
                 raise NotImplementedError(f"Retriver not supported: {value}")

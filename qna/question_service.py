@@ -27,6 +27,7 @@ def qna(question: str,
     logging.debug("Calling qna")
 
     llm, embeddings, llm_chat = pick_llm(vector_name)
+    retriever = pick_retriever(vector_name, embeddings=embeddings)
 
     # override llm to one that supports streaming
     if stream_llm:
@@ -36,7 +37,7 @@ def qna(question: str,
     if is_agent:
         from qna.agent import activate_agent
         from qna.llm import pick_chat_buddy
-        result = activate_agent(question, llm_chat, chat_history)
+        result = activate_agent(question, llm_chat, chat_history, retriever=retriever)
         if result is not None:
             logging.info(f"agent result: {result}")
             chat_buddy, buddy_description = pick_chat_buddy(vector_name)
@@ -48,8 +49,6 @@ def qna(question: str,
             return result
         
         return {'answer':"Agent couldn't help", 'source_documents': []}
-
-    retriever = pick_retriever(vector_name, embeddings=embeddings)
 
     prompt = pick_prompt(vector_name, chat_history)
 
