@@ -15,6 +15,56 @@ import datetime
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
 
+from google.cloud import storage
+
+app = Flask(__name__)
+
+# Initialize Google Cloud Storage client
+storage_client = storage.Client()
+
+# The name of your bucket and the file you want to check
+bucket_name = os.environ.get('GCS_BUCKET')
+blob_name = 'config.json'
+
+# Global variable to store the last modification time
+last_mod_time = None
+
+
+def fetch_config():
+    global last_mod_time
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = storage.Blob(blob_name, bucket)
+
+    # Check if the file exists
+    if not blob.exists():
+        logging.info(f"The blob {blob_name} does not exist in the bucket {bucket_name}.")
+        return None
+
+    # Download the file to a local file
+    blob.download_to_filename('local_config.com')
+
+    # Get the blob's updated time
+    updated_time = blob.updated
+
+    return updated_time
+
+
+@app.before_request
+def before_request():
+    global last_mod_time
+    
+    # Fetch the current modification time from Cloud Storage
+    current_mod_time = fetch_config()
+    
+    if current_mod_time:
+        # Compare the modification times
+        if last_mod_time is None or last_mod_time < current_mod_time:
+            last_mod_time = current_mod_time
+            logging.info("Configuration file updated, reloaded the new configuration.")
+        else:
+            logging.info("Configuration file not modified.")
+
 def document_to_dict(document):
     return {
         "page_content": document.page_content,
