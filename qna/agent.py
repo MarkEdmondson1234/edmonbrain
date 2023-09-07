@@ -37,7 +37,7 @@ def activate_agent(question, llm_chat, chat_history, retriever):
             func=PythonREPLTool().run
         ),
         Tool(
-            name = "Calculator",
+            name = "calculator",
             func=calculator.run,
             description = f"""
             Useful when you need to do mathematical operations or arithmetic.
@@ -49,7 +49,7 @@ def activate_agent(question, llm_chat, chat_history, retriever):
         #     Useful to look up certain events on given dates
         #     """),
         Tool(
-            name = "Long term memory",
+            name = "long-term-memory",
             func=memory.run,
             description="""
             Useful for when you need to look into your shared memory to answer follow up questions.
