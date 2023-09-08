@@ -6,6 +6,7 @@ sys.path.append(parent_dir)
 # app.py
 from flask import Flask, request, jsonify, Response
 import qna.question_service as qs
+from qna.archive import archive_qa
 
 from qna.pubsub_manager import PubSubManager
 
@@ -125,14 +126,6 @@ def extract_chat_history(chat_history=None):
     logging.info(f"Paired messages: {paired_messages}")
 
     return paired_messages
-
-def archive_qa(bot_output, vector_name):
-    pubsub_manager = PubSubManager(vector_name, pubsub_topic=f"qna_archive_{vector_name}")
-    the_data = {"bot_output": bot_output,
-                "vector_name": vector_name,
-                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-    
-    pubsub_manager.publish_message(the_data)
 
 @app.route('/qna/discord/streaming/<vector_name>', methods=['POST'])
 def stream_qa(vector_name):

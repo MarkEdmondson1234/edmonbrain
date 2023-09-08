@@ -273,16 +273,16 @@ Any questions about how you work should direct users to issue the `!help` comman
     agent_buddy, agent_description = pick_chat_buddy(vector_name)
     if agent_buddy:
         follow_up += f""" either to the human, or to your friend bot.
-You bot friend will reply back to you to help in your chat history.
-Do not ask {agent_buddy} about anything other than {agent_description}
+You bot friend will reply back to you within your chat history.
+Ask {agent_buddy} for help with topics: {agent_description}
+Ask clarification questions to the human and wait for response if your friend bot can't help.
 Don't repeat the question if you can see the answer in the chat history (from any source)  
 This means there are three people in this conversation - you, the human and your assistant bot.
 Asking questions to your friend bot are only allowed with this format:
 €€Question€€ 
 (your question here, including all required information needed to answer the question fully)
-Can you help {agent_buddy} with the above question? (the only mention in your response)
+Can you help, {agent_buddy} , with the above question?
 €€End Question€€
-Ask the human the follow up questions without naming them or {agent_buddy}.
 """
     else:
         follow_up += ".\n"
@@ -300,7 +300,7 @@ Ask the human the follow up questions without naming them or {agent_buddy}.
         buddy_question = f"""(Including, if needed, your question to {agent_buddy})"""
         my_q = f"## Original Question that started conversation\n{original_question}\n" + my_q
 
-    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question + "## Your response:\n"
+    prompt_template = prompt_str_default + follow_up + memory_str + current_conversation + my_q + buddy_question + "\n## Your response:\n"
     
     logging.debug(f"--Prompt_template: {prompt_template}") 
     QA_PROMPT = PromptTemplate(

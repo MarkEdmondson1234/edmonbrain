@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Union
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import LLMResult
 
+from qna.archive import archive_qa
+
 logging.basicConfig(level=logging.INFO)
 
 class ContentBuffer:
@@ -162,6 +164,8 @@ def start_streaming_chat(question,
     # TODO: only discord for now - slack? gchat?
 
     discord_output = parse_output(final_result)
+    archive_qa(discord_output, vector_name)
+    
     discord_output = generate_discord_output(discord_output)
 
     yield f"###JSON_START###{discord_output}###JSON_END###"
