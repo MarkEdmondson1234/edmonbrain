@@ -1,5 +1,9 @@
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains.query_constructor.base import AttributeInfo
+from datetime import datetime
+
+current_time_iso = datetime.utcnow().isoformat() + "Z"
+
 
 # example metadat
 """
@@ -25,12 +29,12 @@ from langchain.chains.query_constructor.base import AttributeInfo
 metadata_field_info = [
     AttributeInfo(
         name="source",
-        description="The document source",
+        description="The document source url or path to where the document is located",
         type="string",
     ),
     AttributeInfo(
         name="eventTime",
-        description="When this content was put into the memory",
+        description=f"When this content was put into the memory.  The current datetime is {current_time_iso}",
         type="ISO 8601 formatted date and time string",
     ),
     AttributeInfo(

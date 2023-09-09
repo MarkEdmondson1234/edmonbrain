@@ -46,7 +46,7 @@ def fetch_config():
         return None
 
     # Download the file to a local file
-    blob.download_to_filename('local_config.com')
+    blob.download_to_filename('config.com')
 
     # Get the blob's updated time
     updated_time = blob.updated

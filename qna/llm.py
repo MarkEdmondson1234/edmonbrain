@@ -158,7 +158,7 @@ def pick_retriever(vector_name, embeddings):
 
     vs_str = load_config_key("vectorstore", vector_name)
     
-    if vs_str == 'supabase':
+    if vs_str == 'supabase' and load_config_key("self_query", vector_name):
         from qna.self_query import get_self_query_retriever
         llm, _, _ = pick_llm(vector_name)
 
