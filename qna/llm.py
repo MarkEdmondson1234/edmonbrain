@@ -156,47 +156,60 @@ def pick_vectorstore(vector_name, embeddings):
 def pick_retriever(vector_name, embeddings):
     vectorstore = pick_vectorstore(vector_name, embeddings=embeddings)
 
-    vs_retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
+    vs_str = load_config_key("vectorstore", vector_name)
+    
+    if vs_str == 'supabase':
+        from qna.self_query import get_self_query_retriever
+        llm, _, _ = pick_llm(vector_name)
 
-    rt_list = load_config_key("retrievers", vector_name)
-    if rt_list and len(rt_list) > 0:
-        from langchain.retrievers import MergerRetriever
-        from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
-        _, filter_embeddings, _ = pick_llm(vector_name)
-
-        all_retrievers = [vs_retriever]
-        for key, value in rt_list.items():
-            from utils.gcp import get_gcp_project
-            if value.get("provider") == "GoogleCloudEnterpriseSearchRetriever":
-                gcp_retriever = GoogleCloudEnterpriseSearchRetriever(
-                    project_id=get_gcp_project(),
-                    search_engine_id=key,
-                    location_id=value.get("location", "global"),
-                    engine_data_type=1 if value.get("type","unstructured") == "structured" else 0,
-                    query_expansion_condition=2
-                )
-            else:
-                raise NotImplementedError(f"Retriver not supported: {value}")
-            
-            all_retrievers.append(gcp_retriever)
-        lotr = MergerRetriever(retrievers=all_retrievers)
-
-        # https://python.langchain.com/docs/integrations/retrievers/merger_retriever
-        from langchain.document_transformers import (
-            EmbeddingsRedundantFilter,
-            EmbeddingsClusteringFilter,
-        )
-        from langchain.retrievers.document_compressors import DocumentCompressorPipeline
-        from langchain.retrievers import ContextualCompressionRetriever
-
-        filter = EmbeddingsRedundantFilter(embeddings=filter_embeddings)
-        pipeline = DocumentCompressorPipeline(transformers=[filter])
-        retriever = ContextualCompressionRetriever(
-            base_compressor=pipeline, base_retriever=lotr, 
-            k=3)
-
+        sq_retriver = get_self_query_retriever(llm, vectorstore)
     else:
-        retriever = vs_retriever
+        logging.info(f"No self_querying retriever available for {vs_str}")
+        sq_retriver = None
+
+    vs_retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
+    
+    rt_list = load_config_key("retrievers", vector_name)
+
+    # early return if only one retriever is available
+    if (not rt_list or len(rt_list) == 0) and sq_retriver is None:
+        return vs_retriever
+    
+    all_retrievers = [vs_retriever, sq_retriver]
+
+    from langchain.retrievers import MergerRetriever
+    from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
+    _, filter_embeddings, _ = pick_llm(vector_name)
+
+    for key, value in rt_list.items():
+        from utils.gcp import get_gcp_project
+        if value.get("provider") == "GoogleCloudEnterpriseSearchRetriever":
+            gcp_retriever = GoogleCloudEnterpriseSearchRetriever(
+                project_id=get_gcp_project(),
+                search_engine_id=key,
+                location_id=value.get("location", "global"),
+                engine_data_type=1 if value.get("type","unstructured") == "structured" else 0,
+                query_expansion_condition=2
+            )
+        else:
+            raise NotImplementedError(f"Retriver not supported: {value}")
+        
+        all_retrievers.append(gcp_retriever)
+    lotr = MergerRetriever(retrievers=all_retrievers)
+
+    # https://python.langchain.com/docs/integrations/retrievers/merger_retriever
+    from langchain.document_transformers import (
+        EmbeddingsRedundantFilter,
+        EmbeddingsClusteringFilter,
+    )
+    from langchain.retrievers.document_compressors import DocumentCompressorPipeline
+    from langchain.retrievers import ContextualCompressionRetriever
+
+    filter = EmbeddingsRedundantFilter(embeddings=filter_embeddings)
+    pipeline = DocumentCompressorPipeline(transformers=[filter])
+    retriever = ContextualCompressionRetriever(
+        base_compressor=pipeline, base_retriever=lotr, 
+        k=3)
 
     return retriever
 

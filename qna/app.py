@@ -8,10 +8,8 @@ from flask import Flask, request, jsonify, Response
 import qna.question_service as qs
 from qna.archive import archive_qa
 
-from qna.pubsub_manager import PubSubManager
-
 import logging
-import datetime
+
 
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
