@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS match_documents_{vector_name}(vector, int);
 CREATE OR REPLACE FUNCTION match_documents_{vector_name}(
     query_embedding vector({vector_size}), 
     match_count int DEFAULT 5,
-    filter jsonb DEFAULT '{}')
+    filter jsonb DEFAULT '{{}}')
            RETURNS TABLE(
                id uuid,
                content text,
