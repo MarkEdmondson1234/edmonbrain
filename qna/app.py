@@ -23,6 +23,11 @@ storage_client = storage.Client()
 
 # The name of your bucket and the file you want to check
 bucket_name = os.environ.get('GCS_BUCKET')
+if bucket_name:
+    bucket_name = bucket_name.replace('gs://', '')
+else:
+    raise EnvironmentError("GCS_BUCKET environment variable not set")
+
 blob_name = 'config.json'
 
 # Global variable to store the last modification time
@@ -37,7 +42,7 @@ def fetch_config():
 
     # Check if the file exists
     if not blob.exists():
-        logging.info(f"The blob {blob_name} does not exist in the bucket {bucket_name}.")
+        logging.info(f"The blob {blob_name} does not exist in the bucket {bucket_name}")
         return None
 
     # Download the file to a local file

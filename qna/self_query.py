@@ -26,12 +26,12 @@ metadata_field_info = [
     AttributeInfo(
         name="source",
         description="The document source",
-        type="string or list[string]",
+        type="string",
     ),
     AttributeInfo(
         name="eventTime",
         description="When this content was put into the memory",
-        type="datetime",
+        type="ISO 8601 formatted date and time string",
     ),
     AttributeInfo(
         name="type",

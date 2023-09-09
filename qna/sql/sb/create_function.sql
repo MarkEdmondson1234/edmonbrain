@@ -1,4 +1,9 @@
-CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector({vector_size}), match_count int)
+DROP FUNCTION IF EXISTS match_documents_{vector_name}(vector, int);
+
+CREATE OR REPLACE FUNCTION match_documents_{vector_name}(
+    query_embedding vector({vector_size}), 
+    match_count int DEFAULT 5,
+    filter jsonb DEFAULT '{}')
            RETURNS TABLE(
                id uuid,
                content text,
@@ -19,7 +24,7 @@ CREATE OR REPLACE FUNCTION match_documents_{vector_name}(query_embedding vector(
                1 -({vector_name}.embedding <=> query_embedding) AS similarity
            FROM
                {vector_name}
-           where 1 - ({vector_name}.embedding <=> query_embedding) > 0.6
+           where 1 - ({vector_name}.embedding <=> query_embedding) > 0.6 AND metadata @> filter
            ORDER BY
                {vector_name}.embedding <=> query_embedding
            LIMIT match_count;
