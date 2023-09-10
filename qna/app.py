@@ -28,7 +28,7 @@ if bucket_name:
 else:
     raise EnvironmentError("GCS_BUCKET environment variable not set")
 
-blob_name = 'config.json'
+blob_name = 'local_config.json'
 
 # Global variable to store the last modification time
 last_mod_time = None
