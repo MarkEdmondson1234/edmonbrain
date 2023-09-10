@@ -12,7 +12,7 @@ from httpx import ReadTimeout
 import logging
 import traceback
 
-def activate_agent(question, llm_chat, chat_history, retriever):
+def activate_agent(question, llm_chat, chat_history, retriever, calendar_retriever=None):
 
     logging.info(f"Activating agent {question}")
 
@@ -30,6 +30,12 @@ def activate_agent(question, llm_chat, chat_history, retriever):
         retriever=retriever,
     )
 
+    calendar = RetrievalQA.from_chain_type(
+        llm=llm_chat,
+        chain_type="stuff",
+        retriever=calendar_retriever
+    )
+
     tools = [
         Tool(
             name="python-repl",
@@ -43,16 +49,16 @@ def activate_agent(question, llm_chat, chat_history, retriever):
             Useful when you need to do mathematical operations or arithmetic.
             """
         ),
-        #Tool(name = "Calendar helper",
-        #     func=###,
-        #     description = """
-        #     Useful to look up certain events on given dates
-        #     """),
+        Tool(name = "Calendar helper",
+             func=calendar.run,
+             description = """
+             Useful to look up certain events on given dates within your memory
+             """),
         Tool(
             name = "long-term-memory",
             func=memory.run,
             description="""
-            Useful for when you need to look into your shared memory to answer follow up questions.
+            Useful for when you need to search your shared memory to answer follow up questions.
             """
         )
     ]

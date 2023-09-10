@@ -37,7 +37,11 @@ def qna(question: str,
     if is_agent:
         from qna.agent import activate_agent
         from qna.llm import pick_chat_buddy
-        result = activate_agent(question, llm_chat, chat_history, retriever=retriever)
+        from qna.self_query import get_self_query_retriever
+        from qna.llm import pick_vectorstore
+        calendar = get_self_query_retriever(llm, vectorstore=pick_vectorstore(vector_name, embeddings=embeddings))
+        result = activate_agent(question, llm_chat, chat_history, 
+                                retriever=retriever, calendar_retriever=calendar)
         if result is not None:
             logging.info(f"agent result: {result}")
             chat_buddy, buddy_description = pick_chat_buddy(vector_name)
