@@ -175,7 +175,10 @@ def pick_retriever(vector_name, embeddings):
     if (not rt_list or len(rt_list) == 0) and sq_retriver is None:
         return vs_retriever
     
-    all_retrievers = [vs_retriever, sq_retriver]
+    if sq_retriver is not None:
+        all_retrievers = [vs_retriever, sq_retriver]
+    else:
+        all_retrievers = [vs_retriever]
 
     from langchain.retrievers import MergerRetriever
     from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
