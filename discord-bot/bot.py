@@ -1,6 +1,7 @@
 import os
 import discord
 import aiohttp
+import asyncio
 import json
 from dotenv import load_dotenv
 import shlex
@@ -366,90 +367,98 @@ Need this info:
         }
 
         #print(f'Sending: {payload}')
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(flask_app_url, json=payload) as response:
+                    print(f'chat response.status: {response.status}')
+                    streamed=False
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(flask_app_url, json=payload) as response:
-                print(f'chat response.status: {response.status}')
-                streamed=False
-
-                if response.status != 200:
-                    # Edit the thinking message to show an error
-                    if not agent:
-                        await thinking_message.edit(content="Error in processing message.")
-                    else:
-                        new_thread.send("Error in processing message.")
-                    return
-                
-                
-                if response.headers.get('Transfer-Encoding') == 'chunked':
-                    # This is a streamed response, process it in chunks
-                    async with new_thread.typing():
-                        response_data = await process_streamed_response(response, new_thread, thinking_message)
-                        streamed=True
-                        print("Finished streaming response")
-                else:
-                    response_data = await response.json()  # Get the response data as JSON
-                
-                source_docs = response_data.get('source_documents', [])
-                reply_content = response_data.get('result')  # Get the 'result' field from the JSON
-
-                print(f'response_data: {response_data}')
-                # dedupe source docs
-                seen = set()
-                unique_source_docs = []
-
-                for source in source_docs:
-                    metadata_str = json.dumps(source.get('metadata'), sort_keys=True)
-                    if metadata_str not in seen:
-                        unique_source_docs.append(source)
-                        seen.add(metadata_str)
-
-                for source in unique_source_docs:
-                    metadata_source = source.get('metadata')
-                    source_message = f"**source**: {metadata_source.get('source')}"
-                    if metadata_source.get('page_number', None) is not None:
-                        source_message += f" page: {metadata_source.get('page_number')}"
-                    if metadata_source.get('category', None) is not None:
-                        source_message += f" category: {metadata_source.get('category')}"
-                    if metadata_source.get('title', None) is not None:
-                        source_message += f" title: {metadata_source.get('title')}"
-                        
-                    await chunk_send(new_thread, source_message)
-                    source_url = metadata_source.get('url', None)
-                    if source_url is not None:
-                        url_message = f"**url**: {source_url}"
-                        await chunk_send(new_thread, url_message)
-                            
-                if agent and talking_to_bot:
-                    print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
-                    await chunk_send(new_thread, reply_content)
-                else:
-                    print("Not an agent")
-                    #if streamed and thinking_message.content.startswith("Thinking..."):
-                    #    print(str(thinking_message.content))
-                    #    print(thinking_message)
-                    #    print("Something went wrong with streaming, resorting to batch")
-                    #    #streamed = False
-
-                    # talking to a human
-                    if not streamed:
-                        print("Not streamed content")
-                        if len(reply_content) > 2000:
-                            await thinking_message.edit(content="*Response:*")
-                            await chunk_send(new_thread, reply_content)
-                        elif len(reply_content) == 0:
-                            await thinking_message.edit(content="No response")
+                    if response.status != 200:
+                        # Edit the thinking message to show an error
+                        if not agent:
+                            await thinking_message.edit(content="Error in processing message.")
                         else:
-                            # Edit the thinking message to show the reply
-                            await thinking_message.edit(content=reply_content)
+                            new_thread.send("Error in processing message.")
+                        return
+                    
+                    
+                    if response.headers.get('Transfer-Encoding') == 'chunked':
+                        # This is a streamed response, process it in chunks
+                        async with new_thread.typing():
+                            response_data = await process_streamed_response(response, new_thread, thinking_message)
+                            streamed=True
+                            print("Finished streaming response")
+                    else:
+                        response_data = await response.json()  # Get the response data as JSON
+                    
+                    source_docs = response_data.get('source_documents', [])
+                    reply_content = response_data.get('result')  # Get the 'result' field from the JSON
 
-                # Check if the message was sent in a thread or a private message
-                if isinstance(new_thread, discord.Thread) and not agent:
-                    await new_thread.send(f"*Reply to {bot_mention} within this thread to continue. Use `!help` for special commands*")
-                elif isinstance(new_thread, discord.DMChannel) and not agent:
-                    # Its a DM
-                    await new_thread.send(f"*Use `!help` to see special commands*")
-                else:
-                    print(f"I couldn't work out the channel type: {new_thread}")
+                    print(f'response_data: {response_data}')
+                    # dedupe source docs
+                    seen = set()
+                    unique_source_docs = []
+
+                    for source in source_docs:
+                        metadata_str = json.dumps(source.get('metadata'), sort_keys=True)
+                        if metadata_str not in seen:
+                            unique_source_docs.append(source)
+                            seen.add(metadata_str)
+
+                    for source in unique_source_docs:
+                        metadata_source = source.get('metadata')
+                        source_message = f"**source**: {metadata_source.get('source')}"
+                        if metadata_source.get('page_number', None) is not None:
+                            source_message += f" page: {metadata_source.get('page_number')}"
+                        if metadata_source.get('category', None) is not None:
+                            source_message += f" category: {metadata_source.get('category')}"
+                        if metadata_source.get('title', None) is not None:
+                            source_message += f" title: {metadata_source.get('title')}"
+                            
+                        await chunk_send(new_thread, source_message)
+                        source_url = metadata_source.get('url', None)
+                        if source_url is not None:
+                            url_message = f"**url**: {source_url}"
+                            await chunk_send(new_thread, url_message)
+                                
+                    if agent and talking_to_bot:
+                        print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
+                        await chunk_send(new_thread, reply_content)
+                    else:
+                        print("Not an agent")
+                        #if streamed and thinking_message.content.startswith("Thinking..."):
+                        #    print(str(thinking_message.content))
+                        #    print(thinking_message)
+                        #    print("Something went wrong with streaming, resorting to batch")
+                        #    #streamed = False
+
+                        # talking to a human
+                        if not streamed:
+                            print("Not streamed content")
+                            if len(reply_content) > 2000:
+                                await thinking_message.edit(content="*Response:*")
+                                await chunk_send(new_thread, reply_content)
+                            elif len(reply_content) == 0:
+                                await thinking_message.edit(content="No response")
+                            else:
+                                # Edit the thinking message to show the reply
+                                await thinking_message.edit(content=reply_content)
+
+                    # Check if the message was sent in a thread or a private message
+                    if isinstance(new_thread, discord.Thread) and not agent:
+                        await new_thread.send(f"*Reply to {bot_mention} within this thread to continue. Use `!help` for special commands*")
+                    elif isinstance(new_thread, discord.DMChannel) and not agent:
+                        # Its a DM
+                        await new_thread.send(f"*Use `!help` to see special commands*")
+                    else:
+                        print(f"I couldn't work out the channel type: {new_thread}")
+        except asyncio.TimeoutError:
+            # Handle the timeout error by sending an error message to the user
+            if not agent:
+                await thinking_message.edit(content="The request timed out. Please try again later.")
+            else:
+                new_thread.send("The request timed out. Please try again later.")
+            return
+
 
 client.run(TOKEN)
