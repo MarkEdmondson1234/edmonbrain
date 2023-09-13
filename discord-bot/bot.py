@@ -389,7 +389,8 @@ Need this info:
                             streamed=True
                             print("Finished streaming response")
                     else:
-                        response_data = await response.json()  # Get the response data as JSON
+                        async with new_thread.typing():
+                            response_data = await response.json()  # Get the response data as JSON
                     
                     source_docs = response_data.get('source_documents', [])
                     reply_content = response_data.get('result')  # Get the 'result' field from the JSON
