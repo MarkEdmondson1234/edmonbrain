@@ -49,7 +49,7 @@ def activate_agent(question, llm_chat, chat_history, retriever, calendar_retriev
             Useful when you need to do mathematical operations or arithmetic.
             """
         ),
-        Tool(name = "Calendar helper",
+        Tool(name = "calendar-helper",
              func=calendar.run,
              description = """
              Useful to look up certain events on given dates within your memory
