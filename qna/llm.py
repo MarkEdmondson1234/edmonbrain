@@ -79,7 +79,11 @@ def pick_vectorstore(vector_name, embeddings):
     vs_str = load_config_key("vectorstore", vector_name)
 
     if vs_str is None:
-        raise NotImplementedError(f"Need to provide llm_config for vector_name: {vector_name}")
+        # look for shared vector store
+        shared_vn = load_config_key("shared_vectorstore", vector_name)
+        if shared_vn is None:
+            raise NotImplementedError(f"No vectorstore or shared_vectorstore found in llm_config for vector_name: {vector_name}")
+        vs_str = load_config_key("vectorstore", shared_vn)
     
     if vs_str == 'supabase':
         from supabase import Client, create_client
