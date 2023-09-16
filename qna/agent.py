@@ -23,16 +23,48 @@ def activate_agent(question, llm_chat, chat_history, retriever, calendar_retriev
     # create calculator tool
     calculator = LLMMathChain.from_llm(llm=llm_chat, verbose=True)
 
+    from langchain.prompts import PromptTemplate
     # memory tool
+    template_memory = """You are a memory assistant bot.
+Below are memories that have been recalled to try and answer the question below.
+If the memories do not help you to answer, apologise and say you don't remember anything relevant to help.
+If the memories do help with your answer, use them to answer and also summarise what memories you are using to help answer the question.
+## Memories
+{context}
+## Question
+{question}
+## Your Answer
+"""
     memory = RetrievalQA.from_chain_type(
         llm=llm_chat,
         chain_type="stuff",
+        chain_type_kwargs={
+            "prompt": PromptTemplate(
+                template=template_memory,
+                input_variables=["context", "question"],
+            ),
+        },
         retriever=retriever,
     )
 
+    template_calendar="""You are a calendar assistant bot.  
+Below are events that have been returned for the dates or time period requested in the question.
+Reply echoing the memories and trust they did occur on dates as specified in the question.
+## Memories within dates as specified in the question
+{context}
+## Question
+{question}
+## Your Answer
+"""
     calendar = RetrievalQA.from_chain_type(
         llm=llm_chat,
         chain_type="stuff",
+        chain_type_kwargs={
+            "prompt": PromptTemplate(
+                template=template_calendar,
+                input_variables=["context", "question"],
+            ),
+        },
         retriever=calendar_retriever
     )
 
@@ -52,13 +84,13 @@ def activate_agent(question, llm_chat, chat_history, retriever, calendar_retriev
         Tool(name = "calendar-helper",
              func=calendar.run,
              description = """
-             Useful to look up certain events on given dates within your memory
+             Useful when you have specific dates to look up within your memory
              """),
         Tool(
             name = "long-term-memory",
             func=memory.run,
             description="""
-            Useful for when you need to search your shared memory to answer follow up questions.
+            Use when you don't have specific dates to look up in your memory, but are searching for general subjects that happened in the past.
             """
         )
     ]
