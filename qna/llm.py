@@ -87,6 +87,7 @@ def pick_vectorstore(vector_name, embeddings):
         logging.info(f"Loading shared vectorstore {shared_vn}")
         vs_str = load_config_key("vectorstore", shared_vn)
         shared_vs = True
+        vector_name = shared_vn
     
     if vs_str == 'supabase':
         from supabase import Client, create_client
@@ -181,6 +182,7 @@ def pick_retriever(vector_name, embeddings):
 
     # early return if only one retriever is available
     if (not rt_list or len(rt_list) == 0) and sq_retriver is None:
+        logging.info(f"Only one retriever available - vector store {vs_str}")
         return vs_retriever
     
     if sq_retriver is not None:
