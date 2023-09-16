@@ -36,8 +36,11 @@ async def process_streamed_response(response, new_thread, thinking_message):
         if inside_question:
             question_buffer += chunk_content
             if '€€End Question€€' in question_buffer:
-                await chunk_send(new_thread, question_buffer)
+                end_index = question_buffer.find('€€End Question€€') + len('€€End Question€€')
+                await chunk_send(new_thread, question_buffer[:end_index])
                 inside_question = False
+
+                chunk_content = question_buffer[end_index:]
                 question_buffer = ""
             continue  # Skip further processing for this chunk
 
