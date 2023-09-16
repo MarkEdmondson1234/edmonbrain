@@ -48,12 +48,11 @@ If the memories do help with your answer, use them to answer and also summarise 
     )
 
     template_calendar="""You are a calendar assistant bot.  
-Below are events that have been returned for the dates or time period requested in the question.
-Reply echoing the memories and trust they did occur on dates as specified in the question.
+Below are events that have been returned for the dates or time period in response to the question: {question}
+Reply echoing the memories and trust they did occur on the dates requested.
+If there are no memories of events, reply saying there were no events found. Never make up any events that did not occur.
 ## Memories within dates as specified in the question
 {context}
-## Question
-{question}
 ## Your Answer
 """
     calendar = RetrievalQA.from_chain_type(
