@@ -78,20 +78,24 @@ def pick_vectorstore(vector_name, embeddings):
 
     vs_str = load_config_key("vectorstore", vector_name)
 
+    shared_vs = False
     if vs_str is None:
         # look for shared vector store
         shared_vn = load_config_key("shared_vectorstore", vector_name)
         if shared_vn is None:
             raise NotImplementedError(f"No vectorstore or shared_vectorstore found in llm_config for vector_name: {vector_name}")
+        logging.info(f"Loading shared vectorstore {shared_vn}")
         vs_str = load_config_key("vectorstore", shared_vn)
+        shared_vs = True
     
     if vs_str == 'supabase':
         from supabase import Client, create_client
         from langchain.vectorstores import SupabaseVectorStore
         from qna.database import setup_supabase
 
-        logging.debug(f"Initiating Supabase store: {vector_name}")
-        setup_supabase(vector_name)
+        if not shared_vs:
+            logging.debug(f"Initiating Supabase store: {vector_name}")
+            setup_supabase(vector_name)
         # init embedding and vector store
         supabase_url = os.getenv('SUPABASE_URL')
         supabase_key = os.getenv('SUPABASE_KEY')
