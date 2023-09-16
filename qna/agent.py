@@ -83,13 +83,13 @@ If there are no memories of events, reply saying there were no events found. Nev
         Tool(name = "calendar-helper",
              func=calendar.run,
              description = """
-             Useful when you have specific dates to look up within your memory
+             Useful when you have questions about specific dates or periods that you can use to look up within your memory
              """),
         Tool(
             name = "long-term-memory",
             func=memory.run,
             description="""
-            Use when you don't have specific dates to look up in your memory, but are searching for general subjects that happened in the past.
+            Use when you do not have the right context for your questions yet, but with a specific keyword in a question it may appear in your memory.
             """
         )
     ]
