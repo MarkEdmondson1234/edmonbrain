@@ -55,46 +55,56 @@ def data_import(project_id, datastore_id):
     """
     
     # Get project config from POST data
-    data = request.json
+    try:
+        data = request.json
 
-    # Get the access token
-    token = get_google_cloud_token()
+        # Get the access token
+        token = get_google_cloud_token()
 
-    # Define the endpoint and headers
-    endpoint = f"https://discoveryengine.googleapis.com/v1beta/projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0/documents:import"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    # Define the payload with mandatory fields
-    payload = {
-        "bigquerySource": {
-            "projectId": project_id,
-            "datasetId": data['DATASET_ID'],
-            "tableId": data['TABLE_ID'],
+        # Define the endpoint and headers
+        endpoint = f"https://discoveryengine.googleapis.com/v1beta/projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0/documents:import"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
         }
-    }
-    
-    # Add optional fields to the payload if they are present in the POST data
-    bigquery_source = payload['bigquerySource']
-    if 'DATA_SCHEMA' in data:
-        bigquery_source['dataSchema'] = data['DATA_SCHEMA']
-    if 'ERROR_DIRECTORY' in data:
-        payload['errorConfig'] = {"gcsPrefix": data['ERROR_DIRECTORY']}
-    if 'RECONCILIATION_MODE' in data:
-        payload['reconciliationMode'] = data['RECONCILIATION_MODE']
-    if 'AUTO_GENERATE_IDS' in data:
-        payload['autoGenerateIds'] = data['AUTO_GENERATE_IDS']
-    if 'ID_FIELD' in data:
-        payload['idField'] = data['ID_FIELD']
 
-    logging.info(f"Sending payload {payload} to {endpoint}")
-    # Make the POST request
-    response = requests.post(endpoint, headers=headers, json=payload)
-    logging.info(f"Sent payload {payload} to {endpoint}")
-    # Return the response
-    return jsonify(response.json()), response.status_code
+        # Define the payload with mandatory fields
+        payload = {
+            "bigquerySource": {
+                "projectId": project_id,
+                "datasetId": data['DATASET_ID'],
+                "tableId": data['TABLE_ID'],
+            }
+        }
+        
+        # Add optional fields to the payload if they are present in the POST data
+        bigquery_source = payload['bigquerySource']
+        if 'DATA_SCHEMA' in data:
+            bigquery_source['dataSchema'] = data['DATA_SCHEMA']
+        if 'ERROR_DIRECTORY' in data:
+            payload['errorConfig'] = {"gcsPrefix": data['ERROR_DIRECTORY']}
+        if 'RECONCILIATION_MODE' in data:
+            payload['reconciliationMode'] = data['RECONCILIATION_MODE']
+        if 'AUTO_GENERATE_IDS' in data:
+            payload['autoGenerateIds'] = data['AUTO_GENERATE_IDS']
+        if 'ID_FIELD' in data:
+            payload['idField'] = data['ID_FIELD']
+
+        logging.info(f"Sending payload {payload} to {endpoint}")
+        # Make the POST request
+        response = requests.post(endpoint, headers=headers, json=payload)
+        logging.info(f"Sent payload {payload} to {endpoint}")
+        # Return the response
+        return jsonify(response.json()), response.status_code
+
+    except KeyError as e:
+        logging.error(f"Missing required parameter: {str(e)}")
+        return jsonify({"error": f"Missing required parameter: {str(e)}}"), 400
+
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}}"), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
