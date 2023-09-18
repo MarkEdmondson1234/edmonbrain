@@ -99,11 +99,16 @@ def data_import(project_id, datastore_id):
 
     except KeyError as e:
         logging.error(f"Missing required parameter: {str(e)}")
-        return jsonify({"error": f"Missing required parameter: {str(e)}}"), 400
+        return jsonify({"error": f"Missing required parameter: {str(e)}"}), 400
+
+    except ValueError as e:
+        logging.error(f"Failed to decode API response as JSON: {str(e)}")
+        return jsonify({"error": f"Failed to decode API response as JSON: {response.text}"}), 500
+
 
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
-        return jsonify({"error": f"An unexpected error occurred: {str(e)}}"), 500
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
 if __name__ == '__main__':
