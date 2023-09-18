@@ -1,6 +1,6 @@
 substitutions:
   _IMAGE_NAME: your-image-name
-  _SERVICE_NAME: your-service-name
+  _SERVICE_NAME: edmonbrain-dreamer
   _REGION: your-region
   _GCS_BUCKET: your-gcs-bucket
   _SERVICE_ACCOUNT: your-service@your-project.iam.gserviceaccount.com
@@ -71,7 +71,7 @@ steps:
           # Create a new scheduler job only if it does not exist
           gcloud scheduler jobs create http $$SCHEDULER_JOB_NAME \
             --location ${_REGION} \
-            --schedule "0 1 * * *" \
+            --schedule "44 23 * * *" \
             --http-method GET \
             --uri $$SERVICE_URL/dream/gcloud_brain \
             --oidc-service-account-email ${_SERVICE_ACCOUNT}
