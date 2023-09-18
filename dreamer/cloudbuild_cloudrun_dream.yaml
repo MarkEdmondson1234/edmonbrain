@@ -73,6 +73,6 @@ steps:
             --location ${_REGION} \
             --schedule "44 23 * * *" \
             --http-method GET \
-            --uri $$SERVICE_URL/dream/gcloud_brain \
+            --uri $$SERVICE_URL/dream/edmonbrain \
             --oidc-service-account-email ${_SERVICE_ACCOUNT}
         fi
