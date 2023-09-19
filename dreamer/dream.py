@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging, os, random
 from google.cloud import bigquery
 from google.cloud import storage
@@ -43,7 +43,7 @@ def fetch_data_from_bigquery(date, vector_name):
 
 
 def prepare_llm_input(rows):
-    the_date = datetime.now().strftime('%Y-%m-%d')
+    the_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     llm_input = f"Events occuring on {the_date}:\n\n"
     
     random.shuffle(rows)
