@@ -63,16 +63,16 @@ def data_import(project_id, datastore_id):
         if 'DATA_SCHEMA' in data:
             big_query_source.data_schema = data['DATA_SCHEMA']
         
-        request.bigquery_source = big_query_source
+        import_request.bigquery_source = big_query_source
 
         if 'ERROR_DIRECTORY' in data:
-            request.error_config = discoveryengine_v1.ImportErrorConfig(gcsPrefix=data['ERROR_DIRECTORY'])
+            import_request.error_config = discoveryengine_v1.ImportErrorConfig(gcsPrefix=data['ERROR_DIRECTORY'])
         if 'RECONCILIATION_MODE' in data:
-            request.reconciliation_mode = data['RECONCILIATION_MODE']
+            import_request.reconciliation_mode = data['RECONCILIATION_MODE']
         if 'AUTO_GENERATE_IDS' in data:
-            request.auto_generate_ids = data['AUTO_GENERATE_IDS']
+            import_request.auto_generate_ids = data['AUTO_GENERATE_IDS']
         if 'ID_FIELD' in data:
-            request.id_field = data['ID_FIELD']
+            import_request.id_field = data['ID_FIELD']
         
         logging.info(f"Sending payload {import_request}")
 
