@@ -5,10 +5,8 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 import logging
 from flask import request, jsonify
-import requests
-from google.auth import default
-from google.auth.transport.requests import Request
-
+from google.cloud import discoveryengine_v1
+#https://cloud.google.com/python/docs/reference/discoveryengine/latest/google.cloud.discoveryengine_v1.services.document_service.DocumentServiceClient#google_cloud_discoveryengine_v1_services_document_service_DocumentServiceClient_import_documents
 from dreamer.dream import dream
 
 app = Flask(__name__)
@@ -19,16 +17,6 @@ def create_dream(vector_name):
     return {
         "message": f"Dream for vector {vector_name} created and uploaded successfully."
     }
-
-
-
-def get_google_cloud_token():
-    logging.info("Getting google cloud token...")
-    credentials, project = default()
-    auth_request = Request()
-    credentials.refresh(auth_request)
-    logging.info("Got token")
-    return credentials.token
 
 @app.route('/import/<project_id>/<datastore_id>', methods=['POST'])
 def data_import(project_id, datastore_id):
@@ -58,58 +46,53 @@ def data_import(project_id, datastore_id):
     try:
         data = request.json
 
-        # Get the access token
-        token = get_google_cloud_token()
+        client = discoveryengine_v1.DocumentServiceClient()
 
-        # Define the endpoint and headers
-        endpoint = f"https://discoveryengine.googleapis.com/v1beta/projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0/documents:import"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
+        # Construct the parent resource identifier
+        parent = f"projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0"
 
-        # Define the payload with mandatory fields
-        payload = {
+        # Initialize request argument(s)
+        request_args = {
+            "parent": parent,
             "bigquerySource": {
                 "projectId": project_id,
                 "datasetId": data['DATASET_ID'],
                 "tableId": data['TABLE_ID'],
             }
         }
-        
-        # Add optional fields to the payload if they are present in the POST data
-        bigquery_source = payload['bigquerySource']
+
+        # Add optional fields to the request arguments if they are present in the POST data
         if 'DATA_SCHEMA' in data:
-            bigquery_source['dataSchema'] = data['DATA_SCHEMA']
+            request_args['bigquerySource']['dataSchema'] = data['DATA_SCHEMA']
         if 'ERROR_DIRECTORY' in data:
-            payload['errorConfig'] = {"gcsPrefix": data['ERROR_DIRECTORY']}
+            request_args['errorConfig'] = {"gcsPrefix": data['ERROR_DIRECTORY']}
         if 'RECONCILIATION_MODE' in data:
-            payload['reconciliationMode'] = data['RECONCILIATION_MODE']
+            request_args['reconciliationMode'] = data['RECONCILIATION_MODE']
         if 'AUTO_GENERATE_IDS' in data:
-            payload['autoGenerateIds'] = data['AUTO_GENERATE_IDS']
+            request_args['autoGenerateIds'] = data['AUTO_GENERATE_IDS']
         if 'ID_FIELD' in data:
-            payload['idField'] = data['ID_FIELD']
+            request_args['idField'] = data['ID_FIELD']
 
-        logging.info(f"Sending payload {payload} to {endpoint}")
-        # Make the POST request
-        response = requests.post(endpoint, headers=headers, json=payload)
-        logging.info(f"Sent payload {payload} to {endpoint}")
-        # Return the response
-        return jsonify(response.json()), response.status_code
+        logging.info(f"Sending payload {request_args}")
 
+        # Make the request
+        operation = client.import_documents(request=request_args)
+
+        logging.info("Waiting for operation to complete...")
+        
+        response = operation.result()
+
+        # Handle the response
+        logging.info(f"Response received: {response}")
+        return jsonify({"response": str(response)}), 200
+    
     except KeyError as e:
         logging.error(f"Missing required parameter: {str(e)}")
         return jsonify({"error": f"Missing required parameter: {str(e)}"}), 400
-
-    except ValueError as e:
-        logging.error(f"Failed to decode API response as JSON: {str(e)}")
-        return jsonify({"error": f"Failed to decode API response as JSON: {response.text}"}), 500
-
-
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
-
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

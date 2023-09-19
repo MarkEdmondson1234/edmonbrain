@@ -6,6 +6,8 @@ Needs BigQuery Job User and BigQuery Data Owner added to service email IAM
 
 ## Enterprise Search Refresh
 
+Requires Discovery Engine Admin IAM
+
 ### Data Import Endpoint
 
 The data import endpoint allows you to import data from a BigQuery table into your Generative AI App Builder.
