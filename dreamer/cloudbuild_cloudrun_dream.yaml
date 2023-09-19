@@ -22,7 +22,7 @@ steps:
       cat <<EOF >Dockerfile_cloudrun
       FROM gcr.io/$PROJECT_ID/prebuild/${_IMAGE_NAME}
 
-      RUN pip install --no-cache-dir -r dreamer/requirements.txt
+      RUN pip install gunicorn google-cloud-discoveryengine
       
       COPY . .
 
