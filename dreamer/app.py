@@ -46,6 +46,8 @@ def data_import(project_id, datastore_id):
     try:
         data = request.json
 
+        logging.info(f"Got import request data: {data} for project: {project_id} and datastore_id: {datastore_id}")
+
         client = discoveryengine_v1.DocumentServiceClient()
 
         # Construct the parent resource identifier
