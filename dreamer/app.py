@@ -51,7 +51,7 @@ def data_import(project_id, datastore_id):
         # Construct the parent resource identifier
         parent = f"projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0"
 
-        request = discoveryengine_v1.ImportDocumentsRequest(parent=parent)
+        import_request = discoveryengine_v1.ImportDocumentsRequest(parent=parent)
 
         big_query_source = discoveryengine_v1.BigQuerySource(
                 project_id=project_id,
@@ -74,10 +74,10 @@ def data_import(project_id, datastore_id):
         if 'ID_FIELD' in data:
             request.id_field = data['ID_FIELD']
         
-        logging.info(f"Sending payload {request}")
+        logging.info(f"Sending payload {import_request}")
 
         # Make the request
-        operation = client.import_documents(request=request)
+        operation = client.import_documents(request=import_request)
 
         logging.info("Waiting for operation to complete...")
         
