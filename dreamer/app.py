@@ -18,7 +18,7 @@ def create_dream(vector_name):
         "message": f"Dream for vector {vector_name} created and uploaded successfully."
     }
 
-@app.route('/import/<project_id>/<datastore_id>', methods=['POST'])
+@app.route('/import/discoveryengine/bigquery/<project_id>/<datastore_id>', methods=['POST'])
 def data_import(project_id, datastore_id):
     """
     Endpoint to initiate data import from BigQuery to Generative AI App Builder.
@@ -51,32 +51,33 @@ def data_import(project_id, datastore_id):
         # Construct the parent resource identifier
         parent = f"projects/{project_id}/locations/global/collections/default_collection/dataStores/{datastore_id}/branches/0"
 
-        # Initialize request argument(s)
-        request_args = {
-            "parent": parent,
-            "bigquerySource": {
-                "projectId": project_id,
-                "datasetId": data['DATASET_ID'],
-                "tableId": data['TABLE_ID'],
-            }
-        }
+        request = discoveryengine_v1.ImportDocumentsRequest(parent=parent)
+
+        big_query_source = discoveryengine_v1.BigQuerySource(
+                project_id=project_id,
+                dataset_id=data['DATASET_ID'],
+                table_id=data['TABLE_ID']
+            )
 
         # Add optional fields to the request arguments if they are present in the POST data
         if 'DATA_SCHEMA' in data:
-            request_args['bigquerySource']['dataSchema'] = data['DATA_SCHEMA']
-        if 'ERROR_DIRECTORY' in data:
-            request_args['errorConfig'] = {"gcsPrefix": data['ERROR_DIRECTORY']}
-        if 'RECONCILIATION_MODE' in data:
-            request_args['reconciliationMode'] = data['RECONCILIATION_MODE']
-        if 'AUTO_GENERATE_IDS' in data:
-            request_args['autoGenerateIds'] = data['AUTO_GENERATE_IDS']
-        if 'ID_FIELD' in data:
-            request_args['idField'] = data['ID_FIELD']
+            big_query_source.data_schema = data['DATA_SCHEMA']
+        
+        request.bigquery_source = big_query_source
 
-        logging.info(f"Sending payload {request_args}")
+        if 'ERROR_DIRECTORY' in data:
+            request.error_config = discoveryengine_v1.ImportErrorConfig(gcsPrefix=data['ERROR_DIRECTORY'])
+        if 'RECONCILIATION_MODE' in data:
+            request.reconciliation_mode = data['RECONCILIATION_MODE']
+        if 'AUTO_GENERATE_IDS' in data:
+            request.auto_generate_ids = data['AUTO_GENERATE_IDS']
+        if 'ID_FIELD' in data:
+            request.id_field = data['ID_FIELD']
+        
+        logging.info(f"Sending payload {request}")
 
         # Make the request
-        operation = client.import_documents(request=request_args)
+        operation = client.import_documents(request=request)
 
         logging.info("Waiting for operation to complete...")
         
