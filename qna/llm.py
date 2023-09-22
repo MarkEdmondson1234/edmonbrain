@@ -4,29 +4,7 @@ import datetime
 from langchain.prompts.prompt import PromptTemplate
 
 logging.basicConfig(level=logging.INFO)
-
-def load_config(filename):
-    logging.debug("Loading config for llm")
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-
-    # Join the script directory with the filename
-    config_path = os.path.join(parent_dir, filename)
-
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    return config
-
-def load_config_key(key, vector_name):
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    key_str = llm_config.get(key, None)
-    
-    return key_str
+from utils.config import load_config_key
 
 def pick_llm(vector_name):
     logging.debug('Picking llm')
@@ -171,22 +149,22 @@ def pick_retriever(vector_name, embeddings):
         from qna.self_query import get_self_query_retriever
         llm, _, _ = pick_llm(vector_name)
 
-        sq_retriver = get_self_query_retriever(llm, vectorstore)
+        sq_retriever = get_self_query_retriever(llm, vectorstore)
     else:
         logging.info(f"No self_querying retriever available for {vs_str}")
-        sq_retriver = None
+        sq_retriever = None
 
     vs_retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
     
     rt_list = load_config_key("retrievers", vector_name)
 
     # early return if only one retriever is available
-    if (not rt_list or len(rt_list) == 0) and sq_retriver is None:
+    if (not rt_list or len(rt_list) == 0) and sq_retriever is None:
         logging.info(f"Only one retriever available - vector store {vs_str}")
         return vs_retriever
     
-    if sq_retriver is not None:
-        all_retrievers = [vs_retriever, sq_retriver]
+    if sq_retriever is not None:
+        all_retrievers = [vs_retriever, sq_retriever]
     else:
         all_retrievers = [vs_retriever]
 
@@ -194,20 +172,33 @@ def pick_retriever(vector_name, embeddings):
     from langchain.retrievers import GoogleCloudEnterpriseSearchRetriever
     _, filter_embeddings, _ = pick_llm(vector_name)
 
-    for key, value in rt_list.items():
+    if rt_list.get('GoogleCloudEnterpriseSearchRetriever', None) is not None:
         from utils.gcp import get_gcp_project
-        if value.get("provider") == "GoogleCloudEnterpriseSearchRetriever":
-            gcp_retriever = GoogleCloudEnterpriseSearchRetriever(
-                project_id=get_gcp_project(),
-                search_engine_id=key,
-                location_id=value.get("location", "global"),
-                engine_data_type=1 if value.get("type","unstructured") == "structured" else 0,
-                query_expansion_condition=2
-            )
-        else:
-            raise NotImplementedError(f"Retriver not supported: {value}")
-        
-        all_retrievers.append(gcp_retriever)
+        gcesr = rt_list.get('GoogleCloudEnterpriseSearchRetriever')
+        if gcesr.get('structured', None) is not None:
+            structured_retrievers = gcesr.get('structured')
+            for ret in structured_retrievers:
+                gcp_strut_retriever = GoogleCloudEnterpriseSearchRetriever(
+                        project_id=get_gcp_project(),
+                        search_engine_id=ret['id'],
+                        location_id=ret.get("location", "global"),
+                        engine_data_type=1,
+                        query_expansion_condition=2
+                    )
+                all_retrievers.append(gcp_strut_retriever)
+
+        if gcesr.get('unstructured', None) is not None:
+            unstructured_retrievers = gcesr.get('unstructured')
+            for uret in unstructured_retrievers:
+                gcp_unstrut_retriever = GoogleCloudEnterpriseSearchRetriever(
+                        project_id=get_gcp_project(),
+                        search_engine_id=uret['id'],
+                        location_id=uret.get("location", "global"),
+                        engine_data_type=0,
+                        query_expansion_condition=2
+                    )
+                all_retrievers.append(gcp_unstrut_retriever)
+
     lotr = MergerRetriever(retrievers=all_retrievers)
 
     # https://python.langchain.com/docs/integrations/retrievers/merger_retriever
