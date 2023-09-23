@@ -3,7 +3,7 @@ from langchain.document_loaders.unstructured import UnstructuredAPIFileLoader
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.document_loaders.git import GitLoader
 from langchain.document_loaders import GoogleDriveLoader
-from qna.llm import load_config
+from utils.config import load_config
 from googleapiclient.errors import HttpError
 
 import logging
