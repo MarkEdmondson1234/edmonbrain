@@ -22,13 +22,9 @@ def setup_cloudsql(vector_name:str, verbose:bool=False):
     setup_database(vector_name, verbose)
 
 def lookup_connection_env(vector_name:str):
-    from qna.llm import load_config
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    vs_str = llm_config.get("vectorstore", None)
+    from utils.config import load_config_key
+
+    vs_str = load_config_key("vectorstore", vector_name)
     if vs_str == "supabase":
         return "DB_CONNECTION_STRING"
     elif vs_str == "cloudsql":
@@ -38,13 +34,8 @@ def lookup_connection_env(vector_name:str):
 
 
 def get_vector_size(vector_name: str):
-    from qna.llm import load_config
-    config = load_config("config.json")
-    llm_config = config.get(vector_name, None)
-    if llm_config is None:
-        raise ValueError("No llm_config was found")
-    logging.debug(f'llm_config: {llm_config} for {vector_name}')
-    llm_str = llm_config.get("llm", None)
+    from qna.llm import load_config_key
+    llm_str = load_config_key("llm", vector_name)
 
     vector_size = 768
     if llm_str == 'openai':

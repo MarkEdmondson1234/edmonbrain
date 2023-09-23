@@ -7,6 +7,7 @@ import logging
 import json
 from webapp import bot_help
 import aiohttp
+from utils.config import load_config
 
 async def send_to_qa_async(user_input, vector_name, chat_history):
 
@@ -112,22 +113,8 @@ def generate_slack_output(bot_output):
 
     return blocks
 
-
-def load_config(filename):
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-
-    # Join the script directory with the filename
-    config_path = os.path.join(parent_dir, filename)
-
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    return config
-
-slack_config = load_config('slack/slack_config.json')
-
 def get_slack_vector_name(team_id, bot_user):
+    slack_config = load_config('slack/slack_config.json')
     logging.info(f'getting slack vector_name: {team_id} - {bot_user}')
     try:
         return slack_config['team_ids'][team_id]['bot_users'][bot_user]['llm']

@@ -10,6 +10,7 @@ import tempfile
 import qna.database as db
 import chunker.publish_to_pubsub_embed as pbembed
 from google.cloud import storage
+from utils.config import load_config
 
 
 def generate_webapp_output(bot_output):
@@ -266,21 +267,6 @@ def get_gcs_text_file(user_input, vector_name):
         return dream_text
     else:
         return f"!{command} file does not exist for date {dream_date_str}"
-
-
-
-
-def load_config(filename):
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-
-    # Join the script directory with the filename
-    config_path = os.path.join(parent_dir, filename)
-
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    return config
 
 def send_to_qa(user_input, vector_name, chat_history, message_author=None):
 
