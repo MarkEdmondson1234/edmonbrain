@@ -1,6 +1,8 @@
 # Edmonbrain
 
-The production version of https://github.com/MarkEdmondson1234/langchain-github
+It all works, but its hacked together as use cases and experiments come to mind.  Next phase of this project will be to refactor and generalise functions so it can be deployed more easily.
+
+The next version based off of https://github.com/MarkEdmondson1234/langchain-github
 
 Background details at the blog post: https://code.markedmondson.me/running-llms-on-gcp/
 
