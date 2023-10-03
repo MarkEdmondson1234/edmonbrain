@@ -213,7 +213,7 @@ def pick_retriever(vector_name, embeddings):
     pipeline = DocumentCompressorPipeline(transformers=[filter])
     retriever = ContextualCompressionRetriever(
         base_compressor=pipeline, base_retriever=lotr, 
-        k=3)
+        k=2)
 
     return retriever
 
