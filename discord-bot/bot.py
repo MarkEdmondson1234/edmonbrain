@@ -363,7 +363,7 @@ Need this info:
             
         #pythprint(f'Calling {flask_app_url}')
         payload = {
-            'content': clean_content,
+            'user_input': clean_content,
             'chat_history': chat_history,
             'message_author': f"<@{message.author.id}>"
         }
