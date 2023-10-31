@@ -360,7 +360,7 @@ Need this info:
         
         flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         if streamer:
-            flask_app_url = f'{STREAMURL}/qna/discord/streaming/{VECTORNAME}'
+            flask_app_url = f'{STREAMURL}/discord/{VECTORNAME}/stream'
             
         #pythprint(f'Calling {flask_app_url}')
         payload = {
