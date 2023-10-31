@@ -61,6 +61,7 @@ async def process_streamed_response(response, new_thread, thinking_message):
 
         # Handle the START delimiter (without the END delimiter in the chunk)
         elif '###JSON_START###' in chunk_content:
+            print("Found JSON_START")
             content_before_json = chunk_content.split('###JSON_START###')[0]
             
             # Return or process the content before the JSON delimiter
@@ -75,6 +76,7 @@ async def process_streamed_response(response, new_thread, thinking_message):
         elif inside_json:
             json_buffer += chunk_content
             if '###JSON_END###' in chunk_content:
+                print("Found JSON_END")
                 json_data_str = json_buffer.split('###JSON_END###')[0]
                 json_data = json.loads(json_data_str)
                 inside_json = False
@@ -390,6 +392,7 @@ Need this info:
                             response_data = await process_streamed_response(response, new_thread, thinking_message)
                             streamed=True
                             print("Finished streaming response")
+                            print(response_data)
                     else:
                         async with new_thread.typing():
                             response_data = await response.json()  # Get the response data as JSON
