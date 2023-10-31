@@ -9,7 +9,6 @@ import shlex
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env file
 FLASKURL = os.getenv('FLASK_URL', None)
-STREAMURL = os.getenv('STREAM_URL', None)
 
 async def process_streamed_response(response, new_thread, thinking_message):
     json_buffer = ""
@@ -360,7 +359,7 @@ Need this info:
         
         flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         if streamer:
-            flask_app_url = f'{STREAMURL}/discord/{VECTORNAME}/stream'
+            flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/stream'
             
         #pythprint(f'Calling {flask_app_url}')
         payload = {
