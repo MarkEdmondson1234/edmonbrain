@@ -140,7 +140,8 @@ client = discord.Client(intents=intents)
 async def chunk_send(channel, message):
     chunks = [message[i:i+1500] for i in range(0, len(message), 1500)]
     for chunk in chunks:
-        await channel.send(chunk)
+        if len(chunk) > 0:
+            await channel.send(chunk)
 
 async def make_chat_history(new_thread, bot_mention, client_user):
     history = []
