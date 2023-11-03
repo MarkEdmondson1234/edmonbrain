@@ -20,7 +20,7 @@
 
 		},
 		"edmonbrain_agent":{
-			"agent": true
+			"stream": true
 		},
 		"sanne": {
 		},
