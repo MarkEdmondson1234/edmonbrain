@@ -1,3 +1,4 @@
 discord
 aiohttp
 python-dotenv
+discord-py-interactions

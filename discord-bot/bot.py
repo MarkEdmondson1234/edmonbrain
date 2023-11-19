@@ -1,225 +1,58 @@
 import os
+from interactions import Client, Intents, listen
+from interactions import slash_command, SlashContext
+from interactions import OptionType, slash_option
 import discord
 import aiohttp
 import asyncio
 import json
 from dotenv import load_dotenv
 import shlex
+import discord_helpers as dh
+
+# Initializing the client without a command prefix
+client = Client(intents=Intents.DEFAULT)
 
 load_dotenv()
+# In-memory storage for vectornames
+vectornames = {}
+
 TOKEN = os.getenv('DISCORD_TOKEN', None)  # Get your bot token from the .env file
 FLASKURL = os.getenv('FLASK_URL', None)
 
-async def process_streamed_response(response, new_thread, thinking_message):
-    json_buffer = ""
-    inside_json = False
-    inside_question = False
-    question_buffer = ""
-    first = True
-    print("Start streaming response:")
-
-    async for chunk in response.content.iter_any():
-        chunk_content = chunk.decode('utf-8')
-
-        print("Stream: " + str(chunk_content))
-
-        # Update the "Thinking..." message on the first chunk
-        if first:
-            await thinking_message.edit(content="**Response:**")
-            first=False
-
-        # Handling question blocks
-        if '€€Question€€' in chunk_content:
-            inside_question = True
-
-        if inside_question:
-            question_buffer += chunk_content
-            if '€€End Question€€' in question_buffer:
-                end_index = question_buffer.find('€€End Question€€') + len('€€End Question€€')
-                await chunk_send(new_thread, question_buffer[:end_index])
-                inside_question = False
-
-                chunk_content = question_buffer[end_index:]
-                question_buffer = ""
-            continue  # Skip further processing for this chunk
-
-        # Check for both START and END delimiters in the chunk
-        if '###JSON_START###' in chunk_content and '###JSON_END###' in chunk_content:
-            content_before_json = chunk_content.split('###JSON_START###')[0]
-            json_data_str = chunk_content.split('###JSON_START###')[1].split('###JSON_END###')[0]
-            
-            # Return or process the content before the JSON delimiter
-            if content_before_json:
-                await chunk_send(new_thread, content_before_json)
-
-            try:
-                json_data = json.loads(json_data_str)
-                return json_data
-            except Exception as err:
-                print(f"Could not parse JSON data: {str(err)}")
-                return []
-
-        # Handle the START delimiter (without the END delimiter in the chunk)
-        elif '###JSON_START###' in chunk_content:
-            print("Found JSON_START")
-            content_before_json = chunk_content.split('###JSON_START###')[0]
-            
-            # Return or process the content before the JSON delimiter
-            if content_before_json:
-                await chunk_send(new_thread, content_before_json)
-
-            print("Streaming JSON starting...")
-            json_buffer = chunk_content.split('###JSON_START###')[1]
-            inside_json = True
-
-        # Handle JSON content continuation
-        elif inside_json:
-            json_buffer += chunk_content
-            if '###JSON_END###' in chunk_content:
-                print("Found JSON_END")
-                json_data_str = json_buffer.split('###JSON_END###')[0]
-                json_data = json.loads(json_data_str)
-                inside_json = False
-                json_buffer = ""
-                return json_data
-        else:
-            # Handle regular chunk content
-            print("Streaming...")
-            await chunk_send(new_thread, chunk_content)
-
-    return None
-
-
-def load_config(filename):
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-
-    # Join the script directory with the filename
-    config_path = os.path.join(script_dir, filename)
-
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    return config
-
-def load_config_key(keys):
-    value = load_config('config.json')
-    for key in keys:
-        value = value.get(key, None)
-        if value is None:
-            return False
-    return value
-
 # Load the config file at the start of your program
-config = load_config('config.json')
-
-def select_vectorname(message, bot_mention):
-
-    if message.guild is not None:  
-        server_name = message.guild.name
-        if server_name in config:
-            bot_lookup = bot_mention.replace('<','').replace('>','').replace('@','').strip()
-            vector_name = config[server_name][bot_lookup]
-            print(f'Guild: {server_name} - bot_lookup: {bot_lookup} - vector_name: {vector_name}')
-            return vector_name
-
-        raise ValueError(f"Could not find a configured vector for server_name: {server_name}")
-    
-    raise ValueError(f"Could not find a guild in message: {message}")
-
-
+config = dh.load_config('config.json')
 
 if TOKEN is None or FLASKURL is None:
     raise ValueError("Must set env vars DISCORD_TOKEN, FLASK_URL in .env")
 
-intents = discord.Intents.default()
-intents.messages = True
-intents.dm_messages = True  # Enable DM messages
+@slash_command(name="set_vectorname", description="Set a vectorname for this bot/user")
+@slash_option(
+    name="vectorname",
+    description="Vectorname to set",
+    required=True,
+    opt_type=OptionType.STRING
+)
+async def set_vectorname(ctx: SlashContext, vectorname: str):
 
-client = discord.Client(intents=intents)
+    vectornames[ctx.author.id] = vectorname
+    await ctx.send(f"Vectorname set to: {vectorname}")
 
-async def chunk_send(channel, message):
-    chunks = [message[i:i+1500] for i in range(0, len(message), 1500)]
-    for chunk in chunks:
-        if len(chunk) > 0:
-            await channel.send(chunk)
-
-async def make_chat_history(new_thread, bot_mention, client_user):
-    history = []
-    async for msg in new_thread.history(limit=30):
-        if msg.content.startswith(f"*Reply to {bot_mention}"):
-            continue
-        if msg.content.startswith("*Use !help"):
-            continue
-        if msg.content.startswith("**source**:"):
-            continue
-        if msg.content.startswith("**url**:"):
-            continue
-        if msg.content.startswith("*Response:*"):
-            continue
-        if msg.content.startswith("Deleting source:"):
-            continue
-        history.append(msg)
-
-    print(f"client_user: {client_user}") # Debug print
-    # Reverse the messages to maintain the order of conversation
-    chat_history = []
-    last_author = None
-    group_content = ""
-    group_embeds = []
-    for msg in reversed(history):
-        print(f"msg.author: {msg.author}, msg.author.bot: {msg.author.bot}") # Debug print
-        if msg.author == client_user:
-            author = "AI"
-        elif msg.author.bot:
-            author = str(msg.author)  # This will use the bot's username
-        else:
-            author = "Human"
-        clean_content = msg.content.replace(bot_mention, '').strip()
-        embeds = [embed.to_dict() for embed in msg.embeds]
-
-        print(f'-msg-: {clean_content[:10]}')
-        
-        if last_author is not None and last_author != author:
-            chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
-            group_content = ""
-            group_embeds = []
-        
-        group_content += " " + clean_content
-        group_embeds.extend(embeds)
-        last_author = author
-
-    if group_content:  # Don't forget the last group!
-        chat_history.append({"name": last_author, "content": group_content.strip(), "embeds": group_embeds})
-
-    #print(f"chat_history: {chat_history}")
-
-    return chat_history
-
-
-
-
-async def make_new_thread(message, clean_content):
-    # Check if the message was sent in a thread or a private message
-    if isinstance(message.channel, (discord.Thread, discord.DMChannel)):
-        new_thread = message.channel
+@slash_command(name="see_vectorname", description="See your current vectorname")
+async def see_vectorname(ctx: SlashContext):
+    if ctx.author.id in vectornames:
+        await ctx.send(f"Your current vectorname is: {vectornames[ctx.author.id]}")
     else:
-        if len(clean_content) < 5:
-            thread_name = "Baaa--zzz"
-        else:
-            thread_name = f"Baa-zzz - {clean_content[:40]}"
-        # If it's not a thread, create a new one
-        new_thread = await message.channel.create_thread(
-            name=thread_name, 
-            message=message)
+        await ctx.send("You have not set a vectorname yet.")
 
-    return new_thread
-
-@client.event
+@listen()
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
-@client.event
-async def on_message(message):
+@listen()
+async def on_message_create(message):
+
+    print("Got message: {}".format(message))
 
     if message.author == client.user:
         return
@@ -235,7 +68,7 @@ async def on_message(message):
     clean_content = message.content.replace(bot_mention, '')
 
     try:
-        VECTORNAME = select_vectorname(message, bot_mention)
+        VECTORNAME = dh.select_vectorname(message, bot_mention, vectornames, config)
     except ValueError as e:
         print(e)
         new_thread.send(f"""
@@ -252,7 +85,7 @@ Need this info:
         print("Bot talking to another bot")
         talking_to_bot = True
     
-    agent = load_config_key(["_bot_config", VECTORNAME, "agent"])
+    agent = dh.load_config_key(["_bot_config", VECTORNAME, "agent"])
 
     
     if agent and talking_to_bot:
@@ -273,9 +106,9 @@ Need this info:
             print("#Agent: Received message not in correct format. Ignoring.")
             return
 
-    new_thread = await make_new_thread(message, clean_content)
+    new_thread = await dh.make_new_thread(message, clean_content)
     
-    chat_history = await make_chat_history(new_thread, bot_mention, client.user)
+    chat_history = await dh.make_chat_history(new_thread, bot_mention, client.user)
 
     # a file is attached
     if message.attachments:
@@ -305,7 +138,7 @@ Need this info:
                     print(f'response_data: {response_data}')
                     summaries = response_data.get('summaries', [])
                     for summary in summaries:
-                        await chunk_send(new_thread, summary)
+                        await dh.chunk_send(new_thread, summary)
                     await thinking_message2.edit(
                         content="Uploaded file(s). Use !deletesource {source_name} to remove it again")
                 else:
@@ -334,13 +167,13 @@ Need this info:
                 print(words)
                 if words[0] == "!vectorname":
                     VECTORNAME = words[1]
-                    await chunk_send(message.channel, f"vectorname={VECTORNAME}")
+                    await dh.chunk_send(message.channel, f"vectorname={VECTORNAME}")
                     clean_content = words[2]
                 else:
-                    await chunk_send(message.channel, 
+                    await dh.chunk_send(message.channel, 
                                      "Hello Master. Use !vectorname <vector_name> 'clean content' to debug")
             else:
-                await chunk_send(message.channel,
+                await dh.chunk_send(message.channel,
                                  f"Don't DM me {str(message.author)}, please @me in a channel")
                 return
 
@@ -358,7 +191,7 @@ Need this info:
 
         # Forward the message content to your Flask app
         # stream for openai, batch for vertex
-        streamer = load_config_key(["_bot_config", VECTORNAME, "stream"])
+        streamer = dh.load_config_key(["_bot_config", VECTORNAME, "stream"])
         
         flask_app_url = f'{FLASKURL}/discord/{VECTORNAME}/message'
         if streamer:
@@ -390,7 +223,7 @@ Need this info:
                     if response.headers.get('Transfer-Encoding') == 'chunked':
                         # This is a streamed response, process it in chunks
                         async with new_thread.typing():
-                            response_data = await process_streamed_response(response, new_thread, thinking_message)
+                            response_data = await dh.process_streamed_response(response, new_thread, thinking_message)
                             streamed=True
                             print("Finished streaming response")
                             print(response_data)
@@ -422,15 +255,15 @@ Need this info:
                         if metadata_source.get('title', None) is not None:
                             source_message += f" title: {metadata_source.get('title')}"
                             
-                        await chunk_send(new_thread, source_message)
+                        await dh.chunk_send(new_thread, source_message)
                         source_url = metadata_source.get('url', None)
                         if source_url is not None:
                             url_message = f"**url**: {source_url}"
-                            await chunk_send(new_thread, url_message)
+                            await dh.chunk_send(new_thread, url_message)
                                 
                     if agent and talking_to_bot:
                         print(f"Agent sending directly: agent:{agent} talking_to_bot:{talking_to_bot}")
-                        await chunk_send(new_thread, reply_content)
+                        await dh.chunk_send(new_thread, reply_content)
                     else:
                         print("Not an agent")
                         #if streamed and thinking_message.content.startswith("Thinking..."):
@@ -444,7 +277,7 @@ Need this info:
                             print("Not streamed content")
                             if len(reply_content) > 2000:
                                 await thinking_message.edit(content="*Response:*")
-                                await chunk_send(new_thread, reply_content)
+                                await dh.chunk_send(new_thread, reply_content)
                             elif len(reply_content) == 0:
                                 await thinking_message.edit(content="No response")
                             else:
@@ -468,4 +301,4 @@ Need this info:
             return
 
 
-client.run(TOKEN)
+client.start(TOKEN)
